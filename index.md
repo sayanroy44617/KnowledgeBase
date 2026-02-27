@@ -5,4 +5,4 @@
 - [DSA](dsa/)
 - [Backend](backend/)
 - [DevOps](devops/)
-- [System Design](system-design/)
+- [System Design](/system-design/)
