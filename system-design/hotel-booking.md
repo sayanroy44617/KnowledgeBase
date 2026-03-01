@@ -34,6 +34,7 @@ It is suited for event-driven architectures that require decoupling, durability,
 - Ensures no booking event is lost because events are stored durably.
 - Allows replay of past bookings for audits, fixes, or new features.
 - Makes it easy to add new services later without changing the booking service.
+
 ---
 #### Archival Service
 Moves old bookings out of MySQL into long-term storage.
