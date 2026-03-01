@@ -1,2 +1,2 @@
-[Basic SSH Concepts](Basics.md)
-[Networking Basics](networking.md)
+- [Basic SSH Concepts](Basics.md)
+- [Networking Basics](networking.md)
