@@ -1,6 +1,6 @@
-# Greedy Algorithms - Interview Notes
+# Greedy Algorithms
 
-## 🎯 Core Idea of Greedy
+### 🎯 Core Idea of Greedy
 
 At each step, choose the **locally optimal option** (the "best-looking" move right now).  
 Hope that these local choices add up to a **global optimum**.
@@ -10,7 +10,7 @@ Hope that these local choices add up to a **global optimum**.
 
 ---
 
-## 🔍 Problem-Solving Checklist
+### 🔍 Problem-Solving Checklist
 
 When faced with a problem, ask yourself:
 
@@ -23,7 +23,7 @@ When faced with a problem, ask yourself:
 
 ---
 
-## 📋 Common Greedy Patterns At A Glance
+### 📋 Common Greedy Patterns At A Glance
 
 | Pattern | Example | Approach |
 |---------|---------|----------|
