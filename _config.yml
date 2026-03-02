@@ -1,1 +1,3 @@
-theme: just-the-docs
+title: Knowledge Base
+description: Docs
+theme: jekyll-theme-cayman
