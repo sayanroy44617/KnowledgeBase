@@ -28,14 +28,12 @@ Primary reasons:
 ---
 
 ## 3. Key Characteristics
-| Feature | Explanation |
-|---|---|
-| In-Memory | Data stored in RAM |
-| Persistence | Optional disk persistence (RDB/AOF) |
-| Data Structures | Strings, Lists, Sets, Sorted Sets, Hashes |
-| Atomic Operations | Commands execute atomically |
-| Single Threaded | Avoids lock overhead (uses I/O multiplexing) |
-| Extremely Fast | Memory + optimized engine |
+- **In-Memory:** Data stored in RAM
+- **Persistence:** Optional disk persistence (RDB/AOF)
+- **Data Structures:** Strings, Lists, Sets, Sorted Sets, Hashes
+- **Atomic Operations:** Commands execute atomically
+- **Single Threaded:** Avoids lock overhead (uses I/O multiplexing)
+- **Extremely Fast:** Memory + optimized engine
 
 ---
 
@@ -170,12 +168,10 @@ SET lock_key value NX EX 10
 ---
 
 ## 11. Redis vs Memcached
-| Feature | Redis | Memcached |
-|---|---|---|
-| Data structures | Yes | No |
-| Persistence | Yes | No |
-| Pub/Sub | Yes | No |
-| Performance | Fast | Slightly faster for small strings |
+- **Data structures:** Redis ✓ | Memcached ✗
+- **Persistence:** Redis ✓ | Memcached ✗
+- **Pub/Sub:** Redis ✓ | Memcached ✗
+- **Performance:** Redis (Fast) | Memcached (Slightly faster for small strings)
 
 ---
 
