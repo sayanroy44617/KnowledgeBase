@@ -1,1 +1,2 @@
--[Greedy Algorithm](greedy.md)
+- [Greedy Algorithm](greedy.md)
+- [DSA decision tree](dsa-decision-tree.html)

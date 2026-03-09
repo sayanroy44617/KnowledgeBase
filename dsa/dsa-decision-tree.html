@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSA Decision Tree</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Fraunces:ital,wght@0,700;0,900;1,400&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: #f0ebe0;
+  font-family: 'IBM Plex Mono', monospace;
+  overflow: hidden;
+  height: 100vh;
+  user-select: none;
+}
+
+#ui-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: #1a1208;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.3);
+}
+
+#ui-header h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.2rem;
+  color: #f5f0e8;
+  font-weight: 700;
+}
+
+.header-right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.hint-pill {
+  font-size: 10px;
+  color: #8c7a5e;
+  letter-spacing: 1px;
+  background: rgba(255,255,255,0.05);
+  padding: 4px 12px;
+  border-radius: 100px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.zoom-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #f5f0e8;
+  padding: 5px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  transition: background 0.15s;
+}
+.zoom-btn:hover { background: rgba(255,255,255,0.15); }
+
+#zoom-level {
+  font-size: 11px;
+  color: #8c7a5e;
+  min-width: 40px;
+  text-align: center;
+}
+
+/* Legend */
+#legend {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 100;
+  background: #1a1208;
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.leg-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10px;
+  color: #c8b89a;
+  letter-spacing: 0.5px;
+}
+
+.leg-q { width:14px; height:14px; background:#1a1208; border:2px solid #f5f0e8; border-radius:4px; }
+.leg-r { width:14px; height:14px; background:#e0f7fa; border:2px solid #00acc1; border-radius:4px; }
+.leg-yes { width:28px; height:2px; background:#10b981; }
+.leg-no  { width:28px; height:2px; background:#f43f5e; border-top: 2px dashed #f43f5e; }
+
+/* Canvas */
+#canvas {
+  position: fixed;
+  top: 52px; left: 0; right: 0; bottom: 0;
+  cursor: grab;
+  overflow: hidden;
+}
+#canvas.grabbing { cursor: grabbing; }
+
+#world {
+  position: absolute;
+  transform-origin: 0 0;
+}
+
+/* SVG lines */
+#world svg {
+  position: absolute;
+  top: 0; left: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* Question nodes */
+.qnode {
+  position: absolute;
+  background: #1a1208;
+  color: #f5f0e8;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 11px;
+  line-height: 1.6;
+  width: 190px;
+  box-shadow: 3px 3px 0 #8c7a5e;
+  cursor: default;
+  transition: box-shadow 0.15s, transform 0.15s;
+  white-space: pre-line;
+  text-align: center;
+}
+.qnode:hover {
+  box-shadow: 5px 5px 0 #8c7a5e;
+  transform: translate(-1px,-1px);
+  z-index: 10;
+}
+
+/* Result nodes */
+.rnode {
+  position: absolute;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 10px;
+  width: 165px;
+  border: 2px solid;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  text-align: center;
+}
+.rnode:hover {
+  transform: translate(-2px,-2px);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.15);
+  z-index: 10;
+}
+.rnode .r-icon { font-size: 18px; margin-bottom: 4px; }
+.rnode .r-name { font-family:'Fraunces',serif; font-size:13px; font-weight:700; margin-bottom:3px; line-height:1.2; }
+.rnode .r-tag  { font-size:9px; opacity:0.7; line-height:1.4; }
+.rnode .r-cplx { font-size:9px; margin-top:5px; padding:2px 8px; border-radius:100px; background:rgba(0,0,0,0.1); display:inline-block; }
+
+/* Tooltip */
+#tooltip {
+  position: fixed;
+  z-index: 200;
+  background: #1a1208;
+  color: #f5f0e8;
+  padding: 16px 20px;
+  border-radius: 12px;
+  font-size: 11.5px;
+  line-height: 1.7;
+  max-width: 300px;
+  pointer-events: none;
+  box-shadow: 6px 6px 0 #8c7a5e;
+  display: none;
+  border-left: 3px solid var(--accent-color, #7c3aed);
+}
+#tooltip .tt-title { font-family:'Fraunces',serif; font-size:15px; font-weight:700; margin-bottom:6px; }
+#tooltip .tt-when { margin-bottom:6px; color:#c8b89a; }
+#tooltip .tt-cplx { font-size:10px; color:#10b981; }
+#tooltip .tt-ex { margin-top:8px; }
+#tooltip .tt-ex span {
+  display:inline-block; margin:2px 3px;
+  background:rgba(255,255,255,0.08);
+  padding:1px 8px; border-radius:100px; font-size:10px;
+}
+
+/* Colors */
+.c-cyan   { background:#e0f7fa; color:#00695c; border-color:#00acc1; }
+.c-violet { background:#ede7f6; color:#4527a0; border-color:#7c3aed; }
+.c-amber  { background:#fff8e1; color:#e65100; border-color:#f59e0b; }
+.c-green  { background:#e8f5e9; color:#1b5e20; border-color:#10b981; }
+.c-rose   { background:#fce4ec; color:#880e4f; border-color:#f43f5e; }
+.c-indigo { background:#e8eaf6; color:#1a237e; border-color:#6366f1; }
+.c-teal   { background:#e0f2f1; color:#004d40; border-color:#14b8a6; }
+.c-orange { background:#fff3e0; color:#bf360c; border-color:#f97316; }
+.c-lime   { background:#f0fdf4; color:#14532d; border-color:#84cc16; }
+.c-pink   { background:#fdf2f8; color:#831843; border-color:#ec4899; }
+.c-sky    { background:#e0f2fe; color:#0c4a6e; border-color:#38bdf8; }
+.c-red    { background:#fff1f2; color:#881337; border-color:#e11d48; }
+</style>
+</head>
+<body>
+
+<div id="ui-header">
+  <h1>DSA Pattern Decision Tree</h1>
+  <div class="header-right">
+    <span class="hint-pill">🖱 drag to pan · scroll to zoom · hover patterns for details</span>
+    <button class="zoom-btn" onclick="zoom(1.2)">+</button>
+    <span id="zoom-level">75%</span>
+    <button class="zoom-btn" onclick="zoom(0.83)">−</button>
+    <button class="zoom-btn" onclick="resetView()">fit</button>
+  </div>
+</div>
+
+<div id="legend">
+  <div class="leg-row"><div class="leg-q"></div> Decision question</div>
+  <div class="leg-row"><div class="leg-r"></div> Pattern (tap for details)</div>
+  <div class="leg-row"><div class="leg-yes"></div> YES branch</div>
+  <div class="leg-row"><div class="leg-no"></div> NO branch</div>
+</div>
+
+<div id="canvas">
+  <div id="world">
+    <svg id="svg-lines" width="4000" height="2400"></svg>
+  </div>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+// ─── TREE DATA ────────────────────────────────────────────────────
+const PATTERNS = {
+  sliding_window: {
+    icon:'🪟', name:'Sliding Window', color:'c-cyan', accentColor:'#00acc1',
+    tag:'Contiguous subarray/substring problems',
+    complexity:'O(n) time · O(k) space',
+    when:'Use when you need the best contiguous window of variable size meeting a constraint.',
+    examples:['Longest Substr No Repeat','Min Window Substr','Max Sum Subarray K','Fruit Into Baskets','Permutation In String']
+  },
+  two_pointers: {
+    icon:'👆', name:'Two Pointers', color:'c-violet', accentColor:'#7c3aed',
+    tag:'Sorted array pair-finding',
+    complexity:'O(n) time · O(1) space',
+    when:'Two indices walking toward each other (or same direction). Classic on sorted arrays.',
+    examples:['Two Sum II','3Sum','Container Most Water','Remove Duplicates','Trapping Rain Water']
+  },
+  binary_search: {
+    icon:'🔍', name:'Binary Search', color:'c-amber', accentColor:'#f59e0b',
+    tag:'Halve search space each step',
+    complexity:'O(log n) time · O(1) space',
+    when:'Any monotonic condition — not just classic sorted search.',
+    examples:['Search Rotated Array','Koko Eating Bananas','Find Peak Element','Median of Two Sorted','First Bad Version']
+  },
+  hashmap: {
+    icon:'#️⃣', name:'Hash Map / Set', color:'c-green', accentColor:'#10b981',
+    tag:'O(1) lookup, frequency counting',
+    complexity:'O(n) time · O(n) space',
+    when:'"Have I seen this before?" or "How many times does X appear?" — reach for a hash.',
+    examples:['Two Sum','Group Anagrams','Longest Consecutive','Valid Anagram','Top K Frequent']
+  },
+  stack: {
+    icon:'📚', name:'Stack / Monotonic Stack', color:'c-rose', accentColor:'#f43f5e',
+    tag:'LIFO, nesting, next greater element',
+    complexity:'O(n) time · O(n) space',
+    when:'Parentheses matching, "next greater/smaller", largest rectangle — monotonic stack answers these in O(n).',
+    examples:['Valid Parentheses','Daily Temperatures','Largest Rectangle Histogram','Next Greater Element','Asteroid Collision']
+  },
+  prefix_sum: {
+    icon:'∑', name:'Prefix Sum / Kadane\'s', color:'c-indigo', accentColor:'#6366f1',
+    tag:'Range queries, max subarray',
+    complexity:'O(n) time · O(n) space',
+    when:'Precompute running sums for O(1) range queries. Kadane\'s finds max subarray in one pass.',
+    examples:['Subarray Sum = K','Product Except Self','Max Subarray','Range Sum Query','Continuous Subarray Sum']
+  },
+  bfs: {
+    icon:'🌊', name:'BFS / Dijkstra\'s', color:'c-cyan', accentColor:'#00acc1',
+    tag:'Shortest path, level-by-level',
+    complexity:'O(V+E) time · O(V) space',
+    when:'Unweighted shortest path → BFS. Weighted → Dijkstra (min-heap). Multi-source BFS for grid problems.',
+    examples:['Word Ladder','Rotten Oranges','Network Delay','01 Matrix','Walls and Gates','Cheapest Flights K Stops']
+  },
+  dfs_graph: {
+    icon:'🕳️', name:'DFS / Union-Find', color:'c-violet', accentColor:'#7c3aed',
+    tag:'Connectivity, cycle detection',
+    complexity:'O(V+E) time · O(V) space',
+    when:'Explore deeply before backtracking. Union-Find groups components in near-O(1) per query.',
+    examples:['Number of Islands','Course Schedule','Clone Graph','Pacific Atlantic','Redundant Connection']
+  },
+  topological: {
+    icon:'📋', name:'Topological Sort', color:'c-sky', accentColor:'#38bdf8',
+    tag:'Ordering with dependencies',
+    complexity:'O(V+E) time · O(V) space',
+    when:'Ordering tasks with prerequisites. Use Kahn\'s (BFS) or DFS-based topo sort.',
+    examples:['Course Schedule II','Alien Dictionary','Sequence Reconstruction','Build Order','Task Scheduler']
+  },
+  tree_dfs: {
+    icon:'🌲', name:'Tree DFS', color:'c-green', accentColor:'#10b981',
+    tag:'Path sums, recursion, pre/in/post-order',
+    complexity:'O(n) time · O(h) space',
+    when:'Carry state down, aggregate results up. Pre/in/post-order all live here.',
+    examples:['Path Sum II','Binary Tree Paths','LCA','Diameter of Tree','Validate BST']
+  },
+  tree_bfs: {
+    icon:'🏔️', name:'Tree BFS (Level Order)', color:'c-amber', accentColor:'#f59e0b',
+    tag:'Level-aware tree traversal',
+    complexity:'O(n) time · O(w) space',
+    when:'Process nodes level by level. "Right side view", "zigzag", "level averages".',
+    examples:['Level Order Traversal','Right Side View','Zigzag Level Order','Min Depth','Average of Levels']
+  },
+  dp1d: {
+    icon:'📈', name:'1D Dynamic Programming', color:'c-teal', accentColor:'#14b8a6',
+    tag:'dp[i] = best using first i elements',
+    complexity:'O(n) or O(n²) · O(n) space',
+    when:'Linear DP, knapsack, interval DP. Look for "choices at each step with optimal result".',
+    examples:['Climbing Stairs','House Robber','Coin Change','Word Break','LIS','Jump Game']
+  },
+  dp2d: {
+    icon:'📐', name:'2D Dynamic Programming', color:'c-rose', accentColor:'#f43f5e',
+    tag:'Two sequences or grid paths',
+    complexity:'O(m×n) time · O(m×n) space',
+    when:'Two-string problems (LCS, edit distance) or grid path problems (unique paths, minimum path sum).',
+    examples:['LCS','Edit Distance','Unique Paths','Regex Matching','Interleaving Strings','Coin Change 2']
+  },
+  heap: {
+    icon:'🏆', name:'Heap / Priority Queue', color:'c-orange', accentColor:'#f97316',
+    tag:'Top-K, median, k-way merge',
+    complexity:'O(n log k) · O(k) space',
+    when:'Repeatedly access min/max. Min-heap for top-K largest; max-heap for top-K smallest.',
+    examples:['K Closest Points','Kth Largest','Merge K Sorted Lists','Median Data Stream','Task Scheduler']
+  },
+  backtracking: {
+    icon:'🔀', name:'Backtracking', color:'c-indigo', accentColor:'#6366f1',
+    tag:'Build candidates, prune dead ends',
+    complexity:'O(n! or 2ⁿ) · O(n) space',
+    when:'All permutations/subsets/combinations. Prune early when constraints are violated.',
+    examples:['Permutations','Subsets','N-Queens','Word Search','Sudoku Solver','Combination Sum']
+  },
+  greedy: {
+    icon:'💰', name:'Greedy', color:'c-lime', accentColor:'#84cc16',
+    tag:'Locally optimal → globally optimal',
+    complexity:'O(n) or O(n log n) · O(1)',
+    when:'Greedy works when local optimal choices lead to global optimum — often needs a proof. Sort first.',
+    examples:['Jump Game','Gas Station','Interval Scheduling','Assign Cookies','Partition Labels','Candy']
+  },
+  intervals: {
+    icon:'📏', name:'Intervals / Sweep Line', color:'c-pink', accentColor:'#ec4899',
+    tag:'Overlap detection, merging ranges',
+    complexity:'O(n log n) · O(n) space',
+    when:'Sort by start time, then sweep. Use heap/multiset to track active intervals.',
+    examples:['Merge Intervals','Insert Interval','Meeting Rooms II','Non-overlapping Intervals','Employee Free Time']
+  },
+  trie: {
+    icon:'🌳', name:'Trie (Prefix Tree)', color:'c-sky', accentColor:'#38bdf8',
+    tag:'Prefix search, autocomplete',
+    complexity:'O(L) per op · O(N×L) space',
+    when:'Fast prefix lookup, autocomplete, word search on grid with many words.',
+    examples:['Implement Trie','Word Search II','Replace Words','Design Search Autocomplete','Longest Word in Dict']
+  },
+  segment_tree: {
+    icon:'🗂️', name:'Segment Tree / BIT', color:'c-red', accentColor:'#e11d48',
+    tag:'Range queries + point updates',
+    complexity:'O(log n) per query/update',
+    when:'Need both range queries (sum/min/max) AND point updates. Static → Sparse Table.',
+    examples:['Range Sum Query (Mutable)','Count of Smaller After Self','Range Min Query','Falling Squares']
+  },
+  bit_manip: {
+    icon:'⚙️', name:'Bit Manipulation', color:'c-violet', accentColor:'#7c3aed',
+    tag:'XOR tricks, bit masks',
+    complexity:'O(1) or O(n) · O(1) space',
+    when:'XOR to find single number. Bitmask DP for subset enumeration. Count bits with Brian-Kernighan.',
+    examples:['Single Number','Missing Number','Counting Bits','Power of Two','XOR Queries','Subset DP']
+  },
+  math: {
+    icon:'🔢', name:'Math / Number Theory', color:'c-amber', accentColor:'#f59e0b',
+    tag:'GCD, primes, modular arithmetic',
+    complexity:'O(√n) or O(log n)',
+    when:'Sieve of Eratosthenes for primes, Euclidean GCD, fast power (mod exp), combinatorics.',
+    examples:['Count Primes','Pow(x,n)','Excel Sheet Columns','Happy Number','Factorial Trailing Zeros']
+  }
+};
+
+// ─── LAYOUT ───────────────────────────────────────────────────────
+// Node: { id, type:'q'|'r', x, y, label?, patternKey? }
+// Edge: { from, to, branch:'yes'|'no' }
+
+const QW = 190, QH = 72;
+const RW = 165, RH = 118;
+const nodes = [];
+const edges = [];
+
+function q(id, x, y, label) {
+  nodes.push({ id, type:'q', x, y, label });
+}
+function r(id, x, y, patternKey) {
+  nodes.push({ id, type:'r', x, y, patternKey });
+}
+function e(from, to, branch) {
+  edges.push({ from, to, branch });
+}
+
+// ── COLUMN / ROW LAYOUT ──────────────────────────────────────────
+// Y levels
+const Y0 = 40;    // root
+const Y1 = 220;   // level 1
+const Y2 = 400;   // level 2
+const Y3 = 580;   // level 3
+const Y4 = 760;   // level 4 (results / deep questions)
+const Y5 = 960;   // level 5 results
+
+// X zones
+// LEFT HALF: linear structures
+// RIGHT HALF: non-linear
+
+q('root',   1600, Y0,  'What is your PRIMARY\ndata structure / problem type?');
+
+// ── BRANCH 1: Linear ──
+q('linear', 420,  Y1,  'LINEAR structure?\n(array, string, linked list)');
+e('root','linear','yes');
+
+  // linear → sorted
+  q('sorted', 160, Y2, 'Data is SORTED or\nneed a target value?');
+  e('linear','sorted','yes');
+
+    r('bs_node', 60, Y3, 'binary_search');
+    e('sorted','bs_node','yes');
+
+    q('pair', 220, Y3, 'Find a PAIR / SUBARRAY\nmeeting a condition?');
+    e('sorted','pair','no');
+
+      r('tp_node', 130, Y4, 'two_pointers');
+      e('pair','tp_node','yes');
+
+      r('sw_node', 310, Y4, 'sliding_window');
+      e('pair','sw_node','no');
+
+  // linear → unsorted
+  q('unsorted', 540, Y2, 'Need LOOKUP / FREQUENCY\nor "seen before"?');
+  e('linear','unsorted','no');
+
+    r('hm_node', 440, Y3, 'hashmap');
+    e('unsorted','hm_node','yes');
+
+    q('match', 680, Y3, 'MATCHING pairs, nesting,\nor next greater element?');
+    e('unsorted','match','no');
+
+      r('stk_node', 590, Y4, 'stack');
+      e('match','stk_node','yes');
+
+      r('ps_node', 770, Y4, 'prefix_sum');
+      e('match','ps_node','no');
+
+// ── BRANCH 2: Graph ──
+q('graph_q', 1000, Y1, 'GRAPH problem?\n(cycles, multi-parent, grid)');
+e('root','graph_q','no');
+
+  q('shortest_q', 860, Y2, 'Need SHORTEST PATH\nor level-by-level?');
+  e('graph_q','shortest_q','yes');
+
+    r('bfs_node', 780, Y3, 'bfs');
+    e('shortest_q','bfs_node','yes');
+
+    r('dfs_g_node', 960, Y3, 'dfs_graph');
+    e('shortest_q','dfs_g_node','no');
+
+  q('dep_q', 1150, Y2, 'DEPENDENCY ordering\n(prerequisites, tasks)?');
+  e('graph_q','dep_q','no');
+
+    r('topo_node', 1070, Y3, 'topological');
+    e('dep_q','topo_node','yes');
+
+    // → tree
+    q('tree_q', 1280, Y3, 'TREE structure?');
+    e('dep_q','tree_q','no');
+
+      q('path_q', 1180, Y4, 'Find a PATH or\nnode relationship?');
+      e('tree_q','path_q','yes');
+
+        r('tdfs_node', 1100, Y5, 'tree_dfs');
+        e('path_q','tdfs_node','yes');
+
+        r('tbfs_node', 1280, Y5, 'tree_bfs');
+        e('path_q','tbfs_node','no');
+
+      r('trie_node', 1400, Y4, 'trie');
+      e('tree_q','trie_node','no');
+
+// ── BRANCH 3: DP / Optimization ──
+q('opt_q', 1700, Y1, 'OPTIMAL value (max/min/count)\nwith overlapping subproblems?');
+e('root','opt_q','yes');
+
+  q('dp_dim', 1560, Y2, 'Two SEQUENCES\nor 2D GRID?');
+  e('opt_q','dp_dim','yes');
+
+    r('dp2_node', 1480, Y3, 'dp2d');
+    e('dp_dim','dp2_node','yes');
+
+    r('dp1_node', 1650, Y3, 'dp1d');
+    e('dp_dim','dp1_node','no');
+
+  q('greedy_q', 1880, Y2, 'GREEDY choice works?\n(local → global optimal)');
+  e('opt_q','greedy_q','no');
+
+    r('greedy_node', 1800, Y3, 'greedy');
+    e('greedy_q','greedy_node','yes');
+
+    r('bt_node', 1980, Y3, 'backtracking');
+    e('greedy_q','bt_node','no');
+
+// ── BRANCH 4: Special structures ──
+q('special_q', 2300, Y1, 'SPECIAL structure needed?\n(heap, intervals, bits, segment tree)');
+e('root','special_q','yes');
+
+  q('heap_q', 2100, Y2, 'Repeatedly need\nSMALLEST / LARGEST (top-K)?');
+  e('special_q','heap_q','yes');
+
+    r('heap_node', 2020, Y3, 'heap');
+    e('heap_q','heap_node','yes');
+
+    q('interval_q', 2220, Y3, 'INTERVAL / range\noverlap problem?');
+    e('heap_q','interval_q','no');
+
+      r('interval_node', 2140, Y4, 'intervals');
+      e('interval_q','interval_node','yes');
+
+      r('seg_node', 2330, Y4, 'segment_tree');
+      e('interval_q','seg_node','no');
+
+  q('bit_q', 2500, Y2, 'BIT-level tricks or\nMATH / number theory?');
+  e('special_q','bit_q','no');
+
+    r('bit_node', 2420, Y3, 'bit_manip');
+    e('bit_q','bit_node','yes');
+
+    r('math_node', 2600, Y3, 'math');
+    e('bit_q','math_node','no');
+
+// ─── RENDER ───────────────────────────────────────────────────────
+const world    = document.getElementById('world');
+const svgEl    = document.getElementById('svg-lines');
+const tooltip  = document.getElementById('tooltip');
+
+// Compute bounds
+let maxX = 0, maxY = 0;
+nodes.forEach(n => {
+  const w = n.type==='q' ? QW : RW;
+  const h = n.type==='q' ? QH : RH;
+  maxX = Math.max(maxX, n.x + w + 100);
+  maxY = Math.max(maxY, n.y + h + 80);
+});
+svgEl.setAttribute('width',  maxX);
+svgEl.setAttribute('height', maxY);
+world.style.width  = maxX + 'px';
+world.style.height = maxY + 'px';
+
+// Helper: node center-bottom and center-top
+function centerX(n) { return n.x + (n.type==='q' ? QW : RW)/2; }
+function bottomY(n) { return n.y + (n.type==='q' ? QH : RH); }
+function topY(n)    { return n.y; }
+
+// Map id → node
+const nodeMap = {};
+nodes.forEach(n => nodeMap[n.id] = n);
+
+// Draw edges
+edges.forEach(edge => {
+  const fn = nodeMap[edge.from];
+  const tn = nodeMap[edge.to];
+  if (!fn || !tn) return;
+
+  const x1 = centerX(fn), y1 = bottomY(fn);
+  const x2 = centerX(tn), y2 = topY(tn);
+  const color = edge.branch === 'yes' ? '#10b981' : '#f43f5e';
+  const dash  = edge.branch === 'yes' ? '' : '8,4';
+
+  const cp1y = y1 + (y2-y1)*0.45;
+  const cp2y = y1 + (y2-y1)*0.55;
+
+  const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d', `M${x1},${y1} C${x1},${cp1y} ${x2},${cp2y} ${x2},${y2}`);
+  path.setAttribute('fill','none');
+  path.setAttribute('stroke', color);
+  path.setAttribute('stroke-width','2');
+  if (dash) path.setAttribute('stroke-dasharray', dash);
+  svgEl.appendChild(path);
+
+  // Label midpoint
+  const mx = (x1+x2)/2, my = (y1+y2)/2;
+  const fo = document.createElementNS('http://www.w3.org/2000/svg','foreignObject');
+  fo.setAttribute('x', mx-18); fo.setAttribute('y', my-11);
+  fo.setAttribute('width','44'); fo.setAttribute('height','22');
+  fo.innerHTML = `<div xmlns="http://www.w3.org/1999/xhtml" style="
+    font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;
+    padding:2px 6px;border-radius:100px;text-align:center;
+    background:${edge.branch==='yes'?'#d1fae5':'#fee2e2'};
+    color:${edge.branch==='yes'?'#065f46':'#991b1b'};
+    letter-spacing:1px;">${edge.branch.toUpperCase()}</div>`;
+  svgEl.appendChild(fo);
+});
+
+// Draw nodes
+nodes.forEach(n => {
+  const div = document.createElement('div');
+
+  if (n.type === 'q') {
+    div.className = 'qnode';
+    div.style.left = n.x + 'px';
+    div.style.top  = n.y + 'px';
+    div.style.width = QW + 'px';
+    div.textContent = n.label;
+
+  } else {
+    const p = PATTERNS[n.patternKey];
+    div.className = 'rnode ' + p.color;
+    div.style.left = n.x + 'px';
+    div.style.top  = n.y + 'px';
+    div.style.width = RW + 'px';
+    div.innerHTML = `
+      <div class="r-icon">${p.icon}</div>
+      <div class="r-name">${p.name}</div>
+      <div class="r-tag">${p.tag}</div>
+      <div class="r-cplx">${p.complexity}</div>
+    `;
+
+    div.addEventListener('mouseenter', evt => showTooltip(evt, p));
+    div.addEventListener('mousemove',  evt => moveTooltip(evt));
+    div.addEventListener('mouseleave', hideTooltip);
+  }
+
+  world.appendChild(div);
+});
+
+// ─── TOOLTIP ──────────────────────────────────────────────────────
+function showTooltip(evt, p) {
+  tooltip.style.setProperty('--accent-color', p.accentColor);
+  tooltip.innerHTML = `
+    <div class="tt-title">${p.icon} ${p.name}</div>
+    <div class="tt-when">${p.when}</div>
+    <div class="tt-cplx">⚡ ${p.complexity}</div>
+    <div class="tt-ex">📝 ${p.examples.map(e=>`<span>${e}</span>`).join('')}</div>
+  `;
+  tooltip.style.display = 'block';
+  moveTooltip(evt);
+}
+function moveTooltip(evt) {
+  let x = evt.clientX + 18, y = evt.clientY - 10;
+  if (x + 310 > window.innerWidth)  x = evt.clientX - 320;
+  if (y + 200 > window.innerHeight) y = evt.clientY - 180;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top  = y + 'px';
+}
+function hideTooltip() { tooltip.style.display = 'none'; }
+
+// ─── PAN & ZOOM ───────────────────────────────────────────────────
+const canvas = document.getElementById('canvas');
+let scale = 0.52, tx = -80, ty = 20;
+let dragging = false, sx = 0, sy = 0, stx = 0, sty = 0;
+
+function applyTransform() {
+  world.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`;
+  document.getElementById('zoom-level').textContent = Math.round(scale*100)+'%';
+}
+applyTransform();
+
+canvas.addEventListener('mousedown', e => {
+  dragging = true;
+  sx = e.clientX; sy = e.clientY;
+  stx = tx; sty = ty;
+  canvas.classList.add('grabbing');
+});
+window.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  tx = stx + (e.clientX - sx);
+  ty = sty + (e.clientY - sy);
+  applyTransform();
+});
+window.addEventListener('mouseup', () => { dragging = false; canvas.classList.remove('grabbing'); });
+
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? 0.96 : 1.04;
+  const rect  = canvas.getBoundingClientRect();
+  const mx    = e.clientX - rect.left;
+  const my    = e.clientY - rect.top;
+  tx = mx - (mx - tx) * delta;
+  ty = my - (my - ty) * delta;
+  scale = Math.min(2, Math.max(0.2, scale * delta));
+  applyTransform();
+}, { passive: false });
+
+// Touch support
+let lastDist = null, lastTx = 0, lastTy = 0;
+canvas.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) {
+    dragging = true;
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+    stx = tx; sty = ty;
+  }
+  if (e.touches.length === 2) {
+    dragging = false;
+    lastDist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+    lastTx = (e.touches[0].clientX+e.touches[1].clientX)/2;
+    lastTy = (e.touches[0].clientY+e.touches[1].clientY)/2;
+  }
+}, {passive:true});
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (e.touches.length === 1 && dragging) {
+    tx = stx + (e.touches[0].clientX - sx);
+    ty = sty + (e.touches[0].clientY - sy);
+    applyTransform();
+  }
+  if (e.touches.length === 2 && lastDist) {
+    const dist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+    const delta = dist / lastDist;
+    const mx = (e.touches[0].clientX+e.touches[1].clientX)/2;
+    const my = (e.touches[0].clientY+e.touches[1].clientY)/2;
+    tx = mx - (lastTx - tx) * delta;
+    ty = my - (lastTy - ty) * delta;
+    scale = Math.min(2, Math.max(0.2, scale * delta));
+    lastDist = dist; lastTx = mx; lastTy = my;
+    applyTransform();
+  }
+}, {passive:false});
+canvas.addEventListener('touchend', () => { dragging = false; lastDist = null; });
+
+function zoom(factor) {
+  const cx = canvas.offsetWidth/2, cy = canvas.offsetHeight/2;
+  tx = cx - (cx - tx) * factor;
+  ty = cy - (cy - ty) * factor;
+  scale = Math.min(2, Math.max(0.2, scale * factor));
+  applyTransform();
+}
+
+function resetView() {
+  scale = 0.52; tx = -80; ty = 20;
+  applyTransform();
+}
+</script>
+</body>
+</html>
