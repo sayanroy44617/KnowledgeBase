@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kubernetes Revision Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0f14;
+  --bg2: #13161d;
+  --bg3: #1a1d27;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e8eaf0;
+  --muted: #7a7f94;
+  --dim: #4a4f64;
+  --accent: #5b8af0;
+  --accent2: #3ecf8e;
+  --amber: #f0a03e;
+  --red: #e05252;
+  --purple: #9b7ef0;
+  --pink: #e06ea0;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Sora', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;font-size:14px}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* layout */
+.page{max-width:1100px;margin:0 auto;padding:0 1.5rem 4rem}
+
+/* header */
+.hero{padding:3rem 0 2rem;border-bottom:1px solid var(--border);margin-bottom:2.5rem}
+.hero-eyebrow{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.75rem}
+.hero h1{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:600;line-height:1.2;letter-spacing:-.02em}
+.hero h1 span{color:var(--accent)}
+.hero-meta{margin-top:.75rem;font-size:13px;color:var(--muted);display:flex;gap:1.5rem;flex-wrap:wrap}
+.hero-meta span{display:flex;align-items:center;gap:.4rem}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.dot-blue{background:var(--accent)}
+.dot-green{background:var(--accent2)}
+.dot-amber{background:var(--amber)}
+
+/* nav */
+.nav{position:sticky;top:0;z-index:100;background:rgba(13,15,20,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.6rem 0;margin-bottom:2.5rem}
+.nav-inner{max-width:1100px;margin:0 auto;padding:0 1.5rem;display:flex;gap:.25rem;overflow-x:auto;scrollbar-width:none}
+.nav-inner::-webkit-scrollbar{display:none}
+.nav-btn{font-family:var(--mono);font-size:11px;padding:.3rem .75rem;border-radius:4px;border:1px solid transparent;color:var(--muted);cursor:pointer;background:none;white-space:nowrap;transition:all .15s}
+.nav-btn:hover{color:var(--text);background:var(--bg3)}
+.nav-btn.active{color:var(--accent);border-color:rgba(91,138,240,.3);background:rgba(91,138,240,.08)}
+
+/* sections */
+.section{margin-bottom:3rem;scroll-margin-top:60px}
+.sec-label{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* grid */
+.grid{display:grid;gap:10px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+
+/* card */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.9rem 1rem;transition:border-color .15s,background .15s;position:relative;overflow:hidden}
+.card:hover{border-color:var(--border2);background:var(--bg3)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .2s}
+.card:hover::before{opacity:1}
+.card.blue::before{background:var(--accent)}
+.card.green::before{background:var(--accent2)}
+.card.amber::before{background:var(--amber)}
+.card.purple::before{background:var(--purple)}
+.card.red::before{background:var(--red)}
+.card.pink::before{background:var(--pink)}
+.card-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:5px}
+.card-sub{font-size:12px;color:var(--muted);line-height:1.6}
+
+/* badge */
+.badge{display:inline-flex;align-items:center;font-family:var(--mono);font-size:10px;font-weight:500;padding:2px 8px;border-radius:3px;margin-bottom:7px;letter-spacing:.03em}
+.bd-blue{background:rgba(91,138,240,.15);color:var(--accent)}
+.bd-green{background:rgba(62,207,142,.12);color:var(--accent2)}
+.bd-amber{background:rgba(240,160,62,.12);color:var(--amber)}
+.bd-purple{background:rgba(155,126,240,.12);color:var(--purple)}
+.bd-red{background:rgba(224,82,82,.12);color:var(--red)}
+.bd-pink{background:rgba(224,110,160,.12);color:var(--pink)}
+
+/* cmd block */
+.cmd-block{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.65rem .9rem;font-family:var(--mono);font-size:11px;line-height:2;margin-top:.6rem}
+.cmd-block .k{color:var(--accent)}
+.cmd-block .c{color:var(--dim)}
+.cmd-block .g{color:var(--accent2)}
+.cmd-block .a{color:var(--amber)}
+
+/* tag */
+.tag-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:.5rem}
+.tag{font-family:var(--mono);font-size:10px;padding:2px 7px;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--muted)}
+
+/* kv list */
+.kv-list{margin-top:.5rem}
+.kv{display:flex;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px}
+.kv:last-child{border-bottom:none}
+.kv-key{color:var(--text);font-weight:500;min-width:110px;font-family:var(--mono);font-size:11px}
+.kv-val{color:var(--muted)}
+
+/* flow */
+.flow-row{display:flex;align-items:center;gap:0;flex-wrap:nowrap;overflow-x:auto;padding:.6rem .9rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;scrollbar-width:none}
+.flow-row::-webkit-scrollbar{display:none}
+.flow-box{font-family:var(--mono);font-size:11px;padding:.3rem .65rem;border:1px solid var(--border2);border-radius:4px;white-space:nowrap;color:var(--text);background:var(--bg2)}
+.flow-arr{color:var(--dim);padding:0 8px;font-size:13px}
+
+/* arch svg */
+.arch-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.2rem;overflow-x:auto}
+
+/* two col */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* highlight box */
+.hi-box{background:rgba(91,138,240,.06);border:1px solid rgba(91,138,240,.2);border-radius:8px;padding:.9rem 1rem;margin-top:.6rem}
+.hi-box .card-sub{color:#8ba8e8}
+
+/* inline mono */
+.mono{font-family:var(--mono);font-size:10px;background:var(--bg);padding:1px 5px;border-radius:3px;color:var(--muted);border:1px solid var(--border)}
+
+/* responsive */
+@media(max-width:700px){.g3,.g4{grid-template-columns:1fr 1fr}.two-col{grid-template-columns:1fr}}
+@media(max-width:480px){.g2,.g3,.g4,.two-col{grid-template-columns:1fr}}
+
+/* clickable cards */
+.card[data-modal]{cursor:pointer}
+.card[data-modal]:hover{border-color:var(--border2)}
+.card[data-modal]::after{content:'↗';position:absolute;bottom:.6rem;right:.75rem;font-size:11px;color:var(--dim);transition:color .15s}
+.card[data-modal]:hover::after{color:var(--muted)}
+
+/* modal overlay */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;width:min(680px,92vw);max-height:82vh;overflow-y:auto;transform:translateY(12px) scale(.98);transition:transform .2s;padding:0}
+.modal-overlay.open .modal-box{transform:translateY(0) scale(1)}
+.modal-header{padding:1.2rem 1.4rem .8rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.modal-header-left{display:flex;flex-direction:column;gap:.4rem}
+.modal-close{background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;border-radius:4px;padding:2px 8px;font-size:13px;transition:all .15s;flex-shrink:0}
+.modal-close:hover{color:var(--text);border-color:var(--border2)}
+.modal-body{padding:1.2rem 1.4rem 1.6rem}
+.modal-body h3{font-size:13px;font-weight:500;color:var(--text);margin:1.2rem 0 .5rem}
+.modal-body h3:first-child{margin-top:0}
+.modal-body p{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:.75rem}
+.modal-body ul{padding-left:1.2rem;margin-bottom:.75rem}
+.modal-body li{font-size:13px;color:var(--muted);line-height:1.8}
+.modal-body li strong{color:var(--text)}
+.modal-body .cmd-block{margin-top:0}
+.modal-tip{background:rgba(62,207,142,.06);border:1px solid rgba(62,207,142,.15);border-radius:6px;padding:.75rem 1rem;margin-top:1rem}
+.modal-tip .tip-label{font-family:var(--mono);font-size:10px;color:var(--accent2);margin-bottom:.3rem}
+.modal-tip p{font-size:12px;color:#5ec99a;margin:0}
+.modal-warn{background:rgba(240,160,62,.06);border:1px solid rgba(240,160,62,.15);border-radius:6px;padding:.75rem 1rem;margin-top:.75rem}
+.modal-warn .tip-label{font-family:var(--mono);font-size:10px;color:var(--amber);margin-bottom:.3rem}
+.modal-warn p{font-size:12px;color:#c8883a;margin:0}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="navScrollTo('arch')">Architecture</button>
+    <button class="nav-btn" onclick="navScrollTo('objects')">Objects</button>
+    <button class="nav-btn" onclick="navScrollTo('networking')">Networking</button>
+    <button class="nav-btn" onclick="navScrollTo('storage')">Storage</button>
+    <button class="nav-btn" onclick="navScrollTo('scheduling')">Scheduling</button>
+    <button class="nav-btn" onclick="navScrollTo('probes')">Probes</button>
+    <button class="nav-btn" onclick="navScrollTo('rbac')">RBAC</button>
+    <button class="nav-btn" onclick="navScrollTo('kubectl')">kubectl</button>
+    <button class="nav-btn" onclick="navScrollTo('scaling')">Scaling</button>
+    <button class="nav-btn" onclick="navScrollTo('interview')">Interview</button>
+  </div>
+</div>
+
+<div class="page">
+  <div class="hero">
+    <div class="hero-eyebrow">Interview prep · revision guide</div>
+    <h1>Kubernetes <span>Cheatsheet</span></h1>
+    <div class="hero-meta">
+      <span><span class="dot dot-blue"></span> Control Plane</span>
+      <span><span class="dot dot-green"></span> Workloads</span>
+      <span><span class="dot dot-amber"></span> Networking</span>
+      <span style="color:var(--dim);font-size:12px">Click any section card for more detail</span>
+    </div>
+  </div>
+
+  <!-- ARCHITECTURE -->
+  <div class="section" id="arch">
+    <div class="sec-label">01 — Cluster Architecture</div>
+    <div class="arch-wrap">
+      <svg width="100%" viewBox="0 0 960 220" style="min-width:600px">
+        <!-- Control Plane -->
+        <rect x="10" y="10" width="430" height="200" rx="10" fill="none" stroke="rgba(91,138,240,0.25)" stroke-width="1" stroke-dasharray="5 4"/>
+        <text x="24" y="30" font-family="JetBrains Mono,monospace" font-size="10" fill="#5b8af0">Control Plane</text>
+        <!-- API Server -->
+        <rect x="26" y="42" width="120" height="44" rx="6" fill="rgba(91,138,240,0.1)" stroke="rgba(91,138,240,0.3)" stroke-width="1"/>
+        <text x="86" y="60" text-anchor="middle" font-family="Sora,sans-serif" font-size="12" font-weight="500" fill="#8ba8e8">API Server</text>
+        <text x="86" y="76" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#5b6a8a">hub of control</text>
+        <!-- etcd -->
+        <rect x="158" y="42" width="90" height="44" rx="6" fill="rgba(91,138,240,0.08)" stroke="rgba(91,138,240,0.2)" stroke-width="1"/>
+        <text x="203" y="60" text-anchor="middle" font-family="Sora,sans-serif" font-size="12" font-weight="500" fill="#8ba8e8">etcd</text>
+        <text x="203" y="76" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#5b6a8a">key-value store</text>
+        <!-- Scheduler -->
+        <rect x="260" y="42" width="90" height="44" rx="6" fill="rgba(62,207,142,0.08)" stroke="rgba(62,207,142,0.2)" stroke-width="1"/>
+        <text x="305" y="60" text-anchor="middle" font-family="Sora,sans-serif" font-size="12" font-weight="500" fill="#5ec99a">Scheduler</text>
+        <text x="305" y="76" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#3a7a5a">assigns pods</text>
+        <!-- Controller Mgr -->
+        <rect x="26" y="104" width="150" height="44" rx="6" fill="rgba(62,207,142,0.08)" stroke="rgba(62,207,142,0.2)" stroke-width="1"/>
+        <text x="101" y="122" text-anchor="middle" font-family="Sora,sans-serif" font-size="12" font-weight="500" fill="#5ec99a">Controller Manager</text>
+        <text x="101" y="138" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#3a7a5a">reconcile loop</text>
+        <!-- Cloud Controller -->
+        <rect x="188" y="104" width="140" height="44" rx="6" fill="rgba(62,207,142,0.08)" stroke="rgba(62,207,142,0.2)" stroke-width="1"/>
+        <text x="258" y="122" text-anchor="middle" font-family="Sora,sans-serif" font-size="12" font-weight="500" fill="#5ec99a">Cloud Controller</text>
+        <text x="258" y="138" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#3a7a5a">cloud provider API</text>
+
+        <!-- Worker Node -->
+        <rect x="500" y="10" width="450" height="200" rx="10" fill="none" stroke="rgba(240,160,62,0.2)" stroke-width="1" stroke-dasharray="5 4"/>
+        <text x="514" y="30" font-family="JetBrains Mono,monospace" font-size="10" fill="#f0a03e">Worker Node</text>
+        <!-- kubelet -->
+        <rect x="516" y="42" width="90" height="44" rx="6" fill="rgba(240,160,62,0.08)" stroke="rgba(240,160,62,0.2)" stroke-width="1"/>
+        <text x="561" y="60" text-anchor="middle" font-family="Sora,sans-serif" font-size="12" font-weight="500" fill="#c8883a">kubelet</text>
+        <text x="561" y="76" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#7a5a30">node agent</text>
+        <!-- kube-proxy -->
+        <rect x="618" y="42" width="96" height="44" rx="6" fill="rgba(240,160,62,0.08)" stroke="rgba(240,160,62,0.2)" stroke-width="1"/>
+        <text x="666" y="60" text-anchor="middle" font-family="Sora,sans-serif" font-size="12" font-weight="500" fill="#c8883a">kube-proxy</text>
+        <text x="666" y="76" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#7a5a30">iptables/IPVS</text>
+        <!-- Container RT -->
+        <rect x="726" y="42" width="110" height="44" rx="6" fill="rgba(240,160,62,0.08)" stroke="rgba(240,160,62,0.2)" stroke-width="1"/>
+        <text x="781" y="60" text-anchor="middle" font-family="Sora,sans-serif" font-size="12" font-weight="500" fill="#c8883a">Container RT</text>
+        <text x="781" y="76" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#7a5a30">containerd/crio</text>
+        <!-- Pods -->
+        <rect x="516" y="104" width="64" height="44" rx="6" fill="rgba(224,82,82,0.1)" stroke="rgba(224,82,82,0.25)" stroke-width="1"/>
+        <text x="548" y="128" text-anchor="middle" font-family="Sora,sans-serif" font-size="12" font-weight="500" fill="#e08080">Pod</text>
+        <rect x="590" y="104" width="64" height="44" rx="6" fill="rgba(224,82,82,0.1)" stroke="rgba(224,82,82,0.25)" stroke-width="1"/>
+        <text x="622" y="128" text-anchor="middle" font-family="Sora,sans-serif" font-size="12" font-weight="500" fill="#e08080">Pod</text>
+        <rect x="664" y="104" width="64" height="44" rx="6" fill="rgba(224,82,82,0.1)" stroke="rgba(224,82,82,0.25)" stroke-width="1"/>
+        <text x="696" y="128" text-anchor="middle" font-family="Sora,sans-serif" font-size="12" font-weight="500" fill="#e08080">Pod</text>
+        <rect x="738" y="104" width="64" height="44" rx="6" fill="rgba(224,82,82,0.1)" stroke="rgba(224,82,82,0.25)" stroke-width="1"/>
+        <text x="770" y="128" text-anchor="middle" font-family="Sora,sans-serif" font-size="12" font-weight="500" fill="#e08080">Pod</text>
+
+        <!-- Arrow -->
+        <line x1="442" y1="110" x2="498" y2="110" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+      </svg>
+    </div>
+  </div>
+
+  <!-- OBJECTS -->
+  <div class="section" id="objects">
+    <div class="sec-label">02 — Core Objects</div>
+    <div class="grid g3">
+      <div class="card red" data-modal onclick="openModal('pod')">
+        <span class="badge bd-red">Pod</span>
+        <div class="card-title">Smallest deployable unit</div>
+        <div class="card-sub">1+ containers sharing network + storage. Ephemeral — never restart in place. Each gets a unique IP.</div>
+      </div>
+      <div class="card blue" data-modal onclick="openModal('deployment')">
+        <span class="badge bd-blue">Deployment</span>
+        <div class="card-title">Manages ReplicaSets</div>
+        <div class="card-sub">Declarative updates, rollback, scaling. Most common way to run stateless apps.</div>
+      </div>
+      <div class="card purple" data-modal onclick="openModal('statefulset')">
+        <span class="badge bd-purple">StatefulSet</span>
+        <div class="card-title">Ordered, stable identities</div>
+        <div class="card-sub">Sticky pod names (pod-0, pod-1), persistent storage per pod. Use for DBs, Kafka, ZooKeeper.</div>
+      </div>
+      <div class="card green" data-modal onclick="openModal('daemonset')">
+        <span class="badge bd-green">DaemonSet</span>
+        <div class="card-title">One pod per node</div>
+        <div class="card-sub">Runs on every node automatically. New nodes get it too. Use for log collectors, monitoring agents.</div>
+      </div>
+      <div class="card amber" data-modal onclick="openModal('job')">
+        <span class="badge bd-amber">Job / CronJob</span>
+        <div class="card-title">Run-to-completion</div>
+        <div class="card-sub">Job runs once and exits. CronJob runs on a schedule. Great for batch processing, DB migrations.</div>
+      </div>
+      <div class="card amber" data-modal onclick="openModal('configmap')">
+        <span class="badge bd-amber">ConfigMap / Secret</span>
+        <div class="card-title">Configuration injection</div>
+        <div class="card-sub">ConfigMap for plain config. Secret for sensitive data (base64 encoded — NOT encrypted by default).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NETWORKING -->
+  <div class="section" id="networking">
+    <div class="sec-label">03 — Networking</div>
+    <div class="grid g2">
+      <div class="card blue" data-modal onclick="openModal('services')">
+        <span class="badge bd-blue">Service types</span>
+        <div class="tag-row">
+          <span class="tag">ClusterIP</span>
+          <span class="tag">NodePort</span>
+          <span class="tag">LoadBalancer</span>
+          <span class="tag">ExternalName</span>
+        </div>
+        <div class="kv-list" style="margin-top:8px">
+          <div class="kv"><span class="kv-key">ClusterIP</span><span class="kv-val">Internal only. Default type.</span></div>
+          <div class="kv"><span class="kv-key">NodePort</span><span class="kv-val">Exposes on node port 30000–32767.</span></div>
+          <div class="kv"><span class="kv-key">LoadBalancer</span><span class="kv-val">Cloud LB. Expensive.</span></div>
+          <div class="kv"><span class="kv-key">ExternalName</span><span class="kv-val">DNS alias to external svc.</span></div>
+        </div>
+      </div>
+      <div class="card purple" data-modal onclick="openModal('ingress')">
+        <span class="badge bd-purple">Ingress</span>
+        <div class="card-title">HTTP routing layer</div>
+        <div class="card-sub">Routes external HTTP/S to Services by host/path. Needs an <strong>Ingress Controller</strong> (nginx, traefik, haproxy) to function. Handles TLS termination and path-based routing.</div>
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <div class="card-sub" style="margin-bottom:8px;color:var(--dim);font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em">Request flow</div>
+      <div class="flow-row">
+        <div class="flow-box">Internet</div><div class="flow-arr">→</div>
+        <div class="flow-box">LoadBalancer</div><div class="flow-arr">→</div>
+        <div class="flow-box">Ingress Controller</div><div class="flow-arr">→</div>
+        <div class="flow-box">Service (ClusterIP)</div><div class="flow-arr">→</div>
+        <div class="flow-box">Pod</div>
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <div class="card blue">
+        <span class="badge bd-blue">DNS</span>
+        <div class="card-sub">kube-dns creates entries automatically. Format: <span class="mono">svc.namespace.svc.cluster.local</span><br>Short form within same namespace: just <span class="mono">svc-name</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STORAGE -->
+  <div class="section" id="storage">
+    <div class="sec-label">04 — Storage</div>
+    <div class="grid g3">
+      <div class="card green" data-modal onclick="openModal('pv')">
+        <span class="badge bd-green">PersistentVolume</span>
+        <div class="card-title">Admin-provisioned storage</div>
+        <div class="card-sub">Cluster-level resource. Has a reclaim policy: Retain, Recycle, Delete.</div>
+      </div>
+      <div class="card green">
+        <span class="badge bd-green">PersistentVolumeClaim</span>
+        <div class="card-title">Pod's storage request</div>
+        <div class="card-sub">Requests size + access mode. Bound 1:1 to a PV. Lives in a namespace.</div>
+      </div>
+      <div class="card amber">
+        <span class="badge bd-amber">StorageClass</span>
+        <div class="card-title">Dynamic provisioning</div>
+        <div class="card-sub">Auto-creates PVs on demand. Define provisioner + reclaim policy. Default class used if none specified.</div>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:10px">
+      <div class="card">
+        <span class="badge bd-red">emptyDir</span>
+        <div class="card-sub">Temp dir, lives with the pod. Deleted when pod dies. Good for scratch space.</div>
+      </div>
+      <div class="card">
+        <span class="badge bd-amber">hostPath</span>
+        <div class="card-sub">Mounts a file/dir from the host node. Avoid in prod — breaks node portability.</div>
+      </div>
+      <div class="card">
+        <span class="badge bd-blue">configMap / secret</span>
+        <div class="card-sub">Inject config files into pods as volumes. Read-only by default.</div>
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <div class="card-sub" style="margin-bottom:8px;color:var(--dim);font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em">Access modes</div>
+      <div class="flow-row">
+        <div class="flow-box">RWO — ReadWriteOnce</div><div class="flow-arr">·</div>
+        <div class="flow-box">ROX — ReadOnlyMany</div><div class="flow-arr">·</div>
+        <div class="flow-box">RWX — ReadWriteMany</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHEDULING -->
+  <div class="section" id="scheduling">
+    <div class="sec-label">05 — Scheduling & Resources</div>
+    <div class="two-col">
+      <div class="card red" data-modal onclick="openModal('resources')">
+        <span class="badge bd-red">Requests vs Limits</span>
+        <div class="kv-list">
+          <div class="kv"><span class="kv-key">Request</span><span class="kv-val">Guaranteed minimum. Used for scheduling decisions.</span></div>
+          <div class="kv"><span class="kv-key">Limit</span><span class="kv-val">Hard cap. OOMKilled if exceeded. Always set both.</span></div>
+        </div>
+        <div class="cmd-block">
+          <div><span class="k">resources:</span></div>
+          <div style="padding-left:14px"><span class="k">requests:</span></div>
+          <div style="padding-left:28px">cpu: <span class="a">"250m"</span>  memory: <span class="a">"128Mi"</span></div>
+          <div style="padding-left:14px"><span class="k">limits:</span></div>
+          <div style="padding-left:28px">cpu: <span class="a">"500m"</span>  memory: <span class="a">"256Mi"</span></div>
+        </div>
+      </div>
+      <div class="card purple" data-modal onclick="openModal('scheduling')">
+        <span class="badge bd-purple">Scheduling controls</span>
+        <div class="kv-list">
+          <div class="kv"><span class="kv-key">nodeSelector</span><span class="kv-val">Simple label match to target node</span></div>
+          <div class="kv"><span class="kv-key">nodeAffinity</span><span class="kv-val">Required or preferred rules, more expressive</span></div>
+          <div class="kv"><span class="kv-key">Taint</span><span class="kv-val">Repels pods from a node (applied to node)</span></div>
+          <div class="kv"><span class="kv-key">Toleration</span><span class="kv-val">Pod explicitly ignores a taint</span></div>
+          <div class="kv"><span class="kv-key">podAffinity</span><span class="kv-val">Co-locate pods on same node/zone</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROBES -->
+  <div class="section" id="probes">
+    <div class="sec-label">06 — Health Probes</div>
+    <div class="grid g3">
+      <div class="card red" data-modal onclick="openModal('liveness')">
+        <span class="badge bd-red">Liveness</span>
+        <div class="card-title">Is it alive?</div>
+        <div class="card-sub">Fails → container is <strong>restarted</strong>. Use for deadlock detection. Don't set too aggressively.</div>
+      </div>
+      <div class="card green" data-modal onclick="openModal('readiness')">
+        <span class="badge bd-green">Readiness</span>
+        <div class="card-title">Ready for traffic?</div>
+        <div class="card-sub">Fails → removed from <strong>Service endpoints</strong>. Pod stays running. No traffic during warm-up.</div>
+      </div>
+      <div class="card amber">
+        <span class="badge bd-amber">Startup</span>
+        <div class="card-title">Has it started yet?</div>
+        <div class="card-sub">Disables liveness + readiness until it passes. Prevents killing slow-starting apps.</div>
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <div class="card blue">
+        <span class="badge bd-blue">Probe types</span>
+        <div class="tag-row">
+          <span class="tag">httpGet</span>
+          <span class="tag">tcpSocket</span>
+          <span class="tag">exec (command)</span>
+          <span class="tag">grpc</span>
+        </div>
+        <div class="kv-list" style="margin-top:8px">
+          <div class="kv"><span class="kv-key">initialDelaySeconds</span><span class="kv-val">Wait before first probe</span></div>
+          <div class="kv"><span class="kv-key">periodSeconds</span><span class="kv-val">How often to probe</span></div>
+          <div class="kv"><span class="kv-key">failureThreshold</span><span class="kv-val">Failures before action taken</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RBAC -->
+  <div class="section" id="rbac">
+    <div class="sec-label">07 — RBAC</div>
+    <div class="grid g4">
+      <div class="card blue" data-modal onclick="openModal('rbac')">
+        <span class="badge bd-blue">ServiceAccount</span>
+        <div class="card-sub">Identity for pods. Auto-mounted token at <span class="mono">/var/run/secrets</span>.</div>
+      </div>
+      <div class="card purple">
+        <span class="badge bd-purple">Role / ClusterRole</span>
+        <div class="card-sub">Set of permissions. Role = namespaced. ClusterRole = cluster-wide.</div>
+      </div>
+      <div class="card green">
+        <span class="badge bd-green">RoleBinding</span>
+        <div class="card-sub">Binds a Role to a subject (user, group, or ServiceAccount).</div>
+      </div>
+      <div class="card amber">
+        <span class="badge bd-amber">Namespace</span>
+        <div class="card-sub">Virtual cluster. Scope for names, RBAC, quotas, and network policies.</div>
+      </div>
+    </div>
+    <div class="hi-box">
+      <div class="card-sub">RBAC flow: <span class="mono">ServiceAccount</span> → <span class="mono">RoleBinding</span> → <span class="mono">Role</span> → permissions on resources (pods, secrets, etc.)</div>
+    </div>
+  </div>
+
+  <!-- KUBECTL -->
+  <div class="section" id="kubectl">
+    <div class="sec-label">08 — Essential kubectl</div>
+    <div class="grid g2">
+      <div>
+        <div class="cmd-block">
+          <div class="c"># view resources</div>
+          <div><span class="k">kubectl get</span> pods,svc,deploy -n &lt;ns&gt;</div>
+          <div><span class="k">kubectl describe</span> pod &lt;name&gt;</div>
+          <div><span class="k">kubectl get</span> events --sort-by=.lastTimestamp</div>
+          <div>&nbsp;</div>
+          <div class="c"># logs & exec</div>
+          <div><span class="k">kubectl logs</span> &lt;pod&gt; -f --tail=100</div>
+          <div><span class="k">kubectl logs</span> &lt;pod&gt; -c &lt;container&gt;</div>
+          <div><span class="k">kubectl exec</span> -it &lt;pod&gt; -- bash</div>
+        </div>
+      </div>
+      <div>
+        <div class="cmd-block">
+          <div class="c"># apply & manage</div>
+          <div><span class="k">kubectl apply</span> -f manifest.yaml</div>
+          <div><span class="k">kubectl delete</span> -f manifest.yaml</div>
+          <div><span class="k">kubectl scale</span> deploy/app --replicas=3</div>
+          <div>&nbsp;</div>
+          <div class="c"># rollout</div>
+          <div><span class="k">kubectl rollout</span> status deploy/app</div>
+          <div><span class="k">kubectl rollout</span> history deploy/app</div>
+          <div><span class="k">kubectl rollout</span> undo deploy/app</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g2" style="margin-top:10px">
+      <div class="cmd-block">
+        <div class="c"># debug</div>
+        <div><span class="k">kubectl port-forward</span> pod/&lt;name&gt; 8080:80</div>
+        <div><span class="k">kubectl top</span> pods --sort-by=memory</div>
+        <div><span class="k">kubectl get</span> pod &lt;name&gt; -o yaml</div>
+      </div>
+      <div class="cmd-block">
+        <div class="c"># context & namespace</div>
+        <div><span class="k">kubectl config</span> get-contexts</div>
+        <div><span class="k">kubectl config</span> use-context &lt;ctx&gt;</div>
+        <div><span class="k">kubectl</span> -n &lt;ns&gt; &lt;any-command&gt;</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCALING -->
+  <div class="section" id="scaling">
+    <div class="sec-label">09 — Scaling & Availability</div>
+    <div class="grid g3">
+      <div class="card blue" data-modal onclick="openModal('hpa')">
+        <span class="badge bd-blue">HPA</span>
+        <div class="card-title">HorizontalPodAutoscaler</div>
+        <div class="card-sub">Auto-scales pod count based on CPU/memory or custom metrics. Requires <span class="mono">metrics-server</span>.</div>
+      </div>
+      <div class="card purple" data-modal onclick="openModal('pdb')">
+        <span class="badge bd-purple">PDB</span>
+        <div class="card-title">PodDisruptionBudget</div>
+        <div class="card-sub">Sets <span class="mono">minAvailable</span> or <span class="mono">maxUnavailable</span>. Protects during drains + rolling updates.</div>
+      </div>
+      <div class="card amber">
+        <span class="badge bd-amber">ResourceQuota</span>
+        <div class="card-title">Namespace limits</div>
+        <div class="card-sub">Caps total CPU/memory/objects per namespace. <span class="mono">LimitRange</span> sets per-pod defaults.</div>
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <div class="card green">
+        <span class="badge bd-green">VPA — VerticalPodAutoscaler</span>
+        <div class="card-sub">Automatically adjusts CPU/memory requests and limits. Three modes: <span class="mono">Off</span> (recommend only), <span class="mono">Initial</span> (set on creation), <span class="mono">Auto</span> (update running pods — causes restarts).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTERVIEW -->
+  <div class="section" id="interview">
+    <div class="sec-label">10 — Common Interview Questions</div>
+    <div class="grid g2">
+      <div class="card blue" data-modal onclick="openModal('lifecycle')">
+        <span class="badge bd-blue">Pod lifecycle</span>
+        <div class="card-sub">Pending → Running → Succeeded / Failed / CrashLoopBackOff.<br><br>Know: init containers run first sequentially. postStart / preStop hooks. terminationGracePeriodSeconds (default 30s). SIGTERM → grace period → SIGKILL.</div>
+      </div>
+      <div class="card purple" data-modal onclick="openModal('rolling')">
+        <span class="badge bd-purple">Rolling update</span>
+        <div class="card-sub">Controlled by <span class="mono">maxSurge</span> (extra pods during update) and <span class="mono">maxUnavailable</span> (pods that can go down). <span class="mono">kubectl rollout undo</span> reverts. History limited by <span class="mono">revisionHistoryLimit</span>.</div>
+      </div>
+      <div class="card red">
+        <span class="badge bd-red">QoS classes</span>
+        <div class="card-sub"><strong>Guaranteed</strong> — requests = limits.<br><strong>Burstable</strong> — requests &lt; limits.<br><strong>BestEffort</strong> — no requests/limits set.<br><br>Eviction order: BestEffort → Burstable → Guaranteed.</div>
+      </div>
+      <div class="card green">
+        <span class="badge bd-green">Service discovery</span>
+        <div class="card-sub">kube-dns auto-creates DNS entries. <span class="mono">svc.ns.svc.cluster.local</span>. Env vars also injected into pods. kube-proxy manages iptables / IPVS rules for routing.</div>
+      </div>
+      <div class="card amber">
+        <span class="badge bd-amber">What happens when you create a pod?</span>
+        <div class="card-sub">kubectl → API Server → etcd (persists) → Scheduler picks node → API Server notifies kubelet → kubelet pulls image → Container Runtime starts container → kubelet reports status back.</div>
+      </div>
+      <div class="card pink" data-modal onclick="openModal('crashloop')">
+        <span class="badge bd-pink">CrashLoopBackOff</span>
+        <div class="card-sub">Pod keeps crashing and k8s is backing off restarts. Debug with: <span class="mono">kubectl logs --previous</span>, check liveness probe config, check resource limits (OOMKill), check entrypoint command.</div>
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <div class="card">
+        <span class="badge bd-blue">Deployment vs StatefulSet — when to use what?</span>
+        <div class="card-sub" style="margin-top:4px">Use <strong>Deployment</strong> for stateless apps (APIs, web servers) — pods are interchangeable, any can be replaced. Use <strong>StatefulSet</strong> when each pod needs a stable identity, ordered startup/shutdown, or dedicated persistent storage (databases, message brokers, distributed systems).</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal-box" id="modalBox">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <span id="modalBadge"></span>
+        <span id="modalTitle" style="font-size:15px;font-weight:500;color:var(--text)"></span>
+      </div>
+      <button class="modal-close" onclick="closeModalBtn()">✕ close</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const MODALS = {
+  pod: {
+    badge: '<span class="badge bd-red">Pod</span>',
+    title: 'Pod — the atomic unit',
+    body: `
+      <p>A Pod is the smallest deployable unit in Kubernetes. It wraps one or more containers that share the same network namespace (same IP, same ports) and can share storage volumes.</p>
+      <h3>Key facts</h3>
+      <ul>
+        <li><strong>Ephemeral</strong> — pods are never "restarted in place". If a pod dies, a new one is created with a new IP.</li>
+        <li><strong>Shared network</strong> — all containers in a pod communicate via localhost.</li>
+        <li><strong>Shared storage</strong> — volumes are mounted at pod level, accessible to all containers.</li>
+        <li><strong>Sidecar pattern</strong> — run helper containers (log shippers, proxies) alongside the main container in the same pod.</li>
+      </ul>
+      <h3>Pod spec essentials</h3>
+      <div class="cmd-block">
+        <div><span class="k">spec:</span></div>
+        <div style="padding-left:14px"><span class="k">initContainers:</span> <span class="c"># run before main containers</span></div>
+        <div style="padding-left:14px"><span class="k">containers:</span></div>
+        <div style="padding-left:28px">- name: app</div>
+        <div style="padding-left:28px">  image: nginx:1.25</div>
+        <div style="padding-left:28px">  ports: [{containerPort: 80}]</div>
+        <div style="padding-left:14px"><span class="k">restartPolicy:</span> Always <span class="c"># Always | OnFailure | Never</span></div>
+      </div>
+      <h3>Lifecycle phases</h3>
+      <ul>
+        <li><strong>Pending</strong> — accepted but not yet scheduled or image not pulled</li>
+        <li><strong>Running</strong> — at least one container is running</li>
+        <li><strong>Succeeded</strong> — all containers exited 0</li>
+        <li><strong>Failed</strong> — all containers exited, at least one non-zero</li>
+        <li><strong>CrashLoopBackOff</strong> — container keeps crashing, k8s backing off</li>
+      </ul>
+      <div class="modal-tip"><div class="tip-label">interview tip</div><p>Know the difference between pod restart and pod recreation. A Deployment recreates pods; it doesn't restart them.</p></div>
+    `
+  },
+  deployment: {
+    badge: '<span class="badge bd-blue">Deployment</span>',
+    title: 'Deployment — managing ReplicaSets',
+    body: `
+      <p>A Deployment manages a ReplicaSet which manages Pods. You describe the desired state and the Deployment Controller makes it happen — rolling updates, rollbacks, scaling.</p>
+      <h3>Rolling update strategy</h3>
+      <div class="cmd-block">
+        <div><span class="k">strategy:</span></div>
+        <div style="padding-left:14px"><span class="k">type:</span> RollingUpdate</div>
+        <div style="padding-left:14px"><span class="k">rollingUpdate:</span></div>
+        <div style="padding-left:28px">maxSurge: <span class="a">1</span>        <span class="c"># extra pods during update</span></div>
+        <div style="padding-left:28px">maxUnavailable: <span class="a">0</span>   <span class="c"># pods that can be down</span></div>
+      </div>
+      <h3>Rollout commands</h3>
+      <div class="cmd-block">
+        <div><span class="k">kubectl rollout</span> status deploy/app</div>
+        <div><span class="k">kubectl rollout</span> history deploy/app</div>
+        <div><span class="k">kubectl rollout</span> undo deploy/app</div>
+        <div><span class="k">kubectl rollout</span> undo deploy/app --to-revision=2</div>
+      </div>
+      <h3>Scaling</h3>
+      <div class="cmd-block">
+        <div><span class="k">kubectl scale</span> deploy/app --replicas=5</div>
+      </div>
+      <div class="modal-tip"><div class="tip-label">interview tip</div><p>revisionHistoryLimit defaults to 10. Each revision = an old ReplicaSet kept around for rollback. Set it lower in prod to save resources.</p></div>
+      <div class="modal-warn"><div class="tip-label">common mistake</div><p>Deployment does NOT guarantee zero-downtime by itself — you need readiness probes so traffic only routes to ready pods during rollout.</p></div>
+    `
+  },
+  statefulset: {
+    badge: '<span class="badge bd-purple">StatefulSet</span>',
+    title: 'StatefulSet — stable identities',
+    body: `
+      <p>StatefulSets are for stateful applications where each pod needs a unique, persistent identity. Unlike Deployments, pods are not interchangeable.</p>
+      <h3>What makes it different</h3>
+      <ul>
+        <li><strong>Stable pod names</strong> — pod-0, pod-1, pod-2. Predictable, not random hashes.</li>
+        <li><strong>Ordered startup/shutdown</strong> — pod-0 starts first, pod-N shuts down first.</li>
+        <li><strong>Persistent storage per pod</strong> — each pod gets its own PVC via volumeClaimTemplates.</li>
+        <li><strong>Stable network identity</strong> — requires a Headless Service (clusterIP: None).</li>
+      </ul>
+      <h3>Headless service</h3>
+      <div class="cmd-block">
+        <div><span class="k">spec:</span></div>
+        <div style="padding-left:14px">clusterIP: <span class="a">None</span>  <span class="c"># headless</span></div>
+        <div style="padding-left:14px">selector:</div>
+        <div style="padding-left:28px">app: my-db</div>
+      </div>
+      <div class="modal-tip"><div class="tip-label">when to use</div><p>Databases (Postgres, MySQL), distributed systems (Kafka, ZooKeeper, Elasticsearch), anything where pod identity matters.</p></div>
+    `
+  },
+  daemonset: {
+    badge: '<span class="badge bd-green">DaemonSet</span>',
+    title: 'DaemonSet — one per node',
+    body: `
+      <p>A DaemonSet ensures exactly one pod runs on every node. When a new node joins the cluster, a pod is automatically scheduled on it.</p>
+      <h3>Common use cases</h3>
+      <ul>
+        <li><strong>Log collection</strong> — Fluentd, Filebeat on every node</li>
+        <li><strong>Monitoring</strong> — node-exporter, Datadog agent</li>
+        <li><strong>Networking</strong> — CNI plugins, kube-proxy itself is a DaemonSet</li>
+        <li><strong>Storage</strong> — Ceph or Gluster storage daemons</li>
+      </ul>
+      <h3>Node selector / tolerations</h3>
+      <p>You can restrict a DaemonSet to specific nodes using nodeSelector or add tolerations to run on control plane nodes (which normally have NoSchedule taints).</p>
+      <div class="modal-tip"><div class="tip-label">interview tip</div><p>kube-proxy is itself a DaemonSet. If asked "how does k8s networking work per node" — the answer starts with kube-proxy as a DaemonSet managing iptables/IPVS rules.</p></div>
+    `
+  },
+  job: {
+    badge: '<span class="badge bd-amber">Job / CronJob</span>',
+    title: 'Job & CronJob — run to completion',
+    body: `
+      <p>A Job creates pods that run a task and exit. Kubernetes tracks completions and retries on failure. A CronJob creates Jobs on a schedule.</p>
+      <h3>Job spec</h3>
+      <div class="cmd-block">
+        <div><span class="k">spec:</span></div>
+        <div style="padding-left:14px">completions: <span class="a">1</span>      <span class="c"># how many successful runs needed</span></div>
+        <div style="padding-left:14px">parallelism: <span class="a">1</span>      <span class="c"># run N pods at a time</span></div>
+        <div style="padding-left:14px">backoffLimit: <span class="a">3</span>     <span class="c"># retries before marking failed</span></div>
+        <div style="padding-left:14px">activeDeadlineSeconds: <span class="a">300</span></div>
+      </div>
+      <h3>CronJob schedule</h3>
+      <div class="cmd-block">
+        <div><span class="k">spec:</span></div>
+        <div style="padding-left:14px">schedule: <span class="a">"0 2 * * *"</span>  <span class="c"># 2am daily</span></div>
+        <div style="padding-left:14px">concurrencyPolicy: Forbid  <span class="c"># Allow | Forbid | Replace</span></div>
+        <div style="padding-left:14px">successfulJobsHistoryLimit: <span class="a">3</span></div>
+      </div>
+      <div class="modal-warn"><div class="tip-label">gotcha</div><p>CronJob schedule uses UTC by default. concurrencyPolicy: Forbid prevents overlapping runs — important for long-running batch jobs.</p></div>
+    `
+  },
+  configmap: {
+    badge: '<span class="badge bd-amber">ConfigMap / Secret</span>',
+    title: 'ConfigMap & Secret',
+    body: `
+      <p>ConfigMaps store non-sensitive config. Secrets store sensitive data. Both can be injected as env vars or volume mounts.</p>
+      <h3>Inject as env var</h3>
+      <div class="cmd-block">
+        <div><span class="k">env:</span></div>
+        <div style="padding-left:14px">- name: DB_HOST</div>
+        <div style="padding-left:18px">  valueFrom:</div>
+        <div style="padding-left:22px">    configMapKeyRef:</div>
+        <div style="padding-left:26px">      name: app-config</div>
+        <div style="padding-left:26px">      key: db_host</div>
+      </div>
+      <h3>Mount as volume</h3>
+      <div class="cmd-block">
+        <div><span class="k">volumes:</span></div>
+        <div style="padding-left:14px">- name: config-vol</div>
+        <div style="padding-left:18px">  configMap:</div>
+        <div style="padding-left:22px">    name: app-config</div>
+      </div>
+      <div class="modal-warn"><div class="tip-label">important</div><p>Secrets are base64 encoded, NOT encrypted by default. Enable EncryptionConfiguration or use an external secrets manager (Vault, AWS Secrets Manager) for real security.</p></div>
+      <div class="modal-tip"><div class="tip-label">interview tip</div><p>Changes to ConfigMaps mounted as volumes are eventually reflected in the pod (with a sync delay). Env var injected values are NOT updated until pod restart.</p></div>
+    `
+  },
+  services: {
+    badge: '<span class="badge bd-blue">Service types</span>',
+    title: 'Kubernetes Services',
+    body: `
+      <p>A Service is a stable endpoint (IP + DNS) that load-balances traffic to a set of pods selected by labels. Pods come and go; the Service stays.</p>
+      <h3>Types</h3>
+      <ul>
+        <li><strong>ClusterIP</strong> — default. Only accessible inside the cluster. Gets a virtual IP.</li>
+        <li><strong>NodePort</strong> — exposes on a static port (30000–32767) on every node's IP. Development use.</li>
+        <li><strong>LoadBalancer</strong> — provisions a cloud load balancer. Production external traffic.</li>
+        <li><strong>ExternalName</strong> — maps to a DNS name, no proxying. Good for external services.</li>
+      </ul>
+      <h3>Selector matching</h3>
+      <div class="cmd-block">
+        <div><span class="k">selector:</span></div>
+        <div style="padding-left:14px">app: <span class="a">my-api</span>   <span class="c"># matches pod labels</span></div>
+      </div>
+      <div class="modal-tip"><div class="tip-label">interview tip</div><p>kube-proxy watches Services and Endpoints objects and programs iptables/IPVS rules on each node. There's no actual proxy process handling each packet — it's kernel-level routing.</p></div>
+    `
+  },
+  ingress: {
+    badge: '<span class="badge bd-purple">Ingress</span>',
+    title: 'Ingress — HTTP routing',
+    body: `
+      <p>Ingress routes external HTTP/HTTPS traffic to internal Services based on hostname or path rules. It's an API object — it does nothing without an Ingress Controller.</p>
+      <h3>Example rule</h3>
+      <div class="cmd-block">
+        <div><span class="k">spec:</span></div>
+        <div style="padding-left:14px"><span class="k">rules:</span></div>
+        <div style="padding-left:14px">- host: api.example.com</div>
+        <div style="padding-left:18px">  http:</div>
+        <div style="padding-left:22px">    paths:</div>
+        <div style="padding-left:22px">    - path: /v1</div>
+        <div style="padding-left:26px">      backend:</div>
+        <div style="padding-left:30px">        service:</div>
+        <div style="padding-left:34px">          name: api-svc  port: 80</div>
+        <div style="padding-left:14px"><span class="k">tls:</span></div>
+        <div style="padding-left:14px">- hosts: [api.example.com]</div>
+        <div style="padding-left:18px">  secretName: tls-secret</div>
+      </div>
+      <h3>Popular controllers</h3>
+      <ul>
+        <li><strong>ingress-nginx</strong> — most common, battle-tested</li>
+        <li><strong>Traefik</strong> — auto-discovers services, good for dynamic environments</li>
+        <li><strong>AWS ALB controller</strong> — provisions ALBs natively on EKS</li>
+      </ul>
+      <div class="modal-warn"><div class="tip-label">gotcha</div><p>Ingress only handles HTTP/HTTPS (L7). For TCP/UDP services, use NodePort or LoadBalancer Service directly.</p></div>
+    `
+  },
+  pv: {
+    badge: '<span class="badge bd-green">PV / PVC</span>',
+    title: 'PersistentVolume & PVC',
+    body: `
+      <p>PersistentVolume (PV) is a cluster-level storage resource. PersistentVolumeClaim (PVC) is a namespace-level request for storage. They bind 1:1.</p>
+      <h3>Binding lifecycle</h3>
+      <ul>
+        <li><strong>Available</strong> — PV exists, not yet claimed</li>
+        <li><strong>Bound</strong> — PV matched to a PVC</li>
+        <li><strong>Released</strong> — PVC deleted, PV not yet reclaimed</li>
+        <li><strong>Failed</strong> — reclaim failed</li>
+      </ul>
+      <h3>Reclaim policies</h3>
+      <ul>
+        <li><strong>Retain</strong> — PV stays, data preserved. Manual cleanup required.</li>
+        <li><strong>Delete</strong> — PV and underlying storage deleted when PVC is deleted.</li>
+        <li><strong>Recycle</strong> — deprecated. Basic scrub (rm -rf) then makes available again.</li>
+      </ul>
+      <h3>Access modes</h3>
+      <ul>
+        <li><strong>RWO</strong> — ReadWriteOnce. One node can mount read-write.</li>
+        <li><strong>ROX</strong> — ReadOnlyMany. Many nodes can mount read-only.</li>
+        <li><strong>RWX</strong> — ReadWriteMany. Many nodes can mount read-write (needs NFS/CephFS).</li>
+      </ul>
+      <div class="modal-tip"><div class="tip-label">interview tip</div><p>Most cloud block storage (EBS, GCE PD) only supports RWO. For RWX you need a distributed filesystem like NFS, CephFS, or Azure Files.</p></div>
+    `
+  },
+  resources: {
+    badge: '<span class="badge bd-red">Requests vs Limits</span>',
+    title: 'Resource Requests & Limits',
+    body: `
+      <p>Requests are what the pod is guaranteed. Limits are the hard cap. The scheduler uses requests to decide node placement.</p>
+      <h3>Units</h3>
+      <ul>
+        <li><strong>CPU</strong> — measured in cores or millicores. 250m = 0.25 cores.</li>
+        <li><strong>Memory</strong> — Mi (mebibytes), Gi (gibibytes). 128Mi ≠ 128MB.</li>
+      </ul>
+      <h3>What happens when limits are exceeded</h3>
+      <ul>
+        <li><strong>CPU</strong> — throttled. Pod slows down but keeps running.</li>
+        <li><strong>Memory</strong> — OOMKilled. Container is killed and restarted.</li>
+      </ul>
+      <h3>QoS classes</h3>
+      <ul>
+        <li><strong>Guaranteed</strong> — requests = limits for all containers. Best eviction protection.</li>
+        <li><strong>Burstable</strong> — at least one container has requests &lt; limits.</li>
+        <li><strong>BestEffort</strong> — no requests or limits set. Evicted first under pressure.</li>
+      </ul>
+      <div class="modal-warn"><div class="tip-label">always do this</div><p>Always set both requests and limits in production. A pod with no requests can starve other pods. A pod with no limits can consume all node resources.</p></div>
+    `
+  },
+  scheduling: {
+    badge: '<span class="badge bd-purple">Scheduling controls</span>',
+    title: 'Taints, Tolerations & Affinity',
+    body: `
+      <p>These mechanisms control which pods run on which nodes.</p>
+      <h3>Taints & Tolerations</h3>
+      <p>Taints are applied to nodes to repel pods. Tolerations are applied to pods to allow them on tainted nodes.</p>
+      <div class="cmd-block">
+        <div class="c"># taint a node</div>
+        <div><span class="k">kubectl taint</span> nodes node1 gpu=true:NoSchedule</div>
+        <div>&nbsp;</div>
+        <div class="c"># tolerate it in pod spec</div>
+        <div><span class="k">tolerations:</span></div>
+        <div style="padding-left:14px">- key: <span class="a">"gpu"</span> value: <span class="a">"true"</span> effect: <span class="a">NoSchedule</span></div>
+      </div>
+      <h3>Taint effects</h3>
+      <ul>
+        <li><strong>NoSchedule</strong> — don't schedule pods without toleration</li>
+        <li><strong>PreferNoSchedule</strong> — try not to, but allow if necessary</li>
+        <li><strong>NoExecute</strong> — evict existing pods that don't tolerate it</li>
+      </ul>
+      <h3>Node Affinity</h3>
+      <div class="cmd-block">
+        <div><span class="k">affinity:</span></div>
+        <div style="padding-left:14px"><span class="k">nodeAffinity:</span></div>
+        <div style="padding-left:28px"><span class="k">requiredDuringSchedulingIgnoredDuringExecution:</span></div>
+        <div style="padding-left:42px">nodeSelectorTerms:</div>
+        <div style="padding-left:42px">- matchExpressions:</div>
+        <div style="padding-left:42px">  - key: topology.kubernetes.io/zone</div>
+        <div style="padding-left:44px">    operator: In</div>
+        <div style="padding-left:44px">    values: [us-east-1a]</div>
+      </div>
+      <div class="modal-tip"><div class="tip-label">interview tip</div><p>required = hard constraint (pod won't schedule if not met). preferred = soft constraint (scheduler tries but won't block).</p></div>
+    `
+  },
+  liveness: {
+    badge: '<span class="badge bd-red">Liveness</span>',
+    title: 'Liveness Probe',
+    body: `
+      <p>Liveness probes determine if a container is still alive. A failing liveness probe causes the container to be <strong>killed and restarted</strong> according to restartPolicy.</p>
+      <h3>When to use</h3>
+      <p>Use liveness probes to detect deadlocks or processes that are running but can't make progress. If your app can get stuck without crashing, use a liveness probe.</p>
+      <h3>HTTP example</h3>
+      <div class="cmd-block">
+        <div><span class="k">livenessProbe:</span></div>
+        <div style="padding-left:14px"><span class="k">httpGet:</span></div>
+        <div style="padding-left:28px">path: /healthz</div>
+        <div style="padding-left:28px">port: 8080</div>
+        <div style="padding-left:14px">initialDelaySeconds: <span class="a">15</span></div>
+        <div style="padding-left:14px">periodSeconds: <span class="a">20</span></div>
+        <div style="padding-left:14px">failureThreshold: <span class="a">3</span></div>
+      </div>
+      <div class="modal-warn"><div class="tip-label">don't do this</div><p>Don't make liveness probes check downstream dependencies (DB, APIs). If your DB is down, liveness will restart your pod in a loop solving nothing. Use readiness for that.</p></div>
+    `
+  },
+  readiness: {
+    badge: '<span class="badge bd-green">Readiness</span>',
+    title: 'Readiness Probe',
+    body: `
+      <p>Readiness probes determine if a container is ready to receive traffic. A failing readiness probe removes the pod from Service endpoints — it won't receive any traffic but keeps running.</p>
+      <h3>Use cases</h3>
+      <ul>
+        <li>App needs time to warm up (cache load, connection pool init)</li>
+        <li>Temporarily overloaded — signal "back off" without dying</li>
+        <li>Dependent service (DB) is unavailable</li>
+      </ul>
+      <h3>Example</h3>
+      <div class="cmd-block">
+        <div><span class="k">readinessProbe:</span></div>
+        <div style="padding-left:14px"><span class="k">httpGet:</span></div>
+        <div style="padding-left:28px">path: /ready</div>
+        <div style="padding-left:28px">port: 8080</div>
+        <div style="padding-left:14px">initialDelaySeconds: <span class="a">5</span></div>
+        <div style="padding-left:14px">periodSeconds: <span class="a">10</span></div>
+      </div>
+      <div class="modal-tip"><div class="tip-label">interview tip</div><p>During a rolling update, k8s waits for the new pod to pass readiness before removing the old one. Without a readiness probe, traffic goes to pods that aren't ready yet.</p></div>
+    `
+  },
+  rbac: {
+    badge: '<span class="badge bd-blue">RBAC</span>',
+    title: 'RBAC — Role-Based Access Control',
+    body: `
+      <p>RBAC controls what actions subjects (users, groups, ServiceAccounts) can perform on Kubernetes resources.</p>
+      <h3>The 4 objects</h3>
+      <ul>
+        <li><strong>ServiceAccount</strong> — identity for pods. Auto-mounted JWT token.</li>
+        <li><strong>Role</strong> — set of rules (verbs + resources) scoped to a namespace.</li>
+        <li><strong>ClusterRole</strong> — same as Role but cluster-wide or for non-namespaced resources.</li>
+        <li><strong>RoleBinding / ClusterRoleBinding</strong> — attaches a Role to a subject.</li>
+      </ul>
+      <h3>Example Role</h3>
+      <div class="cmd-block">
+        <div><span class="k">rules:</span></div>
+        <div style="padding-left:14px">- apiGroups: [""]</div>
+        <div style="padding-left:18px">  resources: [<span class="a">"pods"</span>, <span class="a">"pods/log"</span>]</div>
+        <div style="padding-left:18px">  verbs: [<span class="a">"get"</span>, <span class="a">"list"</span>, <span class="a">"watch"</span>]</div>
+      </div>
+      <h3>Common verbs</h3>
+      <p><span class="mono">get</span> <span class="mono">list</span> <span class="mono">watch</span> <span class="mono">create</span> <span class="mono">update</span> <span class="mono">patch</span> <span class="mono">delete</span></p>
+      <div class="modal-tip"><div class="tip-label">interview tip</div><p>Always use least-privilege. Give pods a dedicated ServiceAccount with only the permissions they need — not the default SA which often has too many rights.</p></div>
+    `
+  },
+  hpa: {
+    badge: '<span class="badge bd-blue">HPA</span>',
+    title: 'HorizontalPodAutoscaler',
+    body: `
+      <p>HPA automatically scales the number of pod replicas based on observed metrics (CPU, memory, or custom metrics from Prometheus/KEDA).</p>
+      <h3>Basic CPU HPA</h3>
+      <div class="cmd-block">
+        <div><span class="k">spec:</span></div>
+        <div style="padding-left:14px">scaleTargetRef:</div>
+        <div style="padding-left:28px">apiVersion: apps/v1</div>
+        <div style="padding-left:28px">kind: Deployment</div>
+        <div style="padding-left:28px">name: my-app</div>
+        <div style="padding-left:14px">minReplicas: <span class="a">2</span></div>
+        <div style="padding-left:14px">maxReplicas: <span class="a">10</span></div>
+        <div style="padding-left:14px">targetCPUUtilizationPercentage: <span class="a">70</span></div>
+      </div>
+      <h3>Requirements</h3>
+      <ul>
+        <li>metrics-server must be installed in the cluster</li>
+        <li>Pods must have CPU requests set (HPA uses them to calculate utilization %)</li>
+      </ul>
+      <div class="modal-tip"><div class="tip-label">interview tip</div><p>HPA has a cooldown period (default 5 min scale down, 3 min scale up) to prevent thrashing. KEDA extends HPA with event-driven scaling (queue depth, cron, etc.).</p></div>
+    `
+  },
+  pdb: {
+    badge: '<span class="badge bd-purple">PDB</span>',
+    title: 'PodDisruptionBudget',
+    body: `
+      <p>A PDB limits how many pods of a Deployment/StatefulSet can be voluntarily disrupted at once — during node drains, rolling updates, or cluster upgrades.</p>
+      <h3>Example</h3>
+      <div class="cmd-block">
+        <div><span class="k">spec:</span></div>
+        <div style="padding-left:14px">minAvailable: <span class="a">2</span>     <span class="c"># at least 2 pods always up</span></div>
+        <div style="padding-left:14px"><span class="c"># OR</span></div>
+        <div style="padding-left:14px">maxUnavailable: <span class="a">1</span>  <span class="c"># at most 1 pod down at a time</span></div>
+        <div style="padding-left:14px"><span class="k">selector:</span></div>
+        <div style="padding-left:28px">matchLabels:</div>
+        <div style="padding-left:42px">app: my-api</div>
+      </div>
+      <div class="modal-tip"><div class="tip-label">interview tip</div><p>PDB only applies to voluntary disruptions (node drain, eviction). It does NOT protect against involuntary disruptions like node crashes or OOM kills.</p></div>
+      <div class="modal-warn"><div class="tip-label">gotcha</div><p>If minAvailable equals your replica count, a node drain will block indefinitely — k8s won't evict the pod. Always set minAvailable below replicas.</p></div>
+    `
+  },
+  lifecycle: {
+    badge: '<span class="badge bd-blue">Pod lifecycle</span>',
+    title: 'Pod lifecycle — full walkthrough',
+    body: `
+      <p>Understanding the full pod lifecycle is one of the most common interview topics.</p>
+      <h3>Creation flow</h3>
+      <ul>
+        <li>kubectl/API → API Server validates + persists to etcd</li>
+        <li>Scheduler watches for unscheduled pods → picks node → updates etcd</li>
+        <li>kubelet on the node watches → sees the pod assigned to it</li>
+        <li>kubelet instructs container runtime to pull image + start containers</li>
+        <li>kubelet reports status back to API Server</li>
+      </ul>
+      <h3>Termination flow</h3>
+      <ul>
+        <li>Pod marked Terminating. Removed from Service endpoints.</li>
+        <li>preStop hook runs (if defined)</li>
+        <li>SIGTERM sent to container</li>
+        <li>Grace period countdown starts (terminationGracePeriodSeconds, default 30s)</li>
+        <li>If still running after grace period → SIGKILL</li>
+      </ul>
+      <h3>Init containers</h3>
+      <p>Run sequentially before any app containers start. If one fails, the pod restarts. Great for setup tasks: waiting for a DB, seeding config files.</p>
+      <div class="modal-tip"><div class="tip-label">interview tip</div><p>There's a race condition between SIGTERM and endpoint removal. Pods can receive traffic after SIGTERM. Add a preStop sleep of 5s to let endpoint propagation catch up before shutting down.</p></div>
+    `
+  },
+  rolling: {
+    badge: '<span class="badge bd-purple">Rolling update</span>',
+    title: 'Rolling updates & rollbacks',
+    body: `
+      <p>Deployments update pods gradually with zero downtime using a rolling strategy controlled by maxSurge and maxUnavailable.</p>
+      <h3>How it works</h3>
+      <ul>
+        <li>New ReplicaSet created with updated pod template</li>
+        <li>New pods scale up (controlled by maxSurge)</li>
+        <li>Old pods scale down (controlled by maxUnavailable)</li>
+        <li>Repeat until all pods are on new version</li>
+        <li>Old ReplicaSet kept (revisionHistoryLimit) for rollback</li>
+      </ul>
+      <h3>Commands</h3>
+      <div class="cmd-block">
+        <div><span class="k">kubectl set image</span> deploy/app app=nginx:1.26</div>
+        <div><span class="k">kubectl rollout</span> status deploy/app</div>
+        <div><span class="k">kubectl rollout</span> pause deploy/app   <span class="c"># canary hold</span></div>
+        <div><span class="k">kubectl rollout</span> resume deploy/app</div>
+        <div><span class="k">kubectl rollout</span> undo deploy/app</div>
+      </div>
+      <div class="modal-warn"><div class="tip-label">key requirement</div><p>Readiness probes are essential for zero-downtime rolling updates. Without them, k8s routes traffic to new pods before they're ready.</p></div>
+    `
+  },
+  crashloop: {
+    badge: '<span class="badge bd-pink">CrashLoopBackOff</span>',
+    title: 'Debugging CrashLoopBackOff',
+    body: `
+      <p>CrashLoopBackOff means the container keeps crashing and k8s is exponentially backing off restarts (10s, 20s, 40s... up to 5 min).</p>
+      <h3>Debug steps</h3>
+      <div class="cmd-block">
+        <div class="c"># check logs of crashed container</div>
+        <div><span class="k">kubectl logs</span> &lt;pod&gt; --previous</div>
+        <div>&nbsp;</div>
+        <div class="c"># describe for events</div>
+        <div><span class="k">kubectl describe</span> pod &lt;pod&gt;</div>
+        <div>&nbsp;</div>
+        <div class="c"># check exit code</div>
+        <div><span class="k">kubectl get</span> pod &lt;pod&gt; -o jsonpath='{.status.containerStatuses[0].lastState.terminated}'</div>
+      </div>
+      <h3>Common causes</h3>
+      <ul>
+        <li><strong>Exit code 1</strong> — application error. Check logs.</li>
+        <li><strong>Exit code 137</strong> — OOMKilled. Increase memory limits.</li>
+        <li><strong>Exit code 139</strong> — Segfault.</li>
+        <li>Wrong entrypoint / command in image</li>
+        <li>Missing env vars or secrets</li>
+        <li>Liveness probe too aggressive</li>
+      </ul>
+      <div class="modal-tip"><div class="tip-label">quick trick</div><p>Override the entrypoint with sleep to keep the container alive for debugging: command: ["sleep", "3600"]</p></div>
+    `
+  }
+};
+
+function openModal(key) {
+  const data = MODALS[key];
+  if(!data) return;
+  document.getElementById('modalBadge').innerHTML = data.badge;
+  document.getElementById('modalTitle').textContent = data.title;
+  document.getElementById('modalBody').innerHTML = data.body;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if(e.target === document.getElementById('modalOverlay')) closeModalBtn();
+}
+
+function closeModalBtn() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModalBtn(); });
+
+function navScrollTo(id) {
+  document.getElementById(id).scrollIntoView({behavior:'smooth'});
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+const sections = document.querySelectorAll('.section');
+const btns = document.querySelectorAll('.nav-btn');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting) {
+      const idx = [...sections].indexOf(e.target);
+      btns.forEach(b => b.classList.remove('active'));
+      if(btns[idx]) btns[idx].classList.add('active');
+    }
+  });
+}, {rootMargin:'-30% 0px -60% 0px'});
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
