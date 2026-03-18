@@ -4,6 +4,8 @@
 1. **How HTTP request-response cycle works**
    -  Client sends a formatted text message over TCP → server reads it, does work, sends a formatted text message back.
 2. HTTP vs HTTPS — what TLS actually does
+   - TTP is like sending a postcard where anyone can read the text; HTTPS is like sending a locked safe that only the recipient can open.
+   - The "S" adds TLS encryption, which scrambles your data and verifies that the website is actually who it claims to be.
 3. Status codes — when to use 400 vs 422 vs 409
 4. Idempotency — what it means and why it matters in APIs
 5. REST constraints — the 6 principles explained simply
