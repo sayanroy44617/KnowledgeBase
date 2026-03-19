@@ -1,0 +1,1906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CI/CD — GitLab vs GitHub Actions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0f14;--bg2:#13161d;--bg3:#1a1d27;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#e8eaf0;--muted:#7a7f94;--dim:#4a4f64;
+  --gl:#e2432a;--gh:#e8eaf0;
+  --blue:#4a90e2;--green:#3ecf8e;--amber:#f0a03e;
+  --red:#e05252;--purple:#9b7ef0;--pink:#e06ea0;
+  --mono:'JetBrains Mono',monospace;--sans:'Sora',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;font-size:14px}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* layout */
+.page{max-width:1200px;margin:0 auto;padding:0 1.5rem 5rem}
+.hero{padding:3rem 0 2rem;border-bottom:1px solid var(--border);margin-bottom:0}
+.hero-eyebrow{font-family:var(--mono);font-size:11px;color:var(--blue);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.75rem}
+.hero h1{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:600;line-height:1.2;letter-spacing:-.02em}
+.hero h1 .gl{color:var(--gl)}
+.hero h1 .gh{color:#aaa}
+.hero-sub{margin-top:.75rem;font-size:13px;color:var(--muted);max-width:640px;line-height:1.7}
+.hero-badges{margin-top:1rem;display:flex;gap:.5rem;flex-wrap:wrap}
+
+/* nav */
+.nav{position:sticky;top:0;z-index:100;background:rgba(13,15,20,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.6rem 0;margin-bottom:0}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 1.5rem;display:flex;gap:.25rem;overflow-x:auto;scrollbar-width:none}
+.nav-inner::-webkit-scrollbar{display:none}
+.nav-btn{font-family:var(--mono);font-size:11px;padding:.3rem .75rem;border-radius:4px;border:1px solid transparent;color:var(--muted);cursor:pointer;background:none;white-space:nowrap;transition:all .15s}
+.nav-btn:hover{color:var(--text);background:var(--bg3)}
+.nav-btn.active{color:var(--blue);border-color:rgba(74,144,226,.3);background:rgba(74,144,226,.08)}
+
+/* section */
+.section{margin:3rem 0;scroll-margin-top:56px}
+.sec-label{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1.25rem;display:flex;align-items:center;gap:.5rem}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.sec-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:1.25rem;max-width:800px}
+
+/* side by side */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem}
+.compare-col{border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.col-header{padding:.6rem 1rem;display:flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:11px;font-weight:500;border-bottom:1px solid var(--border)}
+.col-header.gl-h{background:rgba(226,67,42,.08);color:#e2432a}
+.col-header.gh-h{background:rgba(255,255,255,.04);color:#aaa}
+.col-body{padding:1rem;background:var(--bg2)}
+.col-body .cmd-block{margin-top:0}
+
+/* code blocks */
+.cmd-block{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.65rem .9rem;font-family:var(--mono);font-size:11px;line-height:2;overflow-x:auto}
+.cmd-block .k{color:#4a90e2}
+.cmd-block .v{color:#3ecf8e}
+.cmd-block .c{color:var(--dim)}
+.cmd-block .a{color:#f0a03e}
+.cmd-block .r{color:#e05252}
+.cmd-block .p{color:#9b7ef0}
+
+/* cards */
+.grid{display:grid;gap:10px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.9rem 1rem;transition:border-color .15s,background .15s;position:relative;overflow:hidden}
+.card:hover{border-color:var(--border2);background:var(--bg3)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .2s}
+.card:hover::before{opacity:1}
+.card.blue::before{background:var(--blue)}
+.card.green::before{background:var(--green)}
+.card.amber::before{background:var(--amber)}
+.card.purple::before{background:var(--purple)}
+.card.red::before{background:var(--red)}
+.card.pink::before{background:var(--pink)}
+.card[data-modal]{cursor:pointer}
+.card[data-modal]::after{content:'↗';position:absolute;bottom:.6rem;right:.75rem;font-size:11px;color:var(--dim);transition:color .15s}
+.card[data-modal]:hover::after{color:var(--muted)}
+.card-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:5px}
+.card-sub{font-size:12px;color:var(--muted);line-height:1.6}
+
+/* badge */
+.badge{display:inline-flex;align-items:center;font-family:var(--mono);font-size:10px;font-weight:500;padding:2px 8px;border-radius:3px;margin-bottom:7px;letter-spacing:.03em}
+.bd-blue{background:rgba(74,144,226,.15);color:var(--blue)}
+.bd-green{background:rgba(62,207,142,.12);color:var(--green)}
+.bd-amber{background:rgba(240,160,62,.12);color:var(--amber)}
+.bd-purple{background:rgba(155,126,240,.12);color:var(--purple)}
+.bd-red{background:rgba(224,82,82,.12);color:var(--red)}
+.bd-gl{background:rgba(226,67,42,.12);color:#e2432a}
+.bd-gh{background:rgba(255,255,255,.08);color:#ccc}
+
+/* kv */
+.kv-list{margin-top:.5rem}
+.kv{display:flex;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px}
+.kv:last-child{border-bottom:none}
+.kv-key{color:var(--text);font-weight:500;min-width:120px;font-family:var(--mono);font-size:11px}
+.kv-val{color:var(--muted);line-height:1.5}
+
+/* tags */
+.tag-row{display:flex;flex-wrap:wrap;gap:5px;margin:.5rem 0}
+.tag{font-family:var(--mono);font-size:10px;padding:2px 7px;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--muted)}
+
+/* inline mono */
+.mono{font-family:var(--mono);font-size:10px;background:var(--bg);padding:1px 5px;border-radius:3px;color:var(--muted);border:1px solid var(--border)}
+
+/* info/warn boxes */
+.hi-box{background:rgba(74,144,226,.06);border:1px solid rgba(74,144,226,.2);border-radius:8px;padding:.9rem 1rem;margin:.75rem 0}
+.hi-box p{font-size:13px;color:#6ab4f0;line-height:1.7;margin:0}
+.warn-box{background:rgba(240,160,62,.06);border:1px solid rgba(240,160,62,.2);border-radius:8px;padding:.9rem 1rem;margin:.75rem 0}
+.warn-box p{font-size:13px;color:#c8883a;line-height:1.7;margin:0}
+.warn-box .label{font-family:var(--mono);font-size:10px;color:var(--amber);margin-bottom:.3rem}
+.tip-box{background:rgba(62,207,142,.06);border:1px solid rgba(62,207,142,.15);border-radius:6px;padding:.75rem 1rem;margin:.75rem 0}
+.tip-box .label{font-family:var(--mono);font-size:10px;color:var(--green);margin-bottom:.3rem}
+.tip-box p{font-size:12px;color:#5ec99a;margin:0}
+
+/* divider */
+.divider{height:1px;background:var(--border);margin:2rem 0}
+
+/* modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;width:min(760px,94vw);max-height:84vh;overflow-y:auto;transform:translateY(12px) scale(.98);transition:transform .2s}
+.modal-overlay.open .modal-box{transform:translateY(0) scale(1)}
+.modal-header{padding:1.2rem 1.4rem .8rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.modal-header-left{display:flex;flex-direction:column;gap:.4rem}
+.modal-close{background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;border-radius:4px;padding:2px 8px;font-size:13px;transition:all .15s;flex-shrink:0}
+.modal-close:hover{color:var(--text);border-color:var(--border2)}
+.modal-body{padding:1.2rem 1.4rem 1.8rem}
+.modal-body h3{font-size:13px;font-weight:500;color:var(--text);margin:1.2rem 0 .5rem}
+.modal-body h3:first-child{margin-top:0}
+.modal-body p{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:.75rem}
+.modal-body ul{padding-left:1.2rem;margin-bottom:.75rem}
+.modal-body li{font-size:13px;color:var(--muted);line-height:1.9}
+.modal-body li strong{color:var(--text)}
+.modal-body .compare{margin:1rem 0}
+.modal-tip{background:rgba(62,207,142,.06);border:1px solid rgba(62,207,142,.15);border-radius:6px;padding:.75rem 1rem;margin-top:1rem}
+.modal-tip .tip-label{font-family:var(--mono);font-size:10px;color:var(--green);margin-bottom:.3rem}
+.modal-tip p{font-size:12px;color:#5ec99a;margin:0}
+.modal-warn{background:rgba(240,160,62,.06);border:1px solid rgba(240,160,62,.15);border-radius:6px;padding:.75rem 1rem;margin-top:.75rem}
+.modal-warn .tip-label{font-family:var(--mono);font-size:10px;color:var(--amber);margin-bottom:.3rem}
+.modal-warn p{font-size:12px;color:#c8883a;margin:0}
+
+@media(max-width:700px){.compare,.g3,.g4{grid-template-columns:1fr}.g2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="navTo('concepts')">Concepts</button>
+    <button class="nav-btn" onclick="navTo('anatomy')">Anatomy</button>
+    <button class="nav-btn" onclick="navTo('runners')">Runners</button>
+    <button class="nav-btn" onclick="navTo('variables')">Variables</button>
+    <button class="nav-btn" onclick="navTo('cache')">Cache & Artifacts</button>
+    <button class="nav-btn" onclick="navTo('docker')">Docker</button>
+    <button class="nav-btn" onclick="navTo('reusable')">Reusable</button>
+    <button class="nav-btn" onclick="navTo('deployment')">Deployment</button>
+    <button class="nav-btn" onclick="navTo('patterns')">Patterns</button>
+    <button class="nav-btn" onclick="navTo('glossary')">Glossary</button>
+  </div>
+</div>
+
+<div class="page">
+  <div class="hero">
+    <div class="hero-eyebrow">Source of truth · CI/CD</div>
+    <h1><span class="gl">GitLab CI</span> &nbsp;vs&nbsp; <span class="gh">GitHub Actions</span></h1>
+    <div class="hero-sub">A definitive side-by-side reference for pipeline anatomy, runners, variables, caching, Docker integration, reusable components, and deployment patterns. Not a cheatsheet — a reference you can trust.</div>
+    <div class="hero-badges">
+      <span class="badge bd-gl">GitLab CI</span>
+      <span class="badge bd-gh">GitHub Actions</span>
+      <span class="badge bd-blue">Side by side</span>
+      <span class="badge bd-green">Source of truth</span>
+    </div>
+  </div>
+
+  <!-- CORE CONCEPTS -->
+  <div class="section" id="concepts">
+    <div class="sec-label">01 — Core concepts & mental model</div>
+    <div class="sec-desc">Before syntax, understand the mental model. GitLab CI and GitHub Actions share the same fundamental idea but use completely different terminology for the same things.</div>
+    <div class="compare">
+      <div class="compare-col">
+        <div class="col-header gl-h">⬡ GitLab CI — terminology</div>
+        <div class="col-body">
+          <div class="kv-list">
+            <div class="kv"><span class="kv-key">Pipeline</span><span class="kv-val">The top-level automation run. Triggered by push, MR, schedule, API, or manual.</span></div>
+            <div class="kv"><span class="kv-key">Stage</span><span class="kv-val">A named phase. Jobs in the same stage run in parallel. Stages run sequentially.</span></div>
+            <div class="kv"><span class="kv-key">Job</span><span class="kv-val">The atomic unit. A named block with a script, runs on a runner.</span></div>
+            <div class="kv"><span class="kv-key">Runner</span><span class="kv-val">The agent that executes jobs. Registered globally, per-group, or per-project.</span></div>
+            <div class="kv"><span class="kv-key">Executor</span><span class="kv-val">How the runner runs jobs: shell, docker, kubernetes, etc.</span></div>
+            <div class="kv"><span class="kv-key">.gitlab-ci.yml</span><span class="kv-val">The single pipeline definition file at repo root.</span></div>
+            <div class="kv"><span class="kv-key">include</span><span class="kv-val">Pull in external YAML files to compose the pipeline.</span></div>
+            <div class="kv"><span class="kv-key">rules / only</span><span class="kv-val">Control when a job runs.</span></div>
+            <div class="kv"><span class="kv-key">artifacts</span><span class="kv-val">Files passed between jobs in a pipeline.</span></div>
+            <div class="kv"><span class="kv-key">cache</span><span class="kv-val">Files persisted across pipeline runs (e.g. node_modules).</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="compare-col">
+        <div class="col-header gh-h">⬡ GitHub Actions — terminology</div>
+        <div class="col-body">
+          <div class="kv-list">
+            <div class="kv"><span class="kv-key">Workflow</span><span class="kv-val">Equivalent to Pipeline. Defined in .github/workflows/*.yml</span></div>
+            <div class="kv"><span class="kv-key">Job</span><span class="kv-val">Equivalent to Stage+Job combined. Jobs run in parallel by default.</span></div>
+            <div class="kv"><span class="kv-key">Step</span><span class="kv-val">Atomic unit inside a job. Equivalent to a single command in GitLab's script.</span></div>
+            <div class="kv"><span class="kv-key">Runner</span><span class="kv-val">The agent. GitHub-hosted (ubuntu-latest) or self-hosted.</span></div>
+            <div class="kv"><span class="kv-key">Action</span><span class="kv-val">A reusable step from the marketplace or local. No GitLab equivalent (closest: include).</span></div>
+            <div class="kv"><span class="kv-key">.github/workflows/</span><span class="kv-val">Directory of workflow YAML files. Multiple files = multiple workflows.</span></div>
+            <div class="kv"><span class="kv-key">Reusable workflow</span><span class="kv-val">Equivalent to GitLab's include + template jobs.</span></div>
+            <div class="kv"><span class="kv-key">if</span><span class="kv-val">Conditional expression to control job/step execution.</span></div>
+            <div class="kv"><span class="kv-key">artifacts</span><span class="kv-val">Uses actions/upload-artifact and actions/download-artifact.</span></div>
+            <div class="kv"><span class="kv-key">cache</span><span class="kv-val">Uses actions/cache action.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g4">
+      <div class="card blue" data-modal onclick="openModal('triggers')">
+        <span class="badge bd-blue">Triggers</span>
+        <div class="card-title">What starts a pipeline</div>
+        <div class="card-sub">Push, MR/PR, schedule, manual, API, upstream pipeline, and more.</div>
+      </div>
+      <div class="card green" data-modal onclick="openModal('execution')">
+        <span class="badge bd-green">Execution order</span>
+        <div class="card-title">Parallel vs sequential</div>
+        <div class="card-sub">GitLab: parallel within stage, sequential between stages. GH: parallel by default, use needs: for ordering.</div>
+      </div>
+      <div class="card amber" data-modal onclick="openModal('conditions')">
+        <span class="badge bd-amber">Conditions</span>
+        <div class="card-title">When jobs run</div>
+        <div class="card-sub">GitLab rules vs only/except. GitHub Actions if expressions. Both support branch, tag, file path filtering.</div>
+      </div>
+      <div class="card purple" data-modal onclick="openModal('contexts')">
+        <span class="badge bd-purple">Contexts & metadata</span>
+        <div class="card-title">Runtime information</div>
+        <div class="card-sub">CI_COMMIT_SHA, CI_PIPELINE_ID (GL) vs github.sha, github.run_id (GH). Access branch, tag, actor, ref.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANATOMY -->
+  <div class="section" id="anatomy">
+    <div class="sec-label">02 — Pipeline anatomy</div>
+    <div class="sec-desc">The full structure of a pipeline file. Every key explained with its GitLab and GitHub Actions equivalent.</div>
+    <div class="compare">
+      <div class="compare-col">
+        <div class="col-header gl-h">⬡ GitLab CI — .gitlab-ci.yml</div>
+        <div class="col-body">
+          <div class="cmd-block">
+            <div class="c"># global defaults</div>
+            <div><span class="k">default:</span></div>
+            <div style="padding-left:14px">image: python:3.13-slim</div>
+            <div style="padding-left:14px">before_script:</div>
+            <div style="padding-left:28px">- pip install -r requirements.txt</div>
+            <div style="padding-left:14px">retry: 2</div>
+            <div style="padding-left:14px">timeout: 30 minutes</div>
+            <div>&nbsp;</div>
+            <div class="c"># define stages (order matters)</div>
+            <div><span class="k">stages:</span></div>
+            <div style="padding-left:14px">- lint</div>
+            <div style="padding-left:14px">- test</div>
+            <div style="padding-left:14px">- build</div>
+            <div style="padding-left:14px">- deploy</div>
+            <div>&nbsp;</div>
+            <div class="c"># a job</div>
+            <div><span class="k">unit-test:</span></div>
+            <div style="padding-left:14px"><span class="k">stage:</span> test</div>
+            <div style="padding-left:14px"><span class="k">script:</span></div>
+            <div style="padding-left:28px">- pytest tests/unit</div>
+            <div style="padding-left:14px"><span class="k">rules:</span></div>
+            <div style="padding-left:28px">- if: '$CI_PIPELINE_SOURCE == "merge_request_event"'</div>
+            <div style="padding-left:28px">- if: '$CI_COMMIT_BRANCH == "main"'</div>
+            <div style="padding-left:14px"><span class="k">artifacts:</span></div>
+            <div style="padding-left:28px">reports:</div>
+            <div style="padding-left:42px">junit: build/reports/unit-tests.xml</div>
+            <div style="padding-left:28px">when: always</div>
+            <div style="padding-left:14px"><span class="k">tags:</span></div>
+            <div style="padding-left:28px">- k8s-runner</div>
+          </div>
+        </div>
+      </div>
+      <div class="compare-col">
+        <div class="col-header gh-h">⬡ GitHub Actions — .github/workflows/ci.yml</div>
+        <div class="col-body">
+          <div class="cmd-block">
+            <div class="c"># workflow metadata</div>
+            <div><span class="k">name:</span> CI</div>
+            <div>&nbsp;</div>
+            <div class="c"># what triggers this workflow</div>
+            <div><span class="k">on:</span></div>
+            <div style="padding-left:14px">push:</div>
+            <div style="padding-left:28px">branches: [main]</div>
+            <div style="padding-left:14px">pull_request:</div>
+            <div style="padding-left:28px">branches: [main]</div>
+            <div>&nbsp;</div>
+            <div class="c"># global env available to all jobs</div>
+            <div><span class="k">env:</span></div>
+            <div style="padding-left:14px">PYTHON_VERSION: <span class="a">'3.13'</span></div>
+            <div>&nbsp;</div>
+            <div><span class="k">jobs:</span></div>
+            <div style="padding-left:14px"><span class="k">unit-test:</span></div>
+            <div style="padding-left:28px">runs-on: ubuntu-latest</div>
+            <div style="padding-left:28px">timeout-minutes: 30</div>
+            <div style="padding-left:28px">steps:</div>
+            <div style="padding-left:42px">- uses: actions/checkout@v4</div>
+            <div style="padding-left:42px">- uses: actions/setup-python@v5</div>
+            <div style="padding-left:56px">  with:</div>
+            <div style="padding-left:70px">    python-version: ${{ env.PYTHON_VERSION }}</div>
+            <div style="padding-left:42px">- run: pip install -r requirements.txt</div>
+            <div style="padding-left:42px">- run: pytest tests/unit</div>
+            <div style="padding-left:42px">- uses: actions/upload-artifact@v4</div>
+            <div style="padding-left:56px">  if: always()</div>
+            <div style="padding-left:56px">  with:</div>
+            <div style="padding-left:70px">    name: test-results</div>
+            <div style="padding-left:70px">    path: build/reports/</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:12px">
+      <div class="card blue" data-modal onclick="openModal('needs')">
+        <span class="badge bd-blue">needs / depends-on</span>
+        <div class="card-title">Job dependencies</div>
+        <div class="card-sub">GitLab needs: skips stage ordering. GH needs: makes jobs sequential. Both pass artifacts between jobs.</div>
+      </div>
+      <div class="card green" data-modal onclick="openModal('matrix')">
+        <span class="badge bd-green">Matrix builds</span>
+        <div class="card-title">Run across multiple versions</div>
+        <div class="card-sub">Test against multiple Python/Node versions, OS, or any variable in one job definition.</div>
+      </div>
+      <div class="card amber" data-modal onclick="openModal('manual')">
+        <span class="badge bd-amber">Manual & scheduled</span>
+        <div class="card-title">Human-gated & cron jobs</div>
+        <div class="card-sub">Block deployment behind a manual approval step. Run nightly builds on a cron schedule.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RUNNERS -->
+  <div class="section" id="runners">
+    <div class="sec-label">03 — Runners & executors</div>
+    <div class="sec-desc">Runners are the agents that pick up and execute jobs. Understanding runner types and executors is critical for debugging why jobs behave differently in CI vs locally.</div>
+    <div class="compare">
+      <div class="compare-col">
+        <div class="col-header gl-h">⬡ GitLab Runners</div>
+        <div class="col-body">
+          <div class="kv-list">
+            <div class="kv"><span class="kv-key">Shared runner</span><span class="kv-val">Provided by GitLab.com. Available to all projects. Rate limited.</span></div>
+            <div class="kv"><span class="kv-key">Group runner</span><span class="kv-val">Available to all projects in a group. Register once, use everywhere.</span></div>
+            <div class="kv"><span class="kv-key">Project runner</span><span class="kv-val">Dedicated to one project. Most control.</span></div>
+            <div class="kv"><span class="kv-key">tags:</span><span class="kv-val">Target specific runners. Job only runs on runner with matching tags.</span></div>
+          </div>
+          <div style="margin-top:10px;font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:6px">Executors</div>
+          <div class="kv-list">
+            <div class="kv"><span class="kv-key">shell</span><span class="kv-val">Runs directly on runner host. Fast, no isolation.</span></div>
+            <div class="kv"><span class="kv-key">docker</span><span class="kv-val">Each job in a fresh container. Most common.</span></div>
+            <div class="kv"><span class="kv-key">docker+machine</span><span class="kv-val">Auto-scales cloud VMs per job. GitLab SaaS.</span></div>
+            <div class="kv"><span class="kv-key">kubernetes</span><span class="kv-val">Each job in a k8s pod. Best for cloud-native.</span></div>
+            <div class="kv"><span class="kv-key">instance</span><span class="kv-val">New GitLab runner — nesting support for DinD.</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="compare-col">
+        <div class="col-header gh-h">⬡ GitHub Actions Runners</div>
+        <div class="col-body">
+          <div class="kv-list">
+            <div class="kv"><span class="kv-key">GitHub-hosted</span><span class="kv-val">ubuntu-latest, windows-latest, macos-latest. Fresh VM per job. 2 vCPU, 7GB RAM (free tier).</span></div>
+            <div class="kv"><span class="kv-key">Self-hosted</span><span class="kv-val">Your own infrastructure. Register with a token. Persistent or ephemeral.</span></div>
+            <div class="kv"><span class="kv-key">Larger runners</span><span class="kv-val">Paid. Up to 64 vCPU, 256GB RAM. GPU runners available.</span></div>
+            <div class="kv"><span class="kv-key">runs-on:</span><span class="kv-val">Selects runner. Can be a label array for self-hosted targeting.</span></div>
+          </div>
+          <div style="margin-top:10px;font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:6px">Self-hosted setup</div>
+          <div class="cmd-block" style="margin-top:0">
+            <div class="c"># label your runner</div>
+            <div>runs-on: [self-hosted, linux, x64, gpu]</div>
+            <div>&nbsp;</div>
+            <div class="c"># container jobs on self-hosted</div>
+            <div><span class="k">container:</span></div>
+            <div style="padding-left:14px">image: python:3.13-slim</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g2" style="margin-top:12px">
+      <div class="card red" data-modal onclick="openModal('dind')">
+        <span class="badge bd-red">Docker-in-Docker (DinD)</span>
+        <div class="card-title">Building images in CI</div>
+        <div class="card-sub">Running docker build inside a CI container requires special configuration. Two approaches: DinD and socket binding.</div>
+      </div>
+      <div class="card purple" data-modal onclick="openModal('runner_config')">
+        <span class="badge bd-purple">Runner configuration</span>
+        <div class="card-title">config.toml & best practices</div>
+        <div class="card-sub">Concurrency, resource limits, pull policies, cache dir, and security hardening for production runners.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VARIABLES -->
+  <div class="section" id="variables">
+    <div class="sec-label">04 — Variables & secrets</div>
+    <div class="sec-desc">Variables are the backbone of flexible, secure pipelines. Understand scope, precedence, masking, and how to securely inject secrets without leaking them.</div>
+    <div class="compare">
+      <div class="compare-col">
+        <div class="col-header gl-h">⬡ GitLab CI — variables</div>
+        <div class="col-body">
+          <div class="cmd-block">
+            <div class="c"># pipeline-level</div>
+            <div><span class="k">variables:</span></div>
+            <div style="padding-left:14px">APP_ENV: production</div>
+            <div style="padding-left:14px">IMAGE_TAG: <span class="v">$CI_COMMIT_SHORT_SHA</span></div>
+            <div>&nbsp;</div>
+            <div class="c"># job-level (overrides pipeline)</div>
+            <div><span class="k">deploy:</span></div>
+            <div style="padding-left:14px"><span class="k">variables:</span></div>
+            <div style="padding-left:28px">APP_ENV: staging</div>
+            <div>&nbsp;</div>
+            <div class="c"># predefined variables (always available)</div>
+            <div><span class="v">$CI_COMMIT_SHA</span>         <span class="c"># full commit hash</span></div>
+            <div><span class="v">$CI_COMMIT_SHORT_SHA</span>   <span class="c"># short hash</span></div>
+            <div><span class="v">$CI_COMMIT_BRANCH</span>      <span class="c"># branch name</span></div>
+            <div><span class="v">$CI_COMMIT_TAG</span>         <span class="c"># tag name</span></div>
+            <div><span class="v">$CI_PIPELINE_ID</span>        <span class="c"># unique pipeline ID</span></div>
+            <div><span class="v">$CI_JOB_ID</span>            <span class="c"># unique job ID</span></div>
+            <div><span class="v">$CI_PROJECT_PATH</span>       <span class="c"># namespace/project</span></div>
+            <div><span class="v">$CI_REGISTRY_IMAGE</span>     <span class="c"># project container registry</span></div>
+            <div><span class="v">$CI_ENVIRONMENT_NAME</span>   <span class="c"># deployment environment</span></div>
+            <div><span class="v">$GITLAB_USER_LOGIN</span>     <span class="c"># who triggered</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="compare-col">
+        <div class="col-header gh-h">⬡ GitHub Actions — variables</div>
+        <div class="col-body">
+          <div class="cmd-block">
+            <div class="c"># workflow-level env</div>
+            <div><span class="k">env:</span></div>
+            <div style="padding-left:14px">APP_ENV: production</div>
+            <div style="padding-left:14px">IMAGE_TAG: <span class="v">${{ github.sha }}</span></div>
+            <div>&nbsp;</div>
+            <div class="c"># job-level env (overrides workflow)</div>
+            <div><span class="k">jobs:</span></div>
+            <div style="padding-left:14px">deploy:</div>
+            <div style="padding-left:28px">env:</div>
+            <div style="padding-left:42px">APP_ENV: staging</div>
+            <div>&nbsp;</div>
+            <div class="c"># github context (always available)</div>
+            <div><span class="v">${{ github.sha }}</span>            <span class="c"># full commit SHA</span></div>
+            <div><span class="v">${{ github.ref_name }}</span>       <span class="c"># branch or tag name</span></div>
+            <div><span class="v">${{ github.run_id }}</span>         <span class="c"># unique workflow run ID</span></div>
+            <div><span class="v">${{ github.actor }}</span>          <span class="c"># who triggered</span></div>
+            <div><span class="v">${{ github.repository }}</span>     <span class="c"># owner/repo</span></div>
+            <div><span class="v">${{ github.event_name }}</span>     <span class="c"># push, pull_request, etc.</span></div>
+            <div><span class="v">${{ github.event.inputs.* }}</span> <span class="c"># workflow_dispatch inputs</span></div>
+            <div><span class="v">${{ runner.os }}</span>             <span class="c"># Linux, Windows, macOS</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:12px">
+      <div class="card red" data-modal onclick="openModal('secrets')">
+        <span class="badge bd-red">Secrets</span>
+        <div class="card-title">Masked & protected variables</div>
+        <div class="card-sub">GitLab masked/protected vars vs GitHub encrypted secrets. Scope, inheritance, and how to avoid leaking secrets in logs.</div>
+      </div>
+      <div class="card blue" data-modal onclick="openModal('precedence')">
+        <span class="badge bd-blue">Variable precedence</span>
+        <div class="card-title">Which value wins?</div>
+        <div class="card-sub">Full precedence chain for both platforms. Job-level always beats pipeline-level. Secrets beat regular vars.</div>
+      </div>
+      <div class="card green" data-modal onclick="openModal('dotenv')">
+        <span class="badge bd-green">Dynamic variables</span>
+        <div class="card-title">Pass vars between jobs</div>
+        <div class="card-sub">GitLab dotenv artifacts. GitHub GITHUB_OUTPUT / GITHUB_ENV. Set computed values in one job, use in another.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CACHE & ARTIFACTS -->
+  <div class="section" id="cache">
+    <div class="sec-label">05 — Cache & artifacts</div>
+    <div class="sec-desc">Cache and artifacts are fundamentally different things. Cache speeds up jobs by reusing files across runs. Artifacts pass files between jobs in the same pipeline. Getting this wrong is one of the most common CI mistakes.</div>
+    <div class="hi-box">
+      <p><strong>Rule of thumb:</strong> Cache = speed optimisation (node_modules, pip cache, Maven .m2). Artifacts = pipeline data flow (built binaries, test reports, coverage XMLs). Never use artifacts where cache is appropriate and vice versa.</p>
+    </div>
+    <div class="compare" style="margin-top:12px">
+      <div class="compare-col">
+        <div class="col-header gl-h">⬡ GitLab CI — cache</div>
+        <div class="col-body">
+          <div class="cmd-block">
+            <div><span class="k">cache:</span></div>
+            <div style="padding-left:14px"><span class="k">key:</span></div>
+            <div style="padding-left:28px">files:</div>
+            <div style="padding-left:42px">- requirements.txt   <span class="c"># key changes when file changes</span></div>
+            <div style="padding-left:28px">prefix: <span class="v">$CI_JOB_NAME</span></div>
+            <div style="padding-left:14px"><span class="k">paths:</span></div>
+            <div style="padding-left:28px">- .venv/</div>
+            <div style="padding-left:28px">- .cache/pip/</div>
+            <div style="padding-left:14px"><span class="k">policy:</span> pull-push   <span class="c"># pull | push | pull-push</span></div>
+            <div style="padding-left:14px"><span class="k">when:</span> on_success</div>
+          </div>
+        </div>
+      </div>
+      <div class="compare-col">
+        <div class="col-header gh-h">⬡ GitHub Actions — cache</div>
+        <div class="col-body">
+          <div class="cmd-block">
+            <div>- <span class="k">uses:</span> actions/cache@v4</div>
+            <div style="padding-left:14px"><span class="k">with:</span></div>
+            <div style="padding-left:28px">path: |</div>
+            <div style="padding-left:42px">~/.cache/pip</div>
+            <div style="padding-left:42px">.venv</div>
+            <div style="padding-left:28px">key: pip-${{ runner.os }}-${{ hashFiles('requirements.txt') }}</div>
+            <div style="padding-left:28px">restore-keys: |</div>
+            <div style="padding-left:42px">pip-${{ runner.os }}-</div>
+            <div style="padding-left:42px">pip-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="compare" style="margin-top:10px">
+      <div class="compare-col">
+        <div class="col-header gl-h">⬡ GitLab CI — artifacts</div>
+        <div class="col-body">
+          <div class="cmd-block">
+            <div><span class="k">build:</span></div>
+            <div style="padding-left:14px">stage: build</div>
+            <div style="padding-left:14px">script: make build</div>
+            <div style="padding-left:14px"><span class="k">artifacts:</span></div>
+            <div style="padding-left:28px">paths:</div>
+            <div style="padding-left:42px">- dist/</div>
+            <div style="padding-left:28px">expire_in: 1 week</div>
+            <div style="padding-left:28px">when: always  <span class="c"># on_success | on_failure | always</span></div>
+            <div style="padding-left:28px">reports:</div>
+            <div style="padding-left:42px">junit: build/reports/tests.xml</div>
+            <div style="padding-left:42px">coverage_report:</div>
+            <div style="padding-left:56px">coverage_format: cobertura</div>
+            <div style="padding-left:56px">path: build/reports/coverage.xml</div>
+          </div>
+        </div>
+      </div>
+      <div class="compare-col">
+        <div class="col-header gh-h">⬡ GitHub Actions — artifacts</div>
+        <div class="col-body">
+          <div class="cmd-block">
+            <div class="c"># upload</div>
+            <div>- <span class="k">uses:</span> actions/upload-artifact@v4</div>
+            <div style="padding-left:14px">if: always()</div>
+            <div style="padding-left:14px"><span class="k">with:</span></div>
+            <div style="padding-left:28px">name: dist-${{ github.sha }}</div>
+            <div style="padding-left:28px">path: dist/</div>
+            <div style="padding-left:28px">retention-days: 7</div>
+            <div>&nbsp;</div>
+            <div class="c"># download in another job</div>
+            <div>- <span class="k">uses:</span> actions/download-artifact@v4</div>
+            <div style="padding-left:14px"><span class="k">with:</span></div>
+            <div style="padding-left:28px">name: dist-${{ github.sha }}</div>
+            <div style="padding-left:28px">path: dist/</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g2" style="margin-top:12px">
+      <div class="card blue" data-modal onclick="openModal('cache_strategy')">
+        <span class="badge bd-blue">Cache key strategy</span>
+        <div class="card-title">Designing effective cache keys</div>
+        <div class="card-sub">Too broad = stale cache. Too narrow = no hits. The right key invalidates when dependencies change, not on every commit.</div>
+      </div>
+      <div class="card green" data-modal onclick="openModal('reports')">
+        <span class="badge bd-green">Test & coverage reports</span>
+        <div class="card-title">Built-in report integration</div>
+        <div class="card-sub">GitLab natively renders JUnit, Cobertura, SAST, DAST reports in MR UI. GitHub uses third-party actions for this.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOCKER -->
+  <div class="section" id="docker">
+    <div class="sec-label">06 — Docker integration</div>
+    <div class="sec-desc">Building, tagging, scanning, and pushing Docker images is one of the most common CI/CD tasks. The approach differs significantly between GitLab and GitHub Actions.</div>
+    <div class="compare">
+      <div class="compare-col">
+        <div class="col-header gl-h">⬡ GitLab CI — Docker build & push</div>
+        <div class="col-body">
+          <div class="cmd-block">
+            <div><span class="k">build-image:</span></div>
+            <div style="padding-left:14px">stage: build</div>
+            <div style="padding-left:14px">image: docker:26</div>
+            <div style="padding-left:14px">services:</div>
+            <div style="padding-left:28px">- docker:26-dind</div>
+            <div style="padding-left:14px">variables:</div>
+            <div style="padding-left:28px">DOCKER_TLS_CERTDIR: <span class="a">"/certs"</span></div>
+            <div style="padding-left:14px">before_script:</div>
+            <div style="padding-left:28px">- docker login -u <span class="v">$CI_REGISTRY_USER</span> -p <span class="v">$CI_REGISTRY_PASSWORD</span> <span class="v">$CI_REGISTRY</span></div>
+            <div style="padding-left:14px">script:</div>
+            <div style="padding-left:28px">- docker build -t <span class="v">$CI_REGISTRY_IMAGE</span>:<span class="v">$CI_COMMIT_SHORT_SHA</span> .</div>
+            <div style="padding-left:28px">- docker push <span class="v">$CI_REGISTRY_IMAGE</span>:<span class="v">$CI_COMMIT_SHORT_SHA</span></div>
+            <div style="padding-left:14px">rules:</div>
+            <div style="padding-left:28px">- if: '$CI_COMMIT_BRANCH == "main"'</div>
+          </div>
+        </div>
+      </div>
+      <div class="compare-col">
+        <div class="col-header gh-h">⬡ GitHub Actions — Docker build & push</div>
+        <div class="col-body">
+          <div class="cmd-block">
+            <div><span class="k">build-image:</span></div>
+            <div style="padding-left:14px">runs-on: ubuntu-latest</div>
+            <div style="padding-left:14px">steps:</div>
+            <div style="padding-left:28px">- uses: actions/checkout@v4</div>
+            <div style="padding-left:28px">- uses: docker/setup-buildx-action@v3</div>
+            <div style="padding-left:28px">- uses: docker/login-action@v3</div>
+            <div style="padding-left:42px">with:</div>
+            <div style="padding-left:56px">registry: ghcr.io</div>
+            <div style="padding-left:56px">username: ${{ github.actor }}</div>
+            <div style="padding-left:56px">password: ${{ secrets.GITHUB_TOKEN }}</div>
+            <div style="padding-left:28px">- uses: docker/build-push-action@v5</div>
+            <div style="padding-left:42px">with:</div>
+            <div style="padding-left:56px">push: true</div>
+            <div style="padding-left:56px">tags: ghcr.io/${{ github.repository }}:${{ github.sha }}</div>
+            <div style="padding-left:56px">cache-from: type=gha</div>
+            <div style="padding-left:56px">cache-to: type=gha,mode=max</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:12px">
+      <div class="card blue" data-modal onclick="openModal('kaniko')">
+        <span class="badge bd-blue">Kaniko</span>
+        <div class="card-title">Daemonless image builds</div>
+        <div class="card-sub">Build Docker images inside Kubernetes without Docker daemon or privileged mode. Safer than DinD for k8s runners.</div>
+      </div>
+      <div class="card amber" data-modal onclick="openModal('buildx_cache')">
+        <span class="badge bd-amber">BuildKit cache</span>
+        <div class="card-title">Layer cache in CI</div>
+        <div class="card-sub">cache-from/cache-to with registry or GitHub Actions Cache backend. Dramatically speeds up builds.</div>
+      </div>
+      <div class="card red" data-modal onclick="openModal('image_scan')">
+        <span class="badge bd-red">Image scanning in CI</span>
+        <div class="card-title">Trivy, Grype, Docker Scout</div>
+        <div class="card-sub">Scan images after build, fail pipeline on HIGH/CRITICAL CVEs. Integrate with MR comments or PR checks.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REUSABLE -->
+  <div class="section" id="reusable">
+    <div class="sec-label">07 — Reusable components</div>
+    <div class="sec-desc">Reusability is what separates maintainable CI from spaghetti YAML. Both platforms have mature mechanisms — but they work very differently.</div>
+    <div class="compare">
+      <div class="compare-col">
+        <div class="col-header gl-h">⬡ GitLab CI — include & templates</div>
+        <div class="col-body">
+          <div class="cmd-block">
+            <div class="c"># include remote templates</div>
+            <div><span class="k">include:</span></div>
+            <div style="padding-left:14px">- project: 'ska-telescope/templates-repository'</div>
+            <div style="padding-left:18px">  file: 'gitlab-ci/includes/python.gitlab-ci.yml'</div>
+            <div style="padding-left:14px">- template: 'Security/SAST.gitlab-ci.yml'</div>
+            <div style="padding-left:14px">- local: '.gitlab/ci/deploy.yml'</div>
+            <div style="padding-left:14px">- remote: 'https://example.com/ci/template.yml'</div>
+            <div>&nbsp;</div>
+            <div class="c"># hidden job (template)</div>
+            <div><span class="k">.base-python:</span></div>
+            <div style="padding-left:14px">image: python:3.13-slim</div>
+            <div style="padding-left:14px">before_script:</div>
+            <div style="padding-left:28px">- pip install -r requirements.txt</div>
+            <div>&nbsp;</div>
+            <div class="c"># extend a template</div>
+            <div><span class="k">lint:</span></div>
+            <div style="padding-left:14px">extends: .base-python</div>
+            <div style="padding-left:14px">script: flake8 src/</div>
+            <div>&nbsp;</div>
+            <div class="c"># YAML anchors</div>
+            <div><span class="k">.env-vars: &amp;env-vars</span></div>
+            <div style="padding-left:14px">APP_ENV: production</div>
+            <div><span class="k">job:</span></div>
+            <div style="padding-left:14px">variables:</div>
+            <div style="padding-left:28px">&lt;&lt;: *env-vars</div>
+          </div>
+        </div>
+      </div>
+      <div class="compare-col">
+        <div class="col-header gh-h">⬡ GitHub Actions — reusable workflows & actions</div>
+        <div class="col-body">
+          <div class="cmd-block">
+            <div class="c"># call a reusable workflow</div>
+            <div><span class="k">jobs:</span></div>
+            <div style="padding-left:14px">call-deploy:</div>
+            <div style="padding-left:28px"><span class="k">uses:</span> org/repo/.github/workflows/deploy.yml@main</div>
+            <div style="padding-left:28px"><span class="k">with:</span></div>
+            <div style="padding-left:42px">environment: production</div>
+            <div style="padding-left:28px"><span class="k">secrets:</span> inherit</div>
+            <div>&nbsp;</div>
+            <div class="c"># reusable workflow definition</div>
+            <div><span class="k">on:</span></div>
+            <div style="padding-left:14px">workflow_call:</div>
+            <div style="padding-left:28px">inputs:</div>
+            <div style="padding-left:42px">environment:</div>
+            <div style="padding-left:56px">type: string</div>
+            <div style="padding-left:56px">required: true</div>
+            <div style="padding-left:28px">secrets:</div>
+            <div style="padding-left:42px">DEPLOY_KEY:</div>
+            <div style="padding-left:56px">required: true</div>
+            <div>&nbsp;</div>
+            <div class="c"># composite action (local)</div>
+            <div class="c"># .github/actions/setup-python/action.yml</div>
+            <div><span class="k">runs:</span></div>
+            <div style="padding-left:14px">using: composite</div>
+            <div style="padding-left:14px">steps:</div>
+            <div style="padding-left:28px">- uses: actions/setup-python@v5</div>
+            <div style="padding-left:28px">- run: pip install -r requirements.txt</div>
+            <div style="padding-left:28px">  shell: bash</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g2" style="margin-top:12px">
+      <div class="card purple" data-modal onclick="openModal('extends_deep')">
+        <span class="badge bd-purple">extends vs anchors</span>
+        <div class="card-title">GitLab inheritance deep dive</div>
+        <div class="card-sub">extends does deep merge. YAML anchors do shallow merge. Understanding the difference prevents subtle bugs in inherited jobs.</div>
+      </div>
+      <div class="card blue" data-modal onclick="openModal('marketplace')">
+        <span class="badge bd-blue">GitHub Marketplace actions</span>
+        <div class="card-title">Third-party actions</div>
+        <div class="card-sub">actions/checkout, docker/build-push-action, and thousands more. Pinning by SHA vs tag — supply chain security implications.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEPLOYMENT -->
+  <div class="section" id="deployment">
+    <div class="sec-label">08 — Deployment patterns</div>
+    <div class="sec-desc">How to safely ship to production using CI/CD. Environments, approvals, rollback, and environment-specific configuration.</div>
+    <div class="compare">
+      <div class="compare-col">
+        <div class="col-header gl-h">⬡ GitLab CI — environments & deployments</div>
+        <div class="col-body">
+          <div class="cmd-block">
+            <div><span class="k">deploy-staging:</span></div>
+            <div style="padding-left:14px">stage: deploy</div>
+            <div style="padding-left:14px">script:</div>
+            <div style="padding-left:28px">- helm upgrade --install app ./chart</div>
+            <div style="padding-left:14px"><span class="k">environment:</span></div>
+            <div style="padding-left:28px">name: staging</div>
+            <div style="padding-left:28px">url: https://staging.example.com</div>
+            <div style="padding-left:14px">rules:</div>
+            <div style="padding-left:28px">- if: '$CI_COMMIT_BRANCH == "main"'</div>
+            <div>&nbsp;</div>
+            <div><span class="k">deploy-prod:</span></div>
+            <div style="padding-left:14px">stage: deploy</div>
+            <div style="padding-left:14px">script:</div>
+            <div style="padding-left:28px">- helm upgrade --install app ./chart</div>
+            <div style="padding-left:14px"><span class="k">environment:</span></div>
+            <div style="padding-left:28px">name: production</div>
+            <div style="padding-left:14px"><span class="k">when:</span> manual   <span class="c"># human approval required</span></div>
+            <div style="padding-left:14px">rules:</div>
+            <div style="padding-left:28px">- if: '$CI_COMMIT_TAG'</div>
+          </div>
+        </div>
+      </div>
+      <div class="compare-col">
+        <div class="col-header gh-h">⬡ GitHub Actions — environments & approvals</div>
+        <div class="col-body">
+          <div class="cmd-block">
+            <div><span class="k">deploy-staging:</span></div>
+            <div style="padding-left:14px">runs-on: ubuntu-latest</div>
+            <div style="padding-left:14px">environment:</div>
+            <div style="padding-left:28px">name: staging</div>
+            <div style="padding-left:28px">url: https://staging.example.com</div>
+            <div style="padding-left:14px">steps:</div>
+            <div style="padding-left:28px">- run: helm upgrade --install app ./chart</div>
+            <div>&nbsp;</div>
+            <div><span class="k">deploy-prod:</span></div>
+            <div style="padding-left:14px">runs-on: ubuntu-latest</div>
+            <div style="padding-left:14px"><span class="k">environment:</span></div>
+            <div style="padding-left:28px">name: production   <span class="c"># requires reviewer in GH settings</span></div>
+            <div style="padding-left:14px">needs: [deploy-staging]</div>
+            <div style="padding-left:14px">if: startsWith(github.ref, 'refs/tags/')</div>
+            <div style="padding-left:14px">steps:</div>
+            <div style="padding-left:28px">- run: helm upgrade --install app ./chart</div>
+            <div style="padding-left:28px">  env:</div>
+            <div style="padding-left:42px">KUBECONFIG: ${{ secrets.KUBECONFIG }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:12px">
+      <div class="card green" data-modal onclick="openModal('gitops')">
+        <span class="badge bd-green">GitOps pattern</span>
+        <div class="card-title">CI builds, CD reconciles</div>
+        <div class="card-sub">CI pushes an image tag update to a GitOps repo. ArgoCD or Flux reconciles the cluster state. Decouples build from deploy.</div>
+      </div>
+      <div class="card amber" data-modal onclick="openModal('rollback')">
+        <span class="badge bd-amber">Rollback strategies</span>
+        <div class="card-title">When things go wrong</div>
+        <div class="card-sub">Helm rollback, kubectl rollout undo, re-running a previous pipeline, feature flags. Know which to use when.</div>
+      </div>
+      <div class="card blue" data-modal onclick="openModal('release')">
+        <span class="badge bd-blue">Release automation</span>
+        <div class="card-title">Tags, changelogs, releases</div>
+        <div class="card-sub">Semantic versioning, automatic CHANGELOG generation, creating GitHub/GitLab releases from CI on tag push.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PATTERNS -->
+  <div class="section" id="patterns">
+    <div class="sec-label">09 — Real-world patterns</div>
+    <div class="sec-desc">Common pipeline patterns you'll encounter and implement. Each is a proven solution to a recurring CI/CD problem.</div>
+    <div class="grid g2">
+      <div class="card blue" data-modal onclick="openModal('mono_repo')">
+        <span class="badge bd-blue">Monorepo pipelines</span>
+        <div class="card-title">Only build what changed</div>
+        <div class="card-sub">Use changed file paths to trigger only the affected service pipelines. Avoid rebuilding everything on every commit.</div>
+      </div>
+      <div class="card green" data-modal onclick="openModal('test_split')">
+        <span class="badge bd-green">Test parallelisation</span>
+        <div class="card-title">Split tests across jobs</div>
+        <div class="card-sub">GitLab CI_NODE_INDEX / CI_NODE_TOTAL. GitHub matrix strategy. Reduce test time from 20 min to 5 min.</div>
+      </div>
+      <div class="card amber" data-modal onclick="openModal('promote')">
+        <span class="badge bd-amber">Image promotion</span>
+        <div class="card-title">Build once, deploy many</div>
+        <div class="card-sub">Build and test the same image artifact. Promote (retag) it through staging → prod. Never rebuild for production.</div>
+      </div>
+      <div class="card purple" data-modal onclick="openModal('skip_ci')">
+        <span class="badge bd-purple">Skip CI & pipeline control</span>
+        <div class="card-title">Controlling when pipelines run</div>
+        <div class="card-sub">[skip ci] in commit message. rules: changes: for path-based triggers. Interruptible jobs. Pipeline efficiency.</div>
+      </div>
+      <div class="card red" data-modal onclick="openModal('oidc')">
+        <span class="badge bd-red">OIDC / keyless auth</span>
+        <div class="card-title">No long-lived secrets</div>
+        <div class="card-sub">GitLab and GitHub both support OIDC tokens to authenticate to AWS, GCP, Azure, Vault without storing credentials.</div>
+      </div>
+      <div class="card pink" data-modal onclick="openModal('notifications')">
+        <span class="badge bd-pink">Notifications</span>
+        <div class="card-title">Slack, email, webhooks</div>
+        <div class="card-sub">Notify on failure, success, or deployment. GitLab integrations vs GitHub Actions Slack action.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GLOSSARY -->
+  <div class="section" id="glossary">
+    <div class="sec-label">10 — Glossary & quick reference</div>
+    <div class="sec-desc">Full terminology mapping between GitLab CI and GitHub Actions, plus key concepts defined precisely.</div>
+    <div class="compare">
+      <div class="compare-col">
+        <div class="col-header gl-h">⬡ GitLab CI term</div>
+        <div class="col-body">
+          <div class="kv-list">
+            <div class="kv"><span class="kv-key">Pipeline</span><span class="kv-val">Top-level run triggered by an event</span></div>
+            <div class="kv"><span class="kv-key">Stage</span><span class="kv-val">Named phase grouping parallel jobs</span></div>
+            <div class="kv"><span class="kv-key">Job</span><span class="kv-val">Named unit of work with a script</span></div>
+            <div class="kv"><span class="kv-key">script:</span><span class="kv-val">Commands to run in the job</span></div>
+            <div class="kv"><span class="kv-key">before_script:</span><span class="kv-val">Commands run before script</span></div>
+            <div class="kv"><span class="kv-key">after_script:</span><span class="kv-val">Commands run after script, always</span></div>
+            <div class="kv"><span class="kv-key">rules:</span><span class="kv-val">Conditional job execution logic</span></div>
+            <div class="kv"><span class="kv-key">needs:</span><span class="kv-val">Job dependency (skips stage order)</span></div>
+            <div class="kv"><span class="kv-key">artifacts:</span><span class="kv-val">Files passed between jobs</span></div>
+            <div class="kv"><span class="kv-key">cache:</span><span class="kv-val">Files reused across pipeline runs</span></div>
+            <div class="kv"><span class="kv-key">services:</span><span class="kv-val">Sidecar containers (DB, Docker daemon)</span></div>
+            <div class="kv"><span class="kv-key">extends:</span><span class="kv-val">Inherit from a hidden job template</span></div>
+            <div class="kv"><span class="kv-key">include:</span><span class="kv-val">Import external YAML files</span></div>
+            <div class="kv"><span class="kv-key">when: manual</span><span class="kv-val">Human must click to run the job</span></div>
+            <div class="kv"><span class="kv-key">environment:</span><span class="kv-val">Named deployment target</span></div>
+            <div class="kv"><span class="kv-key">tags:</span><span class="kv-val">Target specific runners by label</span></div>
+            <div class="kv"><span class="kv-key">parallel: N</span><span class="kv-val">Run job N times in parallel (test split)</span></div>
+            <div class="kv"><span class="kv-key">interruptible:</span><span class="kv-val">Cancel job if newer pipeline starts</span></div>
+            <div class="kv"><span class="kv-key">retry:</span><span class="kv-val">Auto-retry on failure, up to N times</span></div>
+            <div class="kv"><span class="kv-key">allow_failure:</span><span class="kv-val">Job failure doesn't fail the pipeline</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="compare-col">
+        <div class="col-header gh-h">⬡ GitHub Actions equivalent</div>
+        <div class="col-body">
+          <div class="kv-list">
+            <div class="kv"><span class="kv-key">Workflow</span><span class="kv-val">Top-level run triggered by an event</span></div>
+            <div class="kv"><span class="kv-key">Job</span><span class="kv-val">Named phase (parallel by default)</span></div>
+            <div class="kv"><span class="kv-key">Step</span><span class="kv-val">Atomic unit inside a job</span></div>
+            <div class="kv"><span class="kv-key">run:</span><span class="kv-val">Shell commands in a step</span></div>
+            <div class="kv"><span class="kv-key">No direct equivalent</span><span class="kv-val">Use a step at the start of the job</span></div>
+            <div class="kv"><span class="kv-key">No direct equivalent</span><span class="kv-val">Use if: always() on a cleanup step</span></div>
+            <div class="kv"><span class="kv-key">if:</span><span class="kv-val">Conditional job/step execution</span></div>
+            <div class="kv"><span class="kv-key">needs:</span><span class="kv-val">Job dependency (same concept)</span></div>
+            <div class="kv"><span class="kv-key">actions/upload-artifact</span><span class="kv-val">Files passed between jobs</span></div>
+            <div class="kv"><span class="kv-key">actions/cache</span><span class="kv-val">Files reused across workflow runs</span></div>
+            <div class="kv"><span class="kv-key">services:</span><span class="kv-val">Same concept, same keyword</span></div>
+            <div class="kv"><span class="kv-key">Composite action</span><span class="kv-val">Reusable set of steps</span></div>
+            <div class="kv"><span class="kv-key">Reusable workflow</span><span class="kv-val">Import entire job definitions</span></div>
+            <div class="kv"><span class="kv-key">environment: + reviewers</span><span class="kv-val">Human must approve in GH UI</span></div>
+            <div class="kv"><span class="kv-key">environment:</span><span class="kv-val">Named deployment target</span></div>
+            <div class="kv"><span class="kv-key">runs-on: [self-hosted, label]</span><span class="kv-val">Target specific runners by label</span></div>
+            <div class="kv"><span class="kv-key">strategy: matrix:</span><span class="kv-val">Run job across N combinations</span></div>
+            <div class="kv"><span class="kv-key">concurrency: cancel-in-progress</span><span class="kv-val">Cancel older runs on new push</span></div>
+            <div class="kv"><span class="kv-key">retry: (no native, use action)</span><span class="kv-val">nick-fields/retry or manual logic</span></div>
+            <div class="kv"><span class="kv-key">continue-on-error: true</span><span class="kv-val">Job failure doesn't fail workflow</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <span id="modalBadge"></span>
+        <span id="modalTitle" style="font-size:15px;font-weight:500;color:var(--text)"></span>
+      </div>
+      <button class="modal-close" onclick="closeModalBtn()">✕ close</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const M = {
+  triggers: {
+    badge:'<span class="badge bd-blue">Triggers</span>',
+    title:'What starts a pipeline',
+    body:`
+      <div class="compare">
+        <div class="compare-col">
+          <div class="col-header gl-h">⬡ GitLab CI</div>
+          <div class="col-body">
+            <div class="cmd-block">
+              <div class="c"># push to any branch</div>
+              <div><span class="k">rules:</span></div>
+              <div style="padding-left:14px">- if: '$CI_PIPELINE_SOURCE == "push"'</div>
+              <div>&nbsp;</div>
+              <div class="c"># merge request</div>
+              <div>- if: '$CI_PIPELINE_SOURCE == "merge_request_event"'</div>
+              <div>&nbsp;</div>
+              <div class="c"># schedule (cron)</div>
+              <div>- if: '$CI_PIPELINE_SOURCE == "schedule"'</div>
+              <div>&nbsp;</div>
+              <div class="c"># tag push</div>
+              <div>- if: '$CI_COMMIT_TAG'</div>
+              <div>&nbsp;</div>
+              <div class="c"># API trigger</div>
+              <div>- if: '$CI_PIPELINE_SOURCE == "api"'</div>
+              <div>&nbsp;</div>
+              <div class="c"># manual from UI</div>
+              <div>- if: '$CI_PIPELINE_SOURCE == "web"'</div>
+            </div>
+          </div>
+        </div>
+        <div class="compare-col">
+          <div class="col-header gh-h">⬡ GitHub Actions</div>
+          <div class="col-body">
+            <div class="cmd-block">
+              <div><span class="k">on:</span></div>
+              <div style="padding-left:14px">push:</div>
+              <div style="padding-left:28px">branches: [main, 'release/**']</div>
+              <div style="padding-left:28px">tags: ['v*.*.*']</div>
+              <div style="padding-left:14px">pull_request:</div>
+              <div style="padding-left:28px">branches: [main]</div>
+              <div style="padding-left:28px">types: [opened, synchronize, reopened]</div>
+              <div style="padding-left:14px">schedule:</div>
+              <div style="padding-left:28px">- cron: '0 2 * * *'</div>
+              <div style="padding-left:14px">workflow_dispatch:</div>
+              <div style="padding-left:28px">inputs:</div>
+              <div style="padding-left:42px">environment:</div>
+              <div style="padding-left:56px">type: choice</div>
+              <div style="padding-left:56px">options: [staging, production]</div>
+              <div style="padding-left:14px">workflow_call:</div>
+              <div style="padding-left:14px">repository_dispatch:</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-tip"><div class="tip-label">key difference</div><p>GitLab uses pipeline source variables to differentiate triggers — you filter with rules: if. GitHub has separate event types in the on: block. GitHub's workflow_dispatch allows manual triggers with typed input fields — GitLab's equivalent is a manually triggered pipeline with variables.</p></div>
+    `
+  },
+  execution: {
+    badge:'<span class="badge bd-green">Execution order</span>',
+    title:'Parallel vs sequential execution',
+    body:`
+      <p>GitLab and GitHub handle execution order very differently by default.</p>
+      <h3>GitLab CI — stage-based</h3>
+      <p>Jobs in the same stage run in parallel. Stages run sequentially. A job in stage N only starts after all jobs in stage N-1 succeed. Use needs: to bypass stage ordering and create a DAG (directed acyclic graph).</p>
+      <div class="cmd-block">
+        <div class="c"># needs: bypasses stage order</div>
+        <div><span class="k">deploy:</span></div>
+        <div style="padding-left:14px">stage: deploy</div>
+        <div style="padding-left:14px">needs: [build, test]  <span class="c"># starts as soon as both finish</span></div>
+        <div style="padding-left:14px">script: ./deploy.sh</div>
+      </div>
+      <h3>GitHub Actions — DAG by default</h3>
+      <p>All jobs run in parallel unless you declare needs:. There are no stages — just jobs with optional dependencies.</p>
+      <div class="cmd-block">
+        <div><span class="k">jobs:</span></div>
+        <div style="padding-left:14px">lint: ...</div>
+        <div style="padding-left:14px">test: ...</div>
+        <div style="padding-left:14px">build:</div>
+        <div style="padding-left:28px">needs: [lint, test]   <span class="c"># sequential</span></div>
+        <div style="padding-left:14px">deploy:</div>
+        <div style="padding-left:28px">needs: [build]</div>
+      </div>
+      <div class="modal-warn"><div class="tip-label">common gotcha</div><p>In GitLab, if needs: references a job in a later stage, that job still waits for all previous stages. needs: removes the stage ordering constraint, it doesn't override everything. In GitHub Actions, needs: is the only ordering mechanism — there are no stages.</p></div>
+    `
+  },
+  conditions: {
+    badge:'<span class="badge bd-amber">Conditions</span>',
+    title:'Controlling when jobs run',
+    body:`
+      <h3>GitLab CI — rules:</h3>
+      <p>rules: is the modern way (replaces only:/except:). Evaluated top to bottom, first match wins.</p>
+      <div class="cmd-block">
+        <div><span class="k">rules:</span></div>
+        <div style="padding-left:14px">- if: '$CI_COMMIT_TAG'          <span class="c"># tag push</span></div>
+        <div style="padding-left:18px">  when: on_success</div>
+        <div style="padding-left:14px">- if: '$CI_COMMIT_BRANCH == "main"'</div>
+        <div style="padding-left:18px">  when: manual</div>
+        <div style="padding-left:14px">- changes:                      <span class="c"># path filter</span></div>
+        <div style="padding-left:18px">  - src/**/*</div>
+        <div style="padding-left:18px">  when: on_success</div>
+        <div style="padding-left:14px">- when: never                   <span class="c"># default: don't run</span></div>
+      </div>
+      <h3>GitHub Actions — if:</h3>
+      <div class="cmd-block">
+        <div class="c"># job level</div>
+        <div><span class="k">if:</span> github.ref == 'refs/heads/main'</div>
+        <div><span class="k">if:</span> startsWith(github.ref, 'refs/tags/')</div>
+        <div><span class="k">if:</span> github.event_name == 'pull_request'</div>
+        <div>&nbsp;</div>
+        <div class="c"># step level</div>
+        <div><span class="k">if:</span> failure()</div>
+        <div><span class="k">if:</span> always()</div>
+        <div><span class="k">if:</span> success() && github.actor == 'dependabot[bot]'</div>
+        <div>&nbsp;</div>
+        <div class="c"># path filter (on: block)</div>
+        <div><span class="k">on:</span></div>
+        <div style="padding-left:14px">push:</div>
+        <div style="padding-left:28px">paths: ['src/**', 'requirements.txt']</div>
+        <div style="padding-left:28px">paths-ignore: ['docs/**']</div>
+      </div>
+      <div class="modal-tip"><div class="tip-label">key difference</div><p>GitLab path filtering is per-job via rules: changes. GitHub path filtering is at the workflow trigger level via on: paths. GitLab is more granular; GitHub is simpler but coarser.</p></div>
+    `
+  },
+  contexts: {
+    badge:'<span class="badge bd-purple">Contexts & metadata</span>',
+    title:'Runtime context variables',
+    body:`
+      <h3>Most useful GitLab predefined variables</h3>
+      <div class="cmd-block">
+        <div><span class="v">$CI_COMMIT_SHA</span>           <span class="c"># full 40-char SHA</span></div>
+        <div><span class="v">$CI_COMMIT_SHORT_SHA</span>      <span class="c"># first 8 chars</span></div>
+        <div><span class="v">$CI_COMMIT_BRANCH</span>         <span class="c"># branch name (empty on tag)</span></div>
+        <div><span class="v">$CI_COMMIT_TAG</span>            <span class="c"># tag name (empty on branch)</span></div>
+        <div><span class="v">$CI_COMMIT_REF_SLUG</span>       <span class="c"># branch/tag slugified (safe for DNS)</span></div>
+        <div><span class="v">$CI_PIPELINE_ID</span>           <span class="c"># globally unique pipeline ID</span></div>
+        <div><span class="v">$CI_JOB_ID</span>               <span class="c"># unique job ID</span></div>
+        <div><span class="v">$CI_REGISTRY_IMAGE</span>        <span class="c"># project container registry URL</span></div>
+        <div><span class="v">$CI_PROJECT_PATH</span>          <span class="c"># group/project-name</span></div>
+        <div><span class="v">$CI_ENVIRONMENT_NAME</span>      <span class="c"># deployment environment name</span></div>
+        <div><span class="v">$CI_MERGE_REQUEST_IID</span>     <span class="c"># MR number</span></div>
+        <div><span class="v">$CI_NODE_INDEX</span>            <span class="c"># for parallel: jobs (1-based)</span></div>
+        <div><span class="v">$CI_NODE_TOTAL</span>            <span class="c"># total parallel job count</span></div>
+      </div>
+      <h3>Most useful GitHub Actions contexts</h3>
+      <div class="cmd-block">
+        <div><span class="v">${{ github.sha }}</span>              <span class="c"># full commit SHA</span></div>
+        <div><span class="v">${{ github.ref }}</span>              <span class="c"># refs/heads/main or refs/tags/v1.0</span></div>
+        <div><span class="v">${{ github.ref_name }}</span>         <span class="c"># main or v1.0 (just the name)</span></div>
+        <div><span class="v">${{ github.actor }}</span>            <span class="c"># user who triggered</span></div>
+        <div><span class="v">${{ github.run_id }}</span>           <span class="c"># unique workflow run ID</span></div>
+        <div><span class="v">${{ github.run_number }}</span>       <span class="c"># incrementing run number</span></div>
+        <div><span class="v">${{ github.repository }}</span>       <span class="c"># owner/repo</span></div>
+        <div><span class="v">${{ github.event.pull_request.number }}</span> <span class="c"># PR number</span></div>
+        <div><span class="v">${{ secrets.MY_SECRET }}</span>       <span class="c"># encrypted secret</span></div>
+        <div><span class="v">${{ env.MY_VAR }}</span>             <span class="c"># workflow env var</span></div>
+        <div><span class="v">${{ steps.STEP_ID.outputs.VALUE }}</span> <span class="c"># step output</span></div>
+        <div><span class="v">${{ runner.os }}</span>              <span class="c"># Linux | Windows | macOS</span></div>
+      </div>
+    `
+  },
+  needs: {
+    badge:'<span class="badge bd-blue">needs / depends-on</span>',
+    title:'Job dependencies & artifact passing',
+    body:`
+      <h3>GitLab — needs:</h3>
+      <div class="cmd-block">
+        <div><span class="k">deploy:</span></div>
+        <div style="padding-left:14px">stage: deploy</div>
+        <div style="padding-left:14px"><span class="k">needs:</span></div>
+        <div style="padding-left:28px">- job: build</div>
+        <div style="padding-left:32px">  artifacts: true   <span class="c"># download build artifacts</span></div>
+        <div style="padding-left:28px">- job: test         <span class="c"># just wait, no artifacts needed</span></div>
+        <div style="padding-left:32px">  artifacts: false</div>
+      </div>
+      <h3>GitHub Actions — needs:</h3>
+      <div class="cmd-block">
+        <div><span class="k">deploy:</span></div>
+        <div style="padding-left:14px">needs: [build, test]</div>
+        <div style="padding-left:14px">steps:</div>
+        <div style="padding-left:28px">- uses: actions/download-artifact@v4</div>
+        <div style="padding-left:42px">with:</div>
+        <div style="padding-left:56px">name: dist</div>
+        <div>&nbsp;</div>
+        <div class="c"># access outputs from previous job</div>
+        <div><span class="k">if:</span> needs.build.outputs.image_tag != ''</div>
+        <div><span class="v">${{ needs.build.outputs.image_tag }}</span></div>
+      </div>
+      <div class="modal-tip"><div class="tip-label">outputs between jobs</div><p>GitHub Actions: use echo "key=value" >> $GITHUB_OUTPUT in a step, declare outputs: in the job, then access with needs.JOB.outputs.key. GitLab: use dotenv artifacts to pass variables between jobs.</p></div>
+    `
+  },
+  matrix: {
+    badge:'<span class="badge bd-green">Matrix builds</span>',
+    title:'Matrix strategy — test across versions',
+    body:`
+      <div class="compare">
+        <div class="compare-col">
+          <div class="col-header gl-h">⬡ GitLab — parallel:matrix</div>
+          <div class="col-body">
+            <div class="cmd-block">
+              <div><span class="k">test:</span></div>
+              <div style="padding-left:14px">image: python:<span class="v">$PYTHON_VERSION</span>-slim</div>
+              <div style="padding-left:14px">script: pytest</div>
+              <div style="padding-left:14px"><span class="k">parallel:</span></div>
+              <div style="padding-left:28px">matrix:</div>
+              <div style="padding-left:42px">- PYTHON_VERSION: ['3.11','3.12','3.13']</div>
+              <div style="padding-left:42px">  OS: [ubuntu, alpine]</div>
+            </div>
+          </div>
+        </div>
+        <div class="compare-col">
+          <div class="col-header gh-h">⬡ GitHub — strategy:matrix</div>
+          <div class="col-body">
+            <div class="cmd-block">
+              <div><span class="k">test:</span></div>
+              <div style="padding-left:14px"><span class="k">strategy:</span></div>
+              <div style="padding-left:28px">fail-fast: false</div>
+              <div style="padding-left:28px">matrix:</div>
+              <div style="padding-left:42px">python: ['3.11','3.12','3.13']</div>
+              <div style="padding-left:42px">os: [ubuntu-latest, macos-latest]</div>
+              <div style="padding-left:42px">exclude:</div>
+              <div style="padding-left:56px">- python: '3.11'</div>
+              <div style="padding-left:60px">  os: macos-latest</div>
+              <div style="padding-left:14px">runs-on: <span class="v">${{ matrix.os }}</span></div>
+              <div style="padding-left:14px">steps:</div>
+              <div style="padding-left:28px">- uses: actions/setup-python@v5</div>
+              <div style="padding-left:42px">with:</div>
+              <div style="padding-left:56px">python-version: <span class="v">${{ matrix.python }}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-tip"><div class="tip-label">fail-fast</div><p>GitHub Actions: fail-fast: false means all matrix jobs run even if one fails. Default is true (cancel remaining on first failure). GitLab has no equivalent — all matrix jobs always run.</p></div>
+    `
+  },
+  manual: {
+    badge:'<span class="badge bd-amber">Manual & scheduled</span>',
+    title:'Manual approval & scheduled jobs',
+    body:`
+      <h3>Manual jobs</h3>
+      <div class="compare">
+        <div class="compare-col">
+          <div class="col-header gl-h">GitLab — when: manual</div>
+          <div class="col-body">
+            <div class="cmd-block">
+              <div><span class="k">deploy-prod:</span></div>
+              <div style="padding-left:14px">when: manual</div>
+              <div style="padding-left:14px">allow_failure: false  <span class="c"># blocks next stage</span></div>
+              <div style="padding-left:14px">environment: production</div>
+            </div>
+          </div>
+        </div>
+        <div class="compare-col">
+          <div class="col-header gh-h">GitHub — environment reviewers</div>
+          <div class="col-body">
+            <div class="cmd-block">
+              <div class="c"># set required reviewers</div>
+              <div class="c"># in repo Settings > Environments</div>
+              <div><span class="k">deploy-prod:</span></div>
+              <div style="padding-left:14px">environment: production</div>
+              <div style="padding-left:14px">needs: [deploy-staging]</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h3>Scheduled pipelines (cron)</h3>
+      <div class="compare">
+        <div class="compare-col">
+          <div class="col-header gl-h">GitLab — Schedules UI</div>
+          <div class="col-body"><p style="font-size:12px;color:var(--muted)">GitLab schedules are created in the CI/CD > Schedules UI, not in YAML. You can check if a job is running on a schedule with:<br><br><code>if: $CI_PIPELINE_SOURCE == "schedule"</code></p></div>
+        </div>
+        <div class="compare-col">
+          <div class="col-header gh-h">GitHub — on: schedule</div>
+          <div class="col-body">
+            <div class="cmd-block">
+              <div><span class="k">on:</span></div>
+              <div style="padding-left:14px">schedule:</div>
+              <div style="padding-left:28px">- cron: '0 2 * * 1-5'  <span class="c"># 2am weekdays UTC</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+  },
+  dind: {
+    badge:'<span class="badge bd-red">Docker-in-Docker</span>',
+    title:'Building Docker images in CI',
+    body:`
+      <p>Running docker build inside a CI container is non-trivial. There are two approaches, each with tradeoffs.</p>
+      <h3>Approach 1 — DinD (Docker-in-Docker)</h3>
+      <p>Run a Docker daemon as a sidecar service container. The build container talks to it.</p>
+      <div class="cmd-block">
+        <div class="c"># GitLab CI</div>
+        <div><span class="k">build:</span></div>
+        <div style="padding-left:14px">image: docker:26</div>
+        <div style="padding-left:14px">services: [docker:26-dind]</div>
+        <div style="padding-left:14px">variables:</div>
+        <div style="padding-left:28px">DOCKER_TLS_CERTDIR: <span class="a">"/certs"</span>  <span class="c"># TLS on — always use this</span></div>
+        <div style="padding-left:14px">script:</div>
+        <div style="padding-left:28px">- docker build -t myimage .</div>
+      </div>
+      <h3>Approach 2 — Socket binding</h3>
+      <p>Mount the host Docker socket into the container. The container uses the host daemon.</p>
+      <div class="cmd-block">
+        <div class="c"># runner config.toml</div>
+        <div>[runners.docker]</div>
+        <div style="padding-left:14px">volumes = [<span class="a">"/var/run/docker.sock:/var/run/docker.sock"</span>]</div>
+      </div>
+      <div class="modal-warn"><div class="tip-label">socket binding risk</div><p>Socket binding gives the container root access to the host Docker daemon. A malicious job could read secrets from other containers, mount the host filesystem, or escape the container entirely. Only use on trusted runners with trusted code.</p></div>
+      <h3>Approach 3 — Kaniko (recommended for k8s)</h3>
+      <p>Builds images without a Docker daemon at all. Runs as a non-privileged container. Best for Kubernetes runners.</p>
+      <div class="cmd-block">
+        <div><span class="k">build:</span></div>
+        <div style="padding-left:14px">image:</div>
+        <div style="padding-left:28px">name: gcr.io/kaniko-project/executor:v1.23.0-debug</div>
+        <div style="padding-left:28px">entrypoint: [""]</div>
+        <div style="padding-left:14px">script:</div>
+        <div style="padding-left:28px">- /kaniko/executor --context $CI_PROJECT_DIR --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA</div>
+      </div>
+    `
+  },
+  runner_config: {
+    badge:'<span class="badge bd-purple">Runner configuration</span>',
+    title:'Runner config.toml — production settings',
+    body:`
+      <div class="cmd-block">
+        <div><span class="c"># /etc/gitlab-runner/config.toml</span></div>
+        <div>concurrent = 4          <span class="c"># max parallel jobs on this runner</span></div>
+        <div>check_interval = 3      <span class="c"># poll interval in seconds</span></div>
+        <div>&nbsp;</div>
+        <div>[[runners]]</div>
+        <div style="padding-left:14px">name = "k8s-runner"</div>
+        <div style="padding-left:14px">executor = "kubernetes"</div>
+        <div style="padding-left:14px">[runners.kubernetes]</div>
+        <div style="padding-left:28px">namespace = "gitlab-runners"</div>
+        <div style="padding-left:28px">image = "alpine:3.19"</div>
+        <div style="padding-left:28px">cpu_request = "100m"</div>
+        <div style="padding-left:28px">memory_request = "128Mi"</div>
+        <div style="padding-left:28px">memory_limit = "512Mi"</div>
+        <div style="padding-left:28px">pull_policy = ["if-not-present","always"]</div>
+        <div style="padding-left:28px">service_account = "gitlab-runner"</div>
+        <div style="padding-left:14px">[runners.cache]</div>
+        <div style="padding-left:28px">Type = "s3"</div>
+        <div style="padding-left:28px">Path = "runner/cache"</div>
+        <div style="padding-left:28px">[runners.cache.s3]</div>
+        <div style="padding-left:42px">BucketName = "my-runner-cache"</div>
+        <div style="padding-left:42px">BucketLocation = "eu-west-1"</div>
+      </div>
+      <div class="modal-tip"><div class="tip-label">distributed cache</div><p>For GitLab runners in Kubernetes, configure S3 (or GCS/Azure) as the cache backend. Otherwise each pod starts fresh with no cache, making the cache: block in .gitlab-ci.yml useless.</p></div>
+    `
+  },
+  secrets: {
+    badge:'<span class="badge bd-red">Secrets</span>',
+    title:'Secrets & masked variables',
+    body:`
+      <h3>GitLab CI — variable types</h3>
+      <ul>
+        <li><strong>CI/CD Variables</strong> — set in Settings > CI/CD > Variables</li>
+        <li><strong>Masked</strong> — value hidden in job logs (must be single line, no special chars)</li>
+        <li><strong>Protected</strong> — only available on protected branches/tags</li>
+        <li><strong>File type</strong> — written to a temp file, variable contains the path</li>
+      </ul>
+      <h3>GitHub Actions — secrets</h3>
+      <ul>
+        <li><strong>Repository secrets</strong> — Settings > Secrets > Actions</li>
+        <li><strong>Environment secrets</strong> — scoped to an environment, require environment approval</li>
+        <li><strong>Organization secrets</strong> — shared across repos with access policy</li>
+        <li><strong>GITHUB_TOKEN</strong> — auto-generated per run, scoped to the repo</li>
+      </ul>
+      <div class="cmd-block">
+        <div class="c"># GitHub Actions — use a secret</div>
+        <div>- run: docker login -u $USER -p $TOKEN</div>
+        <div style="padding-left:14px">env:</div>
+        <div style="padding-left:28px">USER: <span class="v">${{ secrets.REGISTRY_USER }}</span></div>
+        <div style="padding-left:28px">TOKEN: <span class="v">${{ secrets.REGISTRY_TOKEN }}</span></div>
+      </div>
+      <div class="modal-warn"><div class="tip-label">masking limitations</div><p>GitLab masking only works for simple strings. Multi-line values, base64 encoded certs, or JSON blobs often can't be masked — use File type variables or external secret managers instead.</p></div>
+      <div class="modal-tip"><div class="tip-label">never do this</div><p>Never echo a secret, set -x with secrets, or pass them as build args. Use --secret mount with BuildKit for secrets needed only during image build.</p></div>
+    `
+  },
+  precedence: {
+    badge:'<span class="badge bd-blue">Variable precedence</span>',
+    title:'Variable precedence — which value wins?',
+    body:`
+      <h3>GitLab CI — precedence (highest first)</h3>
+      <ul>
+        <li><strong>Trigger variables</strong> — passed via API trigger or pipeline trigger</li>
+        <li><strong>Manual pipeline variables</strong> — set in the "Run pipeline" UI</li>
+        <li><strong>Job-level variables:</strong></li>
+        <li><strong>Pipeline-level variables:</strong></li>
+        <li><strong>Project CI/CD variables</strong> — set in Settings</li>
+        <li><strong>Group CI/CD variables</strong></li>
+        <li><strong>Instance variables</strong></li>
+        <li><strong>Predefined variables</strong> — $CI_COMMIT_SHA etc.</li>
+      </ul>
+      <div class="modal-warn"><div class="tip-label">gotcha</div><p>Job-level variables: in .gitlab-ci.yml override project-level CI/CD variables from Settings. This means a developer can override production secrets by setting a variable in the YAML — be careful with protected variables and what can be overridden.</p></div>
+      <h3>GitHub Actions — precedence (highest first)</h3>
+      <ul>
+        <li><strong>Step env:</strong></li>
+        <li><strong>Job env:</strong></li>
+        <li><strong>Workflow env:</strong></li>
+        <li><strong>Repository/environment/org variables</strong> (vars context)</li>
+        <li><strong>Default env vars</strong> — GITHUB_SHA etc.</li>
+      </ul>
+      <p>Secrets are in a separate namespace (secrets context) and always available if the job has access to the environment they're scoped to.</p>
+    `
+  },
+  dotenv: {
+    badge:'<span class="badge bd-green">Dynamic variables</span>',
+    title:'Passing variables between jobs',
+    body:`
+      <h3>GitLab CI — dotenv artifact</h3>
+      <div class="cmd-block">
+        <div><span class="k">build:</span></div>
+        <div style="padding-left:14px">script:</div>
+        <div style="padding-left:28px">- echo "IMAGE_TAG=$CI_COMMIT_SHORT_SHA" >> build.env</div>
+        <div style="padding-left:28px">- echo "BUILD_DATE=$(date -u +%Y-%m-%d)" >> build.env</div>
+        <div style="padding-left:14px">artifacts:</div>
+        <div style="padding-left:28px">reports:</div>
+        <div style="padding-left:42px">dotenv: build.env</div>
+        <div>&nbsp;</div>
+        <div><span class="k">deploy:</span></div>
+        <div style="padding-left:14px">needs: [build]</div>
+        <div style="padding-left:14px">script:</div>
+        <div style="padding-left:28px">- echo "Deploying $IMAGE_TAG"  <span class="c"># available!</span></div>
+      </div>
+      <h3>GitHub Actions — GITHUB_OUTPUT</h3>
+      <div class="cmd-block">
+        <div><span class="k">build:</span></div>
+        <div style="padding-left:14px">outputs:</div>
+        <div style="padding-left:28px">image_tag: <span class="v">${{ steps.meta.outputs.image_tag }}</span></div>
+        <div style="padding-left:14px">steps:</div>
+        <div style="padding-left:28px">- id: meta</div>
+        <div style="padding-left:32px">  run: echo "image_tag=$GITHUB_SHA" >> $GITHUB_OUTPUT</div>
+        <div>&nbsp;</div>
+        <div><span class="k">deploy:</span></div>
+        <div style="padding-left:14px">needs: [build]</div>
+        <div style="padding-left:14px">steps:</div>
+        <div style="padding-left:28px">- run: echo "Deploying ${{ needs.build.outputs.image_tag }}"</div>
+      </div>
+    `
+  },
+  cache_strategy: {
+    badge:'<span class="badge bd-blue">Cache key strategy</span>',
+    title:'Designing effective cache keys',
+    body:`
+      <p>A cache key is a string. Same key = same cache bucket. If the key changes, the cache is busted and rebuilt from scratch.</p>
+      <h3>The golden rule</h3>
+      <p>Cache key should include the hash of the dependency manifest file. When requirements.txt or package-lock.json changes, the key changes, the cache is rebuilt. When only your source changes, the key stays the same, cache is reused.</p>
+      <div class="cmd-block">
+        <div class="c"># GitLab — ideal cache key</div>
+        <div><span class="k">cache:</span></div>
+        <div style="padding-left:14px">key:</div>
+        <div style="padding-left:28px">files: [requirements.txt]     <span class="c"># hash of file</span></div>
+        <div style="padding-left:28px">prefix: <span class="v">$CI_JOB_NAME</span>          <span class="c"># separate per job</span></div>
+        <div style="padding-left:14px">paths: [.venv/, .cache/pip/]</div>
+        <div>&nbsp;</div>
+        <div class="c"># GitHub — ideal cache key</div>
+        <div>key: pip-<span class="v">${{ runner.os }}</span>-<span class="v">${{ hashFiles('requirements.txt') }}</span></div>
+        <div>restore-keys: |</div>
+        <div style="padding-left:14px">pip-<span class="v">${{ runner.os }}</span>-  <span class="c"># fallback to stale cache</span></div>
+      </div>
+      <h3>restore-keys (GitHub) — fallback chain</h3>
+      <p>When no exact key match exists, GitHub tries restore-keys in order. A stale cache is better than no cache — you only need to install new/changed packages instead of all of them.</p>
+      <div class="modal-tip"><div class="tip-label">policy: pull vs pull-push</div><p>GitLab cache policy: In jobs that only read the cache (e.g. test), use policy: pull. Only the build/install job needs pull-push. This prevents multiple parallel jobs from simultaneously trying to update the same cache bucket.</p></div>
+    `
+  },
+  reports: {
+    badge:'<span class="badge bd-green">Test & coverage reports</span>',
+    title:'Test reports & coverage in MR/PR UI',
+    body:`
+      <h3>GitLab — native report rendering</h3>
+      <p>GitLab natively reads several report formats and renders them in Merge Requests — no extra tools needed.</p>
+      <div class="cmd-block">
+        <div><span class="k">artifacts:</span></div>
+        <div style="padding-left:14px">reports:</div>
+        <div style="padding-left:28px">junit: build/reports/tests.xml          <span class="c"># test results</span></div>
+        <div style="padding-left:28px">coverage_report:</div>
+        <div style="padding-left:42px">coverage_format: cobertura</div>
+        <div style="padding-left:42px">path: build/reports/coverage.xml        <span class="c"># line coverage in MR diff</span></div>
+        <div style="padding-left:28px">sast: gl-sast-report.json               <span class="c"># security scan</span></div>
+        <div style="padding-left:28px">dependency_scanning: gl-dependency.json</div>
+      </div>
+      <h3>GitHub Actions — third-party actions</h3>
+      <div class="cmd-block">
+        <div class="c"># test results</div>
+        <div>- uses: EnricoMi/publish-unit-test-result-action@v2</div>
+        <div style="padding-left:14px">with:</div>
+        <div style="padding-left:28px">files: build/reports/*.xml</div>
+        <div>&nbsp;</div>
+        <div class="c"># coverage comment on PR</div>
+        <div>- uses: orgoro/coverage@v3</div>
+        <div style="padding-left:14px">with:</div>
+        <div style="padding-left:28px">coverageFile: build/reports/coverage.xml</div>
+        <div style="padding-left:28px">token: <span class="v">${{ secrets.GITHUB_TOKEN }}</span></div>
+      </div>
+      <div class="modal-tip"><div class="tip-label">coverage regex (GitLab)</div><p>Set coverage: '/TOTAL.*\s+(\d+%)$/' in your job to extract the coverage percentage from stdout and display it as a badge in the GitLab UI.</p></div>
+    `
+  },
+  kaniko: {
+    badge:'<span class="badge bd-blue">Kaniko</span>',
+    title:'Kaniko — daemonless image builds',
+    body:`
+      <p>Kaniko builds container images from a Dockerfile without requiring a Docker daemon. It executes each command in user space, making it safe to run as a non-privileged container in Kubernetes.</p>
+      <h3>GitLab CI with Kaniko</h3>
+      <div class="cmd-block">
+        <div><span class="k">build:</span></div>
+        <div style="padding-left:14px">image:</div>
+        <div style="padding-left:28px">name: gcr.io/kaniko-project/executor:v1.23.0-debug</div>
+        <div style="padding-left:28px">entrypoint: [""]</div>
+        <div style="padding-left:14px">script:</div>
+        <div style="padding-left:28px">- mkdir -p /kaniko/.docker</div>
+        <div style="padding-left:28px">- echo '{"auths":{"'$CI_REGISTRY'":{"auth":"'$(echo -n $CI_REGISTRY_USER:$CI_REGISTRY_PASSWORD | base64)'"}}}'</div>
+        <div style="padding-left:28px">  > /kaniko/.docker/config.json</div>
+        <div style="padding-left:28px">- /kaniko/executor</div>
+        <div style="padding-left:42px">--context $CI_PROJECT_DIR</div>
+        <div style="padding-left:42px">--dockerfile $CI_PROJECT_DIR/Dockerfile</div>
+        <div style="padding-left:42px">--destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA</div>
+        <div style="padding-left:42px">--cache=true</div>
+        <div style="padding-left:42px">--cache-repo $CI_REGISTRY_IMAGE/cache</div>
+      </div>
+      <div class="modal-tip"><div class="tip-label">--cache=true</div><p>Kaniko supports layer caching by pushing intermediate layers to a registry. Use --cache-repo to point to a dedicated cache repository. Dramatically speeds up repeated builds.</p></div>
+    `
+  },
+  buildx_cache: {
+    badge:'<span class="badge bd-amber">BuildKit cache</span>',
+    title:'BuildKit layer cache in CI',
+    body:`
+      <p>BuildKit (the modern Docker build engine) supports external cache backends, allowing layer cache to persist across CI runs.</p>
+      <h3>GitHub Actions — GHA cache backend</h3>
+      <div class="cmd-block">
+        <div>- uses: docker/build-push-action@v5</div>
+        <div style="padding-left:14px">with:</div>
+        <div style="padding-left:28px">cache-from: type=gha</div>
+        <div style="padding-left:28px">cache-to: type=gha,mode=max</div>
+        <div style="padding-left:28px"><span class="c"># mode=max caches all layers, not just final stage</span></div>
+      </div>
+      <h3>Registry cache (works everywhere)</h3>
+      <div class="cmd-block">
+        <div>- uses: docker/build-push-action@v5</div>
+        <div style="padding-left:14px">with:</div>
+        <div style="padding-left:28px">cache-from: type=registry,ref=registry/app:cache</div>
+        <div style="padding-left:28px">cache-to: type=registry,ref=registry/app:cache,mode=max</div>
+      </div>
+      <h3>GitLab CI — registry cache with BuildKit</h3>
+      <div class="cmd-block">
+        <div><span class="k">build:</span></div>
+        <div style="padding-left:14px">script:</div>
+        <div style="padding-left:28px">- docker buildx build</div>
+        <div style="padding-left:42px">--cache-from type=registry,ref=$CI_REGISTRY_IMAGE:cache</div>
+        <div style="padding-left:42px">--cache-to type=registry,ref=$CI_REGISTRY_IMAGE:cache,mode=max</div>
+        <div style="padding-left:42px">--push -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA .</div>
+      </div>
+    `
+  },
+  image_scan: {
+    badge:'<span class="badge bd-red">Image scanning in CI</span>',
+    title:'Vulnerability scanning in CI/CD',
+    body:`
+      <h3>Trivy in GitLab CI</h3>
+      <div class="cmd-block">
+        <div><span class="k">scan:</span></div>
+        <div style="padding-left:14px">image: aquasec/trivy:latest</div>
+        <div style="padding-left:14px">needs: [build]</div>
+        <div style="padding-left:14px">script:</div>
+        <div style="padding-left:28px">- trivy image --exit-code 1</div>
+        <div style="padding-left:42px">--severity HIGH,CRITICAL</div>
+        <div style="padding-left:42px">--format sarif</div>
+        <div style="padding-left:42px">--output trivy-results.sarif</div>
+        <div style="padding-left:42px">$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA</div>
+        <div style="padding-left:14px">artifacts:</div>
+        <div style="padding-left:28px">reports:</div>
+        <div style="padding-left:42px">container_scanning: trivy-results.sarif</div>
+        <div style="padding-left:28px">when: always</div>
+      </div>
+      <h3>Trivy in GitHub Actions</h3>
+      <div class="cmd-block">
+        <div>- uses: aquasecurity/trivy-action@master</div>
+        <div style="padding-left:14px">with:</div>
+        <div style="padding-left:28px">image-ref: ghcr.io/${{ github.repository }}:${{ github.sha }}</div>
+        <div style="padding-left:28px">format: sarif</div>
+        <div style="padding-left:28px">output: trivy-results.sarif</div>
+        <div style="padding-left:28px">severity: HIGH,CRITICAL</div>
+        <div style="padding-left:28px">exit-code: '1'</div>
+        <div>- uses: github/codeql-action/upload-sarif@v3</div>
+        <div style="padding-left:14px">if: always()</div>
+        <div style="padding-left:14px">with:</div>
+        <div style="padding-left:28px">sarif_file: trivy-results.sarif</div>
+      </div>
+      <div class="modal-tip"><div class="tip-label">SARIF format</div><p>SARIF (Static Analysis Results Interchange Format) is a standard for security tool output. GitHub Security tab and GitLab Security Dashboard both natively display SARIF reports. Always output SARIF for visibility.</p></div>
+    `
+  },
+  extends_deep: {
+    badge:'<span class="badge bd-purple">extends vs anchors</span>',
+    title:'GitLab extends deep merge vs YAML anchors',
+    body:`
+      <p>GitLab offers two inheritance mechanisms. They behave differently when merging arrays and nested maps.</p>
+      <h3>extends: — deep merge</h3>
+      <div class="cmd-block">
+        <div><span class="k">.base:</span></div>
+        <div style="padding-left:14px">script: [echo "base"]</div>
+        <div style="padding-left:14px">variables:</div>
+        <div style="padding-left:28px">FOO: base</div>
+        <div style="padding-left:28px">BAR: base</div>
+        <div>&nbsp;</div>
+        <div><span class="k">myjob:</span></div>
+        <div style="padding-left:14px">extends: .base</div>
+        <div style="padding-left:14px">script: [echo "override"]  <span class="c"># replaces base script</span></div>
+        <div style="padding-left:14px">variables:</div>
+        <div style="padding-left:28px">FOO: override       <span class="c"># overrides FOO</span></div>
+        <div style="padding-left:14px"><span class="c"># BAR: base is inherited</span></div>
+      </div>
+      <h3>YAML anchors — shallow merge only</h3>
+      <div class="cmd-block">
+        <div><span class="k">.base: &amp;base</span></div>
+        <div style="padding-left:14px">script: [echo "base"]</div>
+        <div style="padding-left:14px">variables:</div>
+        <div style="padding-left:28px">FOO: base</div>
+        <div>&nbsp;</div>
+        <div><span class="k">myjob:</span></div>
+        <div style="padding-left:14px">&lt;&lt;: *base</div>
+        <div style="padding-left:14px">variables:          <span class="c"># REPLACES entire variables map</span></div>
+        <div style="padding-left:28px">BAR: new            <span class="c"># FOO is LOST</span></div>
+      </div>
+      <div class="modal-warn"><div class="tip-label">use extends, not anchors</div><p>Prefer extends: over YAML anchors. extends: does deep merge so you only need to specify what you're overriding. YAML anchors do a shallow merge — overriding any key in a map replaces the entire map, losing all sibling keys from the base.</p></div>
+    `
+  },
+  marketplace: {
+    badge:'<span class="badge bd-blue">GitHub Marketplace</span>',
+    title:'Third-party actions & supply chain security',
+    body:`
+      <p>GitHub Actions Marketplace has thousands of reusable actions. Supply chain security requires pinning them correctly.</p>
+      <h3>Pinning strategies (most to least secure)</h3>
+      <div class="cmd-block">
+        <div class="c"># most secure — full SHA pin</div>
+        <div>- uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683</div>
+        <div>&nbsp;</div>
+        <div class="c"># good — major version tag</div>
+        <div>- uses: actions/checkout@v4</div>
+        <div>&nbsp;</div>
+        <div class="c"># risky — mutable ref</div>
+        <div class="r">- uses: actions/checkout@main</div>
+        <div>&nbsp;</div>
+        <div class="c"># never</div>
+        <div class="r">- uses: some-random-user/action@latest</div>
+      </div>
+      <h3>Essential trusted actions</h3>
+      <div class="kv-list">
+        <div class="kv"><span class="kv-key">actions/checkout</span><span class="kv-val">Clone the repo. Always first step.</span></div>
+        <div class="kv"><span class="kv-key">actions/setup-python</span><span class="kv-val">Install Python version.</span></div>
+        <div class="kv"><span class="kv-key">actions/cache</span><span class="kv-val">Cache dependencies.</span></div>
+        <div class="kv"><span class="kv-key">actions/upload/download-artifact</span><span class="kv-val">Pass files between jobs.</span></div>
+        <div class="kv"><span class="kv-key">docker/login-action</span><span class="kv-val">Authenticate to container registries.</span></div>
+        <div class="kv"><span class="kv-key">docker/build-push-action</span><span class="kv-val">BuildKit-powered image builds.</span></div>
+        <div class="kv"><span class="kv-key">docker/setup-buildx-action</span><span class="kv-val">Set up BuildKit builder.</span></div>
+      </div>
+      <div class="modal-tip"><div class="tip-label">Dependabot for actions</div><p>Enable Dependabot for GitHub Actions in .github/dependabot.yml to automatically get PRs when action versions are updated.</p></div>
+    `
+  },
+  gitops: {
+    badge:'<span class="badge bd-green">GitOps pattern</span>',
+    title:'GitOps — CI builds, CD reconciles',
+    body:`
+      <p>GitOps separates the build pipeline from the deployment pipeline. CI produces an artifact (image). A separate "config repo" holds the desired state. ArgoCD or Flux continuously reconciles the cluster to match the config repo.</p>
+      <h3>The flow</h3>
+      <div class="cmd-block">
+        <div class="c"># 1. CI builds & pushes image</div>
+        <div>docker push registry/app:abc1234</div>
+        <div>&nbsp;</div>
+        <div class="c"># 2. CI updates the config repo (GitOps repo)</div>
+        <div>git clone https://gitlab.com/org/k8s-config</div>
+        <div>cd k8s-config</div>
+        <div>sed -i "s|image: .*|image: registry/app:abc1234|" apps/deployment.yaml</div>
+        <div>git commit -am "ci: update app image to abc1234"</div>
+        <div>git push</div>
+        <div>&nbsp;</div>
+        <div class="c"># 3. ArgoCD/Flux detects the change</div>
+        <div class="c">#    and applies it to the cluster</div>
+        <div class="c">#    CI doesn't touch kubectl at all</div>
+      </div>
+      <h3>Benefits</h3>
+      <ul>
+        <li>Cluster state is always reflected in Git — full audit trail</li>
+        <li>Rollback = revert a git commit</li>
+        <li>No CI credentials needed for kubectl</li>
+        <li>Drift detection — ArgoCD alerts if cluster drifts from repo</li>
+      </ul>
+      <div class="modal-tip"><div class="tip-label">tools</div><p>ArgoCD is more UI-focused with app-of-apps patterns. Flux is more GitOps-native and Kubernetes-operator-based. Both are CNCF projects. For SKAO-style infrastructure, Flux is commonly used alongside Helm.</p></div>
+    `
+  },
+  rollback: {
+    badge:'<span class="badge bd-amber">Rollback strategies</span>',
+    title:'Rollback when things go wrong',
+    body:`
+      <h3>Option 1 — Helm rollback</h3>
+      <div class="cmd-block">
+        <div>helm history app -n production</div>
+        <div>helm rollback app 3 -n production  <span class="c"># roll back to revision 3</span></div>
+      </div>
+      <h3>Option 2 — kubectl rollout undo</h3>
+      <div class="cmd-block">
+        <div>kubectl rollout undo deploy/app -n production</div>
+        <div>kubectl rollout undo deploy/app --to-revision=5</div>
+      </div>
+      <h3>Option 3 — Re-run a previous pipeline</h3>
+      <p>GitLab: open the previous successful pipeline, click "Retry". The same commit+image gets deployed again. GitHub: re-run a previous workflow run on the old commit.</p>
+      <h3>Option 4 — GitOps revert</h3>
+      <div class="cmd-block">
+        <div>git revert HEAD --no-edit</div>
+        <div>git push  <span class="c"># ArgoCD/Flux reconciles automatically</span></div>
+      </div>
+      <h3>Option 5 — Feature flags</h3>
+      <p>Toggle off a broken feature instantly without a deployment. GitLab has built-in feature flags (LaunchDarkly alternative). Best for zero-downtime rollback of specific features.</p>
+      <div class="modal-tip"><div class="tip-label">which to use</div><p>Helm rollback is fastest for k8s. GitOps revert is safest (audit trail). Feature flags are best for product features. kubectl rollout undo is fine for simple deployments but has no history beyond --to-revision.</p></div>
+    `
+  },
+  release: {
+    badge:'<span class="badge bd-blue">Release automation</span>',
+    title:'Automated releases & changelogs',
+    body:`
+      <h3>GitLab — release CLI</h3>
+      <div class="cmd-block">
+        <div><span class="k">release:</span></div>
+        <div style="padding-left:14px">stage: release</div>
+        <div style="padding-left:14px">image: registry.gitlab.com/gitlab-org/release-cli:latest</div>
+        <div style="padding-left:14px">rules:</div>
+        <div style="padding-left:28px">- if: '$CI_COMMIT_TAG =~ /^v/'</div>
+        <div style="padding-left:14px">script: echo "Creating release $CI_COMMIT_TAG"</div>
+        <div style="padding-left:14px">release:</div>
+        <div style="padding-left:28px">name: Release $CI_COMMIT_TAG</div>
+        <div style="padding-left:28px">tag_name: $CI_COMMIT_TAG</div>
+        <div style="padding-left:28px">description: './CHANGELOG.md'</div>
+        <div style="padding-left:28px">assets:</div>
+        <div style="padding-left:42px">links:</div>
+        <div style="padding-left:56px">- name: Docker image</div>
+        <div style="padding-left:60px">  url: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG</div>
+      </div>
+      <h3>GitHub Actions — softprops/action-gh-release</h3>
+      <div class="cmd-block">
+        <div>- uses: softprops/action-gh-release@v2</div>
+        <div style="padding-left:14px">if: startsWith(github.ref, 'refs/tags/')</div>
+        <div style="padding-left:14px">with:</div>
+        <div style="padding-left:28px">generate_release_notes: true</div>
+        <div style="padding-left:28px">files: |</div>
+        <div style="padding-left:42px">dist/*.tar.gz</div>
+        <div style="padding-left:28px">token: <span class="v">${{ secrets.GITHUB_TOKEN }}</span></div>
+      </div>
+      <div class="modal-tip"><div class="tip-label">conventional commits</div><p>Use Conventional Commits (feat:, fix:, chore:) to auto-generate structured changelogs. Tools: semantic-release, release-please, git-cliff.</p></div>
+    `
+  },
+  mono_repo: {
+    badge:'<span class="badge bd-blue">Monorepo pipelines</span>',
+    title:'Only build what changed in a monorepo',
+    body:`
+      <h3>GitLab — rules: changes</h3>
+      <div class="cmd-block">
+        <div><span class="k">build-api:</span></div>
+        <div style="padding-left:14px">rules:</div>
+        <div style="padding-left:28px">- changes:</div>
+        <div style="padding-left:42px">- services/api/**/*</div>
+        <div style="padding-left:42px">- shared/**/*</div>
+        <div style="padding-left:28px">  when: on_success</div>
+        <div style="padding-left:28px">- when: never</div>
+        <div>&nbsp;</div>
+        <div><span class="k">build-worker:</span></div>
+        <div style="padding-left:14px">rules:</div>
+        <div style="padding-left:28px">- changes:</div>
+        <div style="padding-left:42px">- services/worker/**/*</div>
+        <div style="padding-left:28px">  when: on_success</div>
+        <div style="padding-left:28px">- when: never</div>
+      </div>
+      <h3>GitHub Actions — paths filter</h3>
+      <div class="cmd-block">
+        <div class="c"># separate workflow files per service</div>
+        <div><span class="k">on:</span></div>
+        <div style="padding-left:14px">push:</div>
+        <div style="padding-left:28px">paths:</div>
+        <div style="padding-left:42px">- 'services/api/**'</div>
+        <div style="padding-left:42px">- 'shared/**'</div>
+        <div>&nbsp;</div>
+        <div class="c"># or: dorny/paths-filter action for per-job control</div>
+        <div>- uses: dorny/paths-filter@v3</div>
+        <div style="padding-left:14px">id: changes</div>
+        <div style="padding-left:14px">with:</div>
+        <div style="padding-left:28px">filters: |</div>
+        <div style="padding-left:42px">api: ['services/api/**']</div>
+        <div style="padding-left:42px">worker: ['services/worker/**']</div>
+        <div>- run: make build-api</div>
+        <div style="padding-left:14px">if: steps.changes.outputs.api == 'true'</div>
+      </div>
+    `
+  },
+  test_split: {
+    badge:'<span class="badge bd-green">Test parallelisation</span>',
+    title:'Splitting tests across parallel jobs',
+    body:`
+      <h3>GitLab — parallel: N</h3>
+      <div class="cmd-block">
+        <div><span class="k">test:</span></div>
+        <div style="padding-left:14px">parallel: 4       <span class="c"># creates 4 identical jobs</span></div>
+        <div style="padding-left:14px">script:</div>
+        <div style="padding-left:28px"><span class="c"># CI_NODE_INDEX: 1,2,3,4 | CI_NODE_TOTAL: 4</span></div>
+        <div style="padding-left:28px">- pytest tests/ --splits $CI_NODE_TOTAL --group $CI_NODE_INDEX</div>
+        <div style="padding-left:14px"><span class="c"># uses pytest-split to split by test duration</span></div>
+      </div>
+      <h3>GitHub Actions — matrix strategy</h3>
+      <div class="cmd-block">
+        <div><span class="k">test:</span></div>
+        <div style="padding-left:14px">strategy:</div>
+        <div style="padding-left:28px">matrix:</div>
+        <div style="padding-left:42px">shard: [1, 2, 3, 4]</div>
+        <div style="padding-left:14px">steps:</div>
+        <div style="padding-left:28px">- run: pytest tests/ --splits 4 --group ${{ matrix.shard }}</div>
+      </div>
+      <div class="modal-tip"><div class="tip-label">pytest-split</div><p>pytest-split stores test durations from previous runs and splits tests by duration, not by count. This gives much more even distribution. Store the .test_durations file as a cache artifact.</p></div>
+    `
+  },
+  promote: {
+    badge:'<span class="badge bd-amber">Image promotion</span>',
+    title:'Build once, promote through environments',
+    body:`
+      <p>Never rebuild an image for production. Build once (tagged with commit SHA), test it, then promote (retag) the exact same image through environments.</p>
+      <h3>GitLab CI — promote pattern</h3>
+      <div class="cmd-block">
+        <div class="c"># build stage — create the canonical image</div>
+        <div><span class="k">build:</span></div>
+        <div style="padding-left:14px">script:</div>
+        <div style="padding-left:28px">- docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA .</div>
+        <div style="padding-left:28px">- docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA</div>
+        <div>&nbsp;</div>
+        <div class="c"># deploy to staging — just retag</div>
+        <div><span class="k">deploy-staging:</span></div>
+        <div style="padding-left:14px">script:</div>
+        <div style="padding-left:28px">- docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA</div>
+        <div style="padding-left:28px">- docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA $CI_REGISTRY_IMAGE:staging</div>
+        <div style="padding-left:28px">- docker push $CI_REGISTRY_IMAGE:staging</div>
+        <div style="padding-left:28px"><span class="c"># deploy with the SHA tag — immutable reference</span></div>
+        <div style="padding-left:28px">- helm upgrade app ./chart --set image.tag=$CI_COMMIT_SHORT_SHA</div>
+        <div>&nbsp;</div>
+        <div class="c"># promote to prod — retag SHA as prod</div>
+        <div><span class="k">deploy-prod:</span></div>
+        <div style="padding-left:14px">when: manual</div>
+        <div style="padding-left:14px">script:</div>
+        <div style="padding-left:28px">- docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA $CI_REGISTRY_IMAGE:latest</div>
+        <div style="padding-left:28px">- helm upgrade app ./chart --set image.tag=$CI_COMMIT_SHORT_SHA</div>
+      </div>
+      <div class="modal-tip"><div class="tip-label">always deploy by SHA</div><p>Deploy to k8s using the immutable SHA tag, not the mutable staging/latest/prod tag. The mutable tag is for human reference. The SHA tag is for the deployment — it can never silently change under you.</p></div>
+    `
+  },
+  skip_ci: {
+    badge:'<span class="badge bd-purple">Pipeline control</span>',
+    title:'Controlling when pipelines run',
+    body:`
+      <h3>Skip CI on a commit</h3>
+      <div class="cmd-block">
+        <div class="c"># GitLab — in commit message</div>
+        <div>git commit -m "docs: update readme [skip ci]"</div>
+        <div>git commit -m "docs: update readme [ci skip]"</div>
+        <div>&nbsp;</div>
+        <div class="c"># GitHub Actions — in commit message</div>
+        <div>git commit -m "docs: update readme [skip ci]"</div>
+        <div>git commit -m "docs: update readme [no ci]"</div>
+      </div>
+      <h3>Interruptible jobs (GitLab)</h3>
+      <div class="cmd-block">
+        <div><span class="k">test:</span></div>
+        <div style="padding-left:14px">interruptible: true  <span class="c"># cancel if newer pipeline starts</span></div>
+      </div>
+      <h3>Cancel in progress (GitHub)</h3>
+      <div class="cmd-block">
+        <div><span class="k">concurrency:</span></div>
+        <div style="padding-left:14px">group: <span class="v">${{ github.ref }}</span></div>
+        <div style="padding-left:14px">cancel-in-progress: true  <span class="c"># cancel older runs on same branch</span></div>
+      </div>
+      <div class="modal-tip"><div class="tip-label">resource efficiency</div><p>Set interruptible: true on all long-running jobs that don't need to complete if superseded. For deployment jobs, do NOT set interruptible: true — you don't want a half-deployed app.</p></div>
+    `
+  },
+  oidc: {
+    badge:'<span class="badge bd-red">OIDC / keyless auth</span>',
+    title:'OIDC — authenticate without long-lived secrets',
+    body:`
+      <p>Both GitLab and GitHub Actions can generate short-lived OIDC tokens that cloud providers (AWS, GCP, Azure, Vault) trust. No stored credentials needed.</p>
+      <h3>GitHub Actions — AWS OIDC</h3>
+      <div class="cmd-block">
+        <div><span class="k">permissions:</span></div>
+        <div style="padding-left:14px">id-token: write   <span class="c"># required for OIDC</span></div>
+        <div style="padding-left:14px">contents: read</div>
+        <div>&nbsp;</div>
+        <div>- uses: aws-actions/configure-aws-credentials@v4</div>
+        <div style="padding-left:14px">with:</div>
+        <div style="padding-left:28px">role-to-assume: arn:aws:iam::123456789:role/github-actions</div>
+        <div style="padding-left:28px">aws-region: eu-west-1</div>
+        <div class="c"># now you have temporary AWS creds — no secrets stored</div>
+      </div>
+      <h3>GitLab CI — HashiCorp Vault</h3>
+      <div class="cmd-block">
+        <div><span class="k">job:</span></div>
+        <div style="padding-left:14px">id_tokens:</div>
+        <div style="padding-left:28px">VAULT_ID_TOKEN:</div>
+        <div style="padding-left:42px">aud: https://vault.example.com</div>
+        <div style="padding-left:14px">secrets:</div>
+        <div style="padding-left:28px">DB_PASSWORD:</div>
+        <div style="padding-left:42px">vault: secret/data/myapp/db@production</div>
+        <div style="padding-left:42px">token: $VAULT_ID_TOKEN</div>
+      </div>
+      <div class="modal-tip"><div class="tip-label">why OIDC</div><p>Traditional CI secrets are long-lived — if leaked, they're valid until manually rotated. OIDC tokens are short-lived (15 min) and scoped to a specific pipeline run. Even if intercepted, they expire almost immediately.</p></div>
+    `
+  },
+  notifications: {
+    badge:'<span class="badge bd-pink">Notifications</span>',
+    title:'Pipeline notifications',
+    body:`
+      <h3>GitLab — Slack integration</h3>
+      <div class="cmd-block">
+        <div class="c"># Built-in via Settings > Integrations > Slack</div>
+        <div class="c"># Or custom notification job:</div>
+        <div><span class="k">notify-failure:</span></div>
+        <div style="padding-left:14px">stage: .post</div>
+        <div style="padding-left:14px">when: on_failure</div>
+        <div style="padding-left:14px">image: alpine</div>
+        <div style="padding-left:14px">script:</div>
+        <div style="padding-left:28px">- apk add curl</div>
+        <div style="padding-left:28px">- 'curl -X POST $SLACK_WEBHOOK -H "Content-type: application/json"</div>
+        <div style="padding-left:28px">  --data "{\"text\":\"Pipeline failed: $CI_PIPELINE_URL\"}"'</div>
+      </div>
+      <h3>GitHub Actions — Slack</h3>
+      <div class="cmd-block">
+        <div>- uses: slackapi/slack-github-action@v1.27</div>
+        <div style="padding-left:14px">if: failure()</div>
+        <div style="padding-left:14px">with:</div>
+        <div style="padding-left:28px">channel-id: 'C1234567890'</div>
+        <div style="padding-left:28px">slack-message: "Build failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"</div>
+        <div style="padding-left:14px">env:</div>
+        <div style="padding-left:28px">SLACK_BOT_TOKEN: <span class="v">${{ secrets.SLACK_BOT_TOKEN }}</span></div>
+      </div>
+      <div class="modal-tip"><div class="tip-label">GitLab .post stage</div><p>GitLab has a reserved .post stage that always runs after all other stages, regardless of success or failure. Use it for cleanup, notifications, and reporting jobs — similar to GitHub's if: always() condition.</p></div>
+    `
+  }
+};
+
+function openModal(key) {
+  const data = M[key];
+  if(!data) return;
+  document.getElementById('modalBadge').innerHTML = data.badge;
+  document.getElementById('modalTitle').textContent = data.title;
+  document.getElementById('modalBody').innerHTML = data.body;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(e) {
+  if(e.target === document.getElementById('modalOverlay')) closeModalBtn();
+}
+function closeModalBtn() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModalBtn(); });
+
+function navTo(id) {
+  document.getElementById(id).scrollIntoView({behavior:'smooth'});
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+const sections = document.querySelectorAll('.section');
+const btns = document.querySelectorAll('.nav-btn');
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const idx=[...sections].indexOf(e.target);
+      btns.forEach(b=>b.classList.remove('active'));
+      if(btns[idx]) btns[idx].classList.add('active');
+    }
+  });
+},{rootMargin:'-30% 0px -60% 0px'});
+sections.forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>
