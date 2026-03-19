@@ -311,7 +311,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:
             <div style="padding-left:42px">- uses: actions/checkout@v4</div>
             <div style="padding-left:42px">- uses: actions/setup-python@v5</div>
             <div style="padding-left:56px">  with:</div>
-            <div style="padding-left:70px">    python-version: ${{ env.PYTHON_VERSION }}</div>
+            <div style="padding-left:70px">    python-version: $&#123;&#123; env.PYTHON_VERSION &#125;&#125;</div>
             <div style="padding-left:42px">- run: pip install -r requirements.txt</div>
             <div style="padding-left:42px">- run: pytest tests/unit</div>
             <div style="padding-left:42px">- uses: actions/upload-artifact@v4</div>
@@ -441,7 +441,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:
             <div class="c"># workflow-level env</div>
             <div><span class="k">env:</span></div>
             <div style="padding-left:14px">APP_ENV: production</div>
-            <div style="padding-left:14px">IMAGE_TAG: <span class="v">${{ github.sha }}</span></div>
+            <div style="padding-left:14px">IMAGE_TAG: <span class="v">$&#123;&#123; github.sha &#125;&#125;</span></div>
             <div>&nbsp;</div>
             <div class="c"># job-level env (overrides workflow)</div>
             <div><span class="k">jobs:</span></div>
@@ -450,14 +450,14 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:
             <div style="padding-left:42px">APP_ENV: staging</div>
             <div>&nbsp;</div>
             <div class="c"># github context (always available)</div>
-            <div><span class="v">${{ github.sha }}</span>            <span class="c"># full commit SHA</span></div>
-            <div><span class="v">${{ github.ref_name }}</span>       <span class="c"># branch or tag name</span></div>
-            <div><span class="v">${{ github.run_id }}</span>         <span class="c"># unique workflow run ID</span></div>
-            <div><span class="v">${{ github.actor }}</span>          <span class="c"># who triggered</span></div>
-            <div><span class="v">${{ github.repository }}</span>     <span class="c"># owner/repo</span></div>
-            <div><span class="v">${{ github.event_name }}</span>     <span class="c"># push, pull_request, etc.</span></div>
-            <div><span class="v">${{ github.event.inputs.* }}</span> <span class="c"># workflow_dispatch inputs</span></div>
-            <div><span class="v">${{ runner.os }}</span>             <span class="c"># Linux, Windows, macOS</span></div>
+            <div><span class="v">$&#123;&#123; github.sha &#125;&#125;</span>            <span class="c"># full commit SHA</span></div>
+            <div><span class="v">$&#123;&#123; github.ref_name &#125;&#125;</span>       <span class="c"># branch or tag name</span></div>
+            <div><span class="v">$&#123;&#123; github.run_id &#125;&#125;</span>         <span class="c"># unique workflow run ID</span></div>
+            <div><span class="v">$&#123;&#123; github.actor &#125;&#125;</span>          <span class="c"># who triggered</span></div>
+            <div><span class="v">$&#123;&#123; github.repository &#125;&#125;</span>     <span class="c"># owner/repo</span></div>
+            <div><span class="v">$&#123;&#123; github.event_name &#125;&#125;</span>     <span class="c"># push, pull_request, etc.</span></div>
+            <div><span class="v">$&#123;&#123; github.event.inputs.* &#125;&#125;</span> <span class="c"># workflow_dispatch inputs</span></div>
+            <div><span class="v">$&#123;&#123; runner.os &#125;&#125;</span>             <span class="c"># Linux, Windows, macOS</span></div>
           </div>
         </div>
       </div>
@@ -515,9 +515,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:
             <div style="padding-left:28px">path: |</div>
             <div style="padding-left:42px">~/.cache/pip</div>
             <div style="padding-left:42px">.venv</div>
-            <div style="padding-left:28px">key: pip-${{ runner.os }}-${{ hashFiles('requirements.txt') }}</div>
+            <div style="padding-left:28px">key: pip-$&#123;&#123; runner.os &#125;&#125;-$&#123;&#123; hashFiles('requirements.txt') &#125;&#125;</div>
             <div style="padding-left:28px">restore-keys: |</div>
-            <div style="padding-left:42px">pip-${{ runner.os }}-</div>
+            <div style="padding-left:42px">pip-$&#123;&#123; runner.os &#125;&#125;-</div>
             <div style="padding-left:42px">pip-</div>
           </div>
         </div>
@@ -552,14 +552,14 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:
             <div>- <span class="k">uses:</span> actions/upload-artifact@v4</div>
             <div style="padding-left:14px">if: always()</div>
             <div style="padding-left:14px"><span class="k">with:</span></div>
-            <div style="padding-left:28px">name: dist-${{ github.sha }}</div>
+            <div style="padding-left:28px">name: dist-$&#123;&#123; github.sha &#125;&#125;</div>
             <div style="padding-left:28px">path: dist/</div>
             <div style="padding-left:28px">retention-days: 7</div>
             <div>&nbsp;</div>
             <div class="c"># download in another job</div>
             <div>- <span class="k">uses:</span> actions/download-artifact@v4</div>
             <div style="padding-left:14px"><span class="k">with:</span></div>
-            <div style="padding-left:28px">name: dist-${{ github.sha }}</div>
+            <div style="padding-left:28px">name: dist-$&#123;&#123; github.sha &#125;&#125;</div>
             <div style="padding-left:28px">path: dist/</div>
           </div>
         </div>
@@ -617,12 +617,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:
             <div style="padding-left:28px">- uses: docker/login-action@v3</div>
             <div style="padding-left:42px">with:</div>
             <div style="padding-left:56px">registry: ghcr.io</div>
-            <div style="padding-left:56px">username: ${{ github.actor }}</div>
-            <div style="padding-left:56px">password: ${{ secrets.GITHUB_TOKEN }}</div>
+            <div style="padding-left:56px">username: $&#123;&#123; github.actor &#125;&#125;</div>
+            <div style="padding-left:56px">password: $&#123;&#123; secrets.GITHUB_TOKEN &#125;&#125;</div>
             <div style="padding-left:28px">- uses: docker/build-push-action@v5</div>
             <div style="padding-left:42px">with:</div>
             <div style="padding-left:56px">push: true</div>
-            <div style="padding-left:56px">tags: ghcr.io/${{ github.repository }}:${{ github.sha }}</div>
+            <div style="padding-left:56px">tags: ghcr.io/$&#123;&#123; github.repository &#125;&#125;:$&#123;&#123; github.sha &#125;&#125;</div>
             <div style="padding-left:56px">cache-from: type=gha</div>
             <div style="padding-left:56px">cache-to: type=gha,mode=max</div>
           </div>
@@ -786,7 +786,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:
             <div style="padding-left:14px">steps:</div>
             <div style="padding-left:28px">- run: helm upgrade --install app ./chart</div>
             <div style="padding-left:28px">  env:</div>
-            <div style="padding-left:42px">KUBECONFIG: ${{ secrets.KUBECONFIG }}</div>
+            <div style="padding-left:42px">KUBECONFIG: $&#123;&#123; secrets.KUBECONFIG &#125;&#125;</div>
           </div>
         </div>
       </div>
@@ -926,6 +926,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:
 </div>
 
 <script>
+window.addEventListener("DOMContentLoaded", function() { console.log("Script loaded, openModal type:", typeof openModal); });
 const M = {
   triggers: {
     badge:'<span class="badge bd-blue">Triggers</span>',
@@ -1072,18 +1073,18 @@ const M = {
       </div>
       <h3>Most useful GitHub Actions contexts</h3>
       <div class="cmd-block">
-        <div><span class="v">${{ github.sha }}</span>              <span class="c"># full commit SHA</span></div>
-        <div><span class="v">${{ github.ref }}</span>              <span class="c"># refs/heads/main or refs/tags/v1.0</span></div>
-        <div><span class="v">${{ github.ref_name }}</span>         <span class="c"># main or v1.0 (just the name)</span></div>
-        <div><span class="v">${{ github.actor }}</span>            <span class="c"># user who triggered</span></div>
-        <div><span class="v">${{ github.run_id }}</span>           <span class="c"># unique workflow run ID</span></div>
-        <div><span class="v">${{ github.run_number }}</span>       <span class="c"># incrementing run number</span></div>
-        <div><span class="v">${{ github.repository }}</span>       <span class="c"># owner/repo</span></div>
-        <div><span class="v">${{ github.event.pull_request.number }}</span> <span class="c"># PR number</span></div>
-        <div><span class="v">${{ secrets.MY_SECRET }}</span>       <span class="c"># encrypted secret</span></div>
-        <div><span class="v">${{ env.MY_VAR }}</span>             <span class="c"># workflow env var</span></div>
-        <div><span class="v">${{ steps.STEP_ID.outputs.VALUE }}</span> <span class="c"># step output</span></div>
-        <div><span class="v">${{ runner.os }}</span>              <span class="c"># Linux | Windows | macOS</span></div>
+        <div><span class="v">$&#123;&#123; github.sha &#125;&#125;</span>              <span class="c"># full commit SHA</span></div>
+        <div><span class="v">$&#123;&#123; github.ref &#125;&#125;</span>              <span class="c"># refs/heads/main or refs/tags/v1.0</span></div>
+        <div><span class="v">$&#123;&#123; github.ref_name &#125;&#125;</span>         <span class="c"># main or v1.0 (just the name)</span></div>
+        <div><span class="v">$&#123;&#123; github.actor &#125;&#125;</span>            <span class="c"># user who triggered</span></div>
+        <div><span class="v">$&#123;&#123; github.run_id &#125;&#125;</span>           <span class="c"># unique workflow run ID</span></div>
+        <div><span class="v">$&#123;&#123; github.run_number &#125;&#125;</span>       <span class="c"># incrementing run number</span></div>
+        <div><span class="v">$&#123;&#123; github.repository &#125;&#125;</span>       <span class="c"># owner/repo</span></div>
+        <div><span class="v">$&#123;&#123; github.event.pull_request.number &#125;&#125;</span> <span class="c"># PR number</span></div>
+        <div><span class="v">$&#123;&#123; secrets.MY_SECRET &#125;&#125;</span>       <span class="c"># encrypted secret</span></div>
+        <div><span class="v">$&#123;&#123; env.MY_VAR &#125;&#125;</span>             <span class="c"># workflow env var</span></div>
+        <div><span class="v">$&#123;&#123; steps.STEP_ID.outputs.VALUE &#125;&#125;</span> <span class="c"># step output</span></div>
+        <div><span class="v">$&#123;&#123; runner.os &#125;&#125;</span>              <span class="c"># Linux | Windows | macOS</span></div>
       </div>
     `
   },
@@ -1112,7 +1113,7 @@ const M = {
         <div>&nbsp;</div>
         <div class="c"># access outputs from previous job</div>
         <div><span class="k">if:</span> needs.build.outputs.image_tag != ''</div>
-        <div><span class="v">${{ needs.build.outputs.image_tag }}</span></div>
+        <div><span class="v">$&#123;&#123; needs.build.outputs.image_tag &#125;&#125;</span></div>
       </div>
       <div class="modal-tip"><div class="tip-label">outputs between jobs</div><p>GitHub Actions: use echo "key=value" >> $GITHUB_OUTPUT in a step, declare outputs: in the job, then access with needs.JOB.outputs.key. GitLab: use dotenv artifacts to pass variables between jobs.</p></div>
     `
@@ -1149,11 +1150,11 @@ const M = {
               <div style="padding-left:42px">exclude:</div>
               <div style="padding-left:56px">- python: '3.11'</div>
               <div style="padding-left:60px">  os: macos-latest</div>
-              <div style="padding-left:14px">runs-on: <span class="v">${{ matrix.os }}</span></div>
+              <div style="padding-left:14px">runs-on: <span class="v">$&#123;&#123; matrix.os &#125;&#125;</span></div>
               <div style="padding-left:14px">steps:</div>
               <div style="padding-left:28px">- uses: actions/setup-python@v5</div>
               <div style="padding-left:42px">with:</div>
-              <div style="padding-left:56px">python-version: <span class="v">${{ matrix.python }}</span></div>
+              <div style="padding-left:56px">python-version: <span class="v">$&#123;&#123; matrix.python &#125;&#125;</span></div>
             </div>
           </div>
         </div>
@@ -1299,8 +1300,8 @@ const M = {
         <div class="c"># GitHub Actions — use a secret</div>
         <div>- run: docker login -u $USER -p $TOKEN</div>
         <div style="padding-left:14px">env:</div>
-        <div style="padding-left:28px">USER: <span class="v">${{ secrets.REGISTRY_USER }}</span></div>
-        <div style="padding-left:28px">TOKEN: <span class="v">${{ secrets.REGISTRY_TOKEN }}</span></div>
+        <div style="padding-left:28px">USER: <span class="v">$&#123;&#123; secrets.REGISTRY_USER &#125;&#125;</span></div>
+        <div style="padding-left:28px">TOKEN: <span class="v">$&#123;&#123; secrets.REGISTRY_TOKEN &#125;&#125;</span></div>
       </div>
       <div class="modal-warn"><div class="tip-label">masking limitations</div><p>GitLab masking only works for simple strings. Multi-line values, base64 encoded certs, or JSON blobs often can't be masked — use File type variables or external secret managers instead.</p></div>
       <div class="modal-tip"><div class="tip-label">never do this</div><p>Never echo a secret, set -x with secrets, or pass them as build args. Use --secret mount with BuildKit for secrets needed only during image build.</p></div>
@@ -1356,7 +1357,7 @@ const M = {
       <div class="cmd-block">
         <div><span class="k">build:</span></div>
         <div style="padding-left:14px">outputs:</div>
-        <div style="padding-left:28px">image_tag: <span class="v">${{ steps.meta.outputs.image_tag }}</span></div>
+        <div style="padding-left:28px">image_tag: <span class="v">$&#123;&#123; steps.meta.outputs.image_tag &#125;&#125;</span></div>
         <div style="padding-left:14px">steps:</div>
         <div style="padding-left:28px">- id: meta</div>
         <div style="padding-left:32px">  run: echo "image_tag=$GITHUB_SHA" >> $GITHUB_OUTPUT</div>
@@ -1364,7 +1365,7 @@ const M = {
         <div><span class="k">deploy:</span></div>
         <div style="padding-left:14px">needs: [build]</div>
         <div style="padding-left:14px">steps:</div>
-        <div style="padding-left:28px">- run: echo "Deploying ${{ needs.build.outputs.image_tag }}"</div>
+        <div style="padding-left:28px">- run: echo "Deploying $&#123;&#123; needs.build.outputs.image_tag &#125;&#125;"</div>
       </div>
     `
   },
@@ -1384,9 +1385,9 @@ const M = {
         <div style="padding-left:14px">paths: [.venv/, .cache/pip/]</div>
         <div>&nbsp;</div>
         <div class="c"># GitHub — ideal cache key</div>
-        <div>key: pip-<span class="v">${{ runner.os }}</span>-<span class="v">${{ hashFiles('requirements.txt') }}</span></div>
+        <div>key: pip-<span class="v">$&#123;&#123; runner.os &#125;&#125;</span>-<span class="v">$&#123;&#123; hashFiles('requirements.txt') &#125;&#125;</span></div>
         <div>restore-keys: |</div>
-        <div style="padding-left:14px">pip-<span class="v">${{ runner.os }}</span>-  <span class="c"># fallback to stale cache</span></div>
+        <div style="padding-left:14px">pip-<span class="v">$&#123;&#123; runner.os &#125;&#125;</span>-  <span class="c"># fallback to stale cache</span></div>
       </div>
       <h3>restore-keys (GitHub) — fallback chain</h3>
       <p>When no exact key match exists, GitHub tries restore-keys in order. A stale cache is better than no cache — you only need to install new/changed packages instead of all of them.</p>
@@ -1420,7 +1421,7 @@ const M = {
         <div>- uses: orgoro/coverage@v3</div>
         <div style="padding-left:14px">with:</div>
         <div style="padding-left:28px">coverageFile: build/reports/coverage.xml</div>
-        <div style="padding-left:28px">token: <span class="v">${{ secrets.GITHUB_TOKEN }}</span></div>
+        <div style="padding-left:28px">token: <span class="v">$&#123;&#123; secrets.GITHUB_TOKEN &#125;&#125;</span></div>
       </div>
       <div class="modal-tip"><div class="tip-label">coverage regex (GitLab)</div><p>Set coverage: '/TOTAL.*\s+(\d+%)$/' in your job to extract the coverage percentage from stdout and display it as a badge in the GitLab UI.</p></div>
     `
@@ -1438,8 +1439,8 @@ const M = {
         <div style="padding-left:28px">entrypoint: [""]</div>
         <div style="padding-left:14px">script:</div>
         <div style="padding-left:28px">- mkdir -p /kaniko/.docker</div>
-        <div style="padding-left:28px">- echo '{"auths":{"'$CI_REGISTRY'":{"auth":"'$(echo -n $CI_REGISTRY_USER:$CI_REGISTRY_PASSWORD | base64)'"}}}'</div>
-        <div style="padding-left:28px">  > /kaniko/.docker/config.json</div>
+        <div style="padding-left:28px">- AUTH=$(printf '%s' "$CI_REGISTRY_USER:$CI_REGISTRY_PASSWORD" | base64)</div>
+        <div style="padding-left:28px">- echo '{"auths":{"'$CI_REGISTRY'":{"auth":"'$AUTH'"}}}' > /kaniko/.docker/config.json</div>
         <div style="padding-left:28px">- /kaniko/executor</div>
         <div style="padding-left:42px">--context $CI_PROJECT_DIR</div>
         <div style="padding-left:42px">--dockerfile $CI_PROJECT_DIR/Dockerfile</div>
@@ -1505,7 +1506,7 @@ const M = {
       <div class="cmd-block">
         <div>- uses: aquasecurity/trivy-action@master</div>
         <div style="padding-left:14px">with:</div>
-        <div style="padding-left:28px">image-ref: ghcr.io/${{ github.repository }}:${{ github.sha }}</div>
+        <div style="padding-left:28px">image-ref: ghcr.io/$&#123;&#123; github.repository &#125;&#125;:$&#123;&#123; github.sha &#125;&#125;</div>
         <div style="padding-left:28px">format: sarif</div>
         <div style="padding-left:28px">output: trivy-results.sarif</div>
         <div style="padding-left:28px">severity: HIGH,CRITICAL</div>
@@ -1671,7 +1672,7 @@ const M = {
         <div style="padding-left:28px">generate_release_notes: true</div>
         <div style="padding-left:28px">files: |</div>
         <div style="padding-left:42px">dist/*.tar.gz</div>
-        <div style="padding-left:28px">token: <span class="v">${{ secrets.GITHUB_TOKEN }}</span></div>
+        <div style="padding-left:28px">token: <span class="v">$&#123;&#123; secrets.GITHUB_TOKEN &#125;&#125;</span></div>
       </div>
       <div class="modal-tip"><div class="tip-label">conventional commits</div><p>Use Conventional Commits (feat:, fix:, chore:) to auto-generate structured changelogs. Tools: semantic-release, release-please, git-cliff.</p></div>
     `
@@ -1738,7 +1739,7 @@ const M = {
         <div style="padding-left:28px">matrix:</div>
         <div style="padding-left:42px">shard: [1, 2, 3, 4]</div>
         <div style="padding-left:14px">steps:</div>
-        <div style="padding-left:28px">- run: pytest tests/ --splits 4 --group ${{ matrix.shard }}</div>
+        <div style="padding-left:28px">- run: pytest tests/ --splits 4 --group $&#123;&#123; matrix.shard &#125;&#125;</div>
       </div>
       <div class="modal-tip"><div class="tip-label">pytest-split</div><p>pytest-split stores test durations from previous runs and splits tests by duration, not by count. This gives much more even distribution. Store the .test_durations file as a cache artifact.</p></div>
     `
@@ -1797,7 +1798,7 @@ const M = {
       <h3>Cancel in progress (GitHub)</h3>
       <div class="cmd-block">
         <div><span class="k">concurrency:</span></div>
-        <div style="padding-left:14px">group: <span class="v">${{ github.ref }}</span></div>
+        <div style="padding-left:14px">group: <span class="v">$&#123;&#123; github.ref &#125;&#125;</span></div>
         <div style="padding-left:14px">cancel-in-progress: true  <span class="c"># cancel older runs on same branch</span></div>
       </div>
       <div class="modal-tip"><div class="tip-label">resource efficiency</div><p>Set interruptible: true on all long-running jobs that don't need to complete if superseded. For deployment jobs, do NOT set interruptible: true — you don't want a half-deployed app.</p></div>
@@ -1857,16 +1858,16 @@ const M = {
         <div style="padding-left:14px">if: failure()</div>
         <div style="padding-left:14px">with:</div>
         <div style="padding-left:28px">channel-id: 'C1234567890'</div>
-        <div style="padding-left:28px">slack-message: "Build failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"</div>
+        <div style="padding-left:28px">slack-message: "Build failed: $&#123;&#123; github.server_url &#125;&#125;/$&#123;&#123; github.repository &#125;&#125;/actions/runs/$&#123;&#123; github.run_id &#125;&#125;"</div>
         <div style="padding-left:14px">env:</div>
-        <div style="padding-left:28px">SLACK_BOT_TOKEN: <span class="v">${{ secrets.SLACK_BOT_TOKEN }}</span></div>
+        <div style="padding-left:28px">SLACK_BOT_TOKEN: <span class="v">$&#123;&#123; secrets.SLACK_BOT_TOKEN &#125;&#125;</span></div>
       </div>
       <div class="modal-tip"><div class="tip-label">GitLab .post stage</div><p>GitLab has a reserved .post stage that always runs after all other stages, regardless of success or failure. Use it for cleanup, notifications, and reporting jobs — similar to GitHub's if: always() condition.</p></div>
     `
   }
 };
 
-function openModal(key) {
+window.openModal = function(key) {
   const data = M[key];
   if(!data) return;
   document.getElementById('modalBadge').innerHTML = data.badge;
@@ -1875,16 +1876,16 @@ function openModal(key) {
   document.getElementById('modalOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
-function closeModal(e) {
+window.closeModal = function(e) {
   if(e.target === document.getElementById('modalOverlay')) closeModalBtn();
 }
-function closeModalBtn() {
+window.closeModalBtn = function() {
   document.getElementById('modalOverlay').classList.remove('open');
   document.body.style.overflow = '';
 }
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeModalBtn(); });
 
-function navTo(id) {
+window.navTo = function(id) {
   document.getElementById(id).scrollIntoView({behavior:'smooth'});
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   event.target.classList.add('active');
