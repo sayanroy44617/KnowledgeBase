@@ -7,10 +7,12 @@
    - TTP is like sending a postcard where anyone can read the text; HTTPS is like sending a locked safe that only the recipient can open.
    - The "S" adds TLS encryption, which scrambles your data and verifies that the website is actually who it claims to be.
 3. Status codes — when to use 400 vs 422 vs 409
-   - 400 Bad Request: Syntax Error — The JSON is malformed or data types are wrong (e.g., sending a string instead of an integer).
-   - 422 Unprocessable Entity: Semantic Error — The JSON is valid, but the data fails business rules (e.g., using an ArtifactType not in your Enum). 
-   - 409 Conflict: State Error — The request is valid, but it clashes with data already in the DB (e.g., trying to POST a duplicate URI).
+   - **400 Bad Request**: Syntax Error — The JSON is malformed or data types are wrong (e.g., sending a string instead of an integer).
+   - **422 Unprocessable Entity**: Semantic Error — The JSON is valid, but the data fails business rules (e.g., using an ArtifactType not in your Enum). 
+   - **409 Conflict**: State Error — The request is valid, but it clashes with data already in the DB (e.g., trying to POST a duplicate URI).
 4. Idempotency — what it means and why it matters in APIs
+   - **Idempotency**: A property where performing an operation multiple times has the same result as performing it once.
+   - **Why it matters**: It prevents duplicate data and allows you to safely restart or retry a failed sync script without side effects.
 5. REST constraints — the 6 principles explained simply
 6. Stateless vs stateful services
 7. Synchronous vs asynchronous communication
