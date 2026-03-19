@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Greedy Algorithms Cheatsheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0f14;--bg2:#13161d;--bg3:#1a1d27;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#e8eaf0;--muted:#7a7f94;--dim:#4a4f64;
+  --accent:#f0a03e;--accent2:#3ecf8e;--blue:#4a90e2;
+  --red:#e05252;--purple:#9b7ef0;--pink:#e06ea0;--teal:#0f9d9d;
+  --mono:'JetBrains Mono',monospace;--sans:'Sora',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;font-size:14px}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.page{max-width:1100px;margin:0 auto;padding:0 1.5rem 5rem}
+.hero{padding:3rem 0 2rem;border-bottom:1px solid var(--border);margin-bottom:0}
+.hero-eyebrow{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.75rem}
+.hero h1{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:600;line-height:1.2;letter-spacing:-.02em}
+.hero h1 span{color:var(--accent)}
+.hero-sub{margin-top:.75rem;font-size:13px;color:var(--muted);max-width:680px;line-height:1.7}
+.hero-badges{margin-top:1rem;display:flex;gap:.5rem;flex-wrap:wrap}
+.nav{position:sticky;top:0;z-index:100;background:rgba(13,15,20,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.6rem 0;margin-bottom:0}
+.nav-inner{max-width:1100px;margin:0 auto;padding:0 1.5rem;display:flex;gap:.25rem;overflow-x:auto;scrollbar-width:none}
+.nav-inner::-webkit-scrollbar{display:none}
+.nav-btn{font-family:var(--mono);font-size:11px;padding:.3rem .75rem;border-radius:4px;border:1px solid transparent;color:var(--muted);cursor:pointer;background:none;white-space:nowrap;transition:all .15s}
+.nav-btn:hover{color:var(--text);background:var(--bg3)}
+.nav-btn.active{color:var(--accent);border-color:rgba(240,160,62,.3);background:rgba(240,160,62,.08)}
+.section{margin:3rem 0;scroll-margin-top:56px}
+.sec-label{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1.25rem;display:flex;align-items:center;gap:.5rem}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.sec-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:1.25rem;max-width:800px}
+.grid{display:grid;gap:10px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.9rem 1rem;transition:border-color .15s,background .15s;position:relative;overflow:hidden}
+.card:hover{border-color:var(--border2);background:var(--bg3)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .2s}
+.card:hover::before{opacity:1}
+.card.amber::before{background:var(--accent)}
+.card.green::before{background:var(--accent2)}
+.card.blue::before{background:var(--blue)}
+.card.purple::before{background:var(--purple)}
+.card.red::before{background:var(--red)}
+.card.pink::before{background:var(--pink)}
+.card.teal::before{background:var(--teal)}
+.card[data-modal]{cursor:pointer}
+.card[data-modal]::after{content:'&#x2197;';position:absolute;bottom:.6rem;right:.75rem;font-size:11px;color:var(--dim);transition:color .15s}
+.card[data-modal]:hover::after{color:var(--muted)}
+.card-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:5px}
+.card-sub{font-size:12px;color:var(--muted);line-height:1.6}
+.badge{display:inline-flex;align-items:center;font-family:var(--mono);font-size:10px;font-weight:500;padding:2px 8px;border-radius:3px;margin-bottom:7px;letter-spacing:.03em}
+.bd-amber{background:rgba(240,160,62,.15);color:var(--accent)}
+.bd-green{background:rgba(62,207,142,.12);color:var(--accent2)}
+.bd-blue{background:rgba(74,144,226,.15);color:var(--blue)}
+.bd-purple{background:rgba(155,126,240,.12);color:var(--purple)}
+.bd-red{background:rgba(224,82,82,.12);color:var(--red)}
+.bd-pink{background:rgba(224,110,160,.12);color:var(--pink)}
+.bd-teal{background:rgba(15,157,157,.15);color:var(--teal)}
+.cmd-block{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.65rem .9rem;font-family:var(--mono);font-size:11px;line-height:2;overflow-x:auto;margin-top:.6rem}
+.cmd-block .k{color:var(--accent)}
+.cmd-block .v{color:var(--accent2)}
+.cmd-block .c{color:var(--dim)}
+.cmd-block .t{color:var(--blue)}
+.cmd-block .r{color:var(--red)}
+.cmd-block .p{color:var(--purple)}
+.kv-list{margin-top:.5rem}
+.kv{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.kv:last-child{border-bottom:none}
+.kv-key{color:var(--text);font-weight:500;min-width:140px;font-family:var(--mono);font-size:11px}
+.kv-val{color:var(--muted);line-height:1.5}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hi-box{background:rgba(240,160,62,.06);border:1px solid rgba(240,160,62,.2);border-radius:8px;padding:.9rem 1rem;margin:.75rem 0}
+.hi-box p{font-size:13px;color:#c8883a;line-height:1.7;margin:0}
+.info-box{background:rgba(74,144,226,.06);border:1px solid rgba(74,144,226,.2);border-radius:8px;padding:.9rem 1rem;margin:.75rem 0}
+.info-box p{font-size:13px;color:#6ab4f0;line-height:1.7;margin:0}
+.mono{font-family:var(--mono);font-size:10px;background:var(--bg);padding:1px 5px;border-radius:3px;color:var(--muted);border:1px solid var(--border)}
+/* pattern number badge */
+.pat-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:rgba(240,160,62,.15);color:var(--accent);font-family:var(--mono);font-size:11px;font-weight:500;margin-right:6px;flex-shrink:0}
+.pat-header{display:flex;align-items:center;margin-bottom:8px}
+.pat-title{font-size:13px;font-weight:500;color:var(--text)}
+/* table */
+.ref-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:.5rem}
+.ref-table th{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:6px 10px;border-bottom:1px solid var(--border);text-align:left;font-weight:500}
+.ref-table td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;line-height:1.5}
+.ref-table td:first-child{color:var(--text);font-weight:500;font-family:var(--mono);font-size:11px}
+.ref-table tr:last-child td{border-bottom:none}
+.ref-table tr:hover td{background:var(--bg3)}
+/* modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;width:min(740px,94vw);max-height:85vh;overflow-y:auto;transform:translateY(12px) scale(.98);transition:transform .2s}
+.modal-overlay.open .modal-box{transform:translateY(0) scale(1)}
+.modal-header{padding:1.2rem 1.4rem .8rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.modal-header-left{display:flex;flex-direction:column;gap:.4rem}
+.modal-close{background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;border-radius:4px;padding:2px 8px;font-size:13px;transition:all .15s;flex-shrink:0}
+.modal-close:hover{color:var(--text);border-color:var(--border2)}
+.modal-body{padding:1.2rem 1.4rem 1.8rem}
+.modal-body h3{font-size:13px;font-weight:500;color:var(--text);margin:1.2rem 0 .5rem}
+.modal-body h3:first-child{margin-top:0}
+.modal-body p{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:.75rem}
+.modal-body ul{padding-left:1.2rem;margin-bottom:.75rem}
+.modal-body li{font-size:13px;color:var(--muted);line-height:1.9}
+.modal-body li strong{color:var(--text)}
+.modal-body .cmd-block{margin-top:0}
+.modal-tip{background:rgba(62,207,142,.06);border:1px solid rgba(62,207,142,.15);border-radius:6px;padding:.75rem 1rem;margin-top:1rem}
+.modal-tip .tip-label{font-family:var(--mono);font-size:10px;color:var(--accent2);margin-bottom:.3rem}
+.modal-tip p{font-size:12px;color:#5ec99a;margin:0}
+.modal-warn{background:rgba(240,160,62,.06);border:1px solid rgba(240,160,62,.15);border-radius:6px;padding:.75rem 1rem;margin-top:.75rem}
+.modal-warn .tip-label{font-family:var(--mono);font-size:10px;color:var(--accent);margin-bottom:.3rem}
+.modal-warn p{font-size:12px;color:#c8883a;margin:0}
+@media(max-width:700px){.g3,.g4,.two-col{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+@media(max-width:480px){.g2,.g3,.g4,.two-col{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="navTo('core')">Core Idea</button>
+    <button class="nav-btn" onclick="navTo('checklist')">Checklist</button>
+    <button class="nav-btn" onclick="navTo('patterns')">5 Patterns</button>
+    <button class="nav-btn" onclick="navTo('sort')">Sort + Pick</button>
+    <button class="nav-btn" onclick="navTo('heap')">Heap</button>
+    <button class="nav-btn" onclick="navTo('running')">Running Var</button>
+    <button class="nav-btn" onclick="navTo('freq')">Frequency</button>
+    <button class="nav-btn" onclick="navTo('twoptr')">Two Pointers</button>
+    <button class="nav-btn" onclick="navTo('problems')">Problems</button>
+    <button class="nav-btn" onclick="navTo('vs_dp')">Greedy vs DP</button>
+  </div>
+</div>
+
+<div class="page">
+  <div class="hero">
+    <div class="hero-eyebrow">DSA revision guide</div>
+    <h1>Greedy <span>Algorithms</span></h1>
+    <div class="hero-sub">At each step, choose the locally optimal option. Hope that local choices add up to a global optimum. Recognise the pattern — the solution almost always follows one of 5 skeletons.</div>
+    <div class="hero-badges">
+      <span class="badge bd-amber">Sort + Pick</span>
+      <span class="badge bd-green">Heap</span>
+      <span class="badge bd-blue">Running Variable</span>
+      <span class="badge bd-purple">Frequency</span>
+      <span class="badge bd-teal">Two Pointers</span>
+      <span style="color:var(--dim);font-size:12px">Click any card for deep dive</span>
+    </div>
+  </div>
+
+  <!-- CORE IDEA -->
+  <div class="section" id="core">
+    <div class="sec-label">01 — Core idea</div>
+    <div class="hi-box">
+      <p><strong>The greedy choice property:</strong> A globally optimal solution can be reached by making locally optimal (greedy) choices at each step. You never reconsider a past decision. Works only when the problem has both greedy-choice property AND optimal substructure.</p>
+    </div>
+    <div class="grid g3">
+      <div class="card amber" data-modal onclick="openModal('greedy_choice')">
+        <span class="badge bd-amber">Greedy-choice property</span>
+        <div class="card-title">Local best = Global best</div>
+        <div class="card-sub">The locally optimal choice at each step leads to a globally optimal solution. The key property that makes greedy work.</div>
+      </div>
+      <div class="card green" data-modal onclick="openModal('optimal_sub')">
+        <span class="badge bd-green">Optimal substructure</span>
+        <div class="card-title">Subproblems are optimal too</div>
+        <div class="card-sub">An optimal solution contains optimal solutions to its subproblems. Shared with DP — but greedy doesn&#39;t explore all options.</div>
+      </div>
+      <div class="card red" data-modal onclick="openModal('when_fails')">
+        <span class="badge bd-red">When greedy fails</span>
+        <div class="card-title">No greedy-choice property</div>
+        <div class="card-sub">0/1 Knapsack, Longest Common Subsequence. A locally good choice blocks a globally better path. Use DP instead.</div>
+      </div>
+    </div>
+    <div class="grid g2" style="margin-top:10px">
+      <div class="card blue" data-modal onclick="openModal('proof')">
+        <span class="badge bd-blue">Exchange argument</span>
+        <div class="card-title">How to prove greedy works</div>
+        <div class="card-sub">Show that any solution that differs from the greedy solution can be transformed into the greedy solution without getting worse.</div>
+      </div>
+      <div class="card purple" data-modal onclick="openModal('complexity')">
+        <span class="badge bd-purple">Time complexity</span>
+        <div class="card-title">Typically O(n log n)</div>
+        <div class="card-sub">Usually dominated by the sorting step. Greedy processing itself is linear. Heap-based greedy adds O(log n) per operation.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <div class="section" id="checklist">
+    <div class="sec-label">02 — Problem-solving checklist</div>
+    <div class="sec-desc">When you see a new problem, run through these questions before writing any code.</div>
+    <div class="card amber">
+      <span class="badge bd-amber">Decision framework</span>
+      <table class="ref-table" style="margin-top:10px">
+        <tr><th>Question</th><th>What you&#39;re checking</th><th>If yes</th></tr>
+        <tr><td>Sort / prioritise?</td><td>Is there a natural ordering (end time, ratio, frequency)?</td><td>Sort first — likely Sort+Pick pattern</td></tr>
+        <tr><td>Always pick min or max?</td><td>Do you need the current smallest/largest dynamically?</td><td>Use a heap / priority queue</td></tr>
+        <tr><td>Track furthest reach?</td><td>Does each element extend some range or position?</td><td>Running variable pattern</td></tr>
+        <tr><td>Balance/pair things?</td><td>Are you matching elements optimally?</td><td>Two pointers (after sorting)</td></tr>
+        <tr><td>Count frequencies?</td><td>Is the problem about characters or task scheduling?</td><td>Frequency + max-heap pattern</td></tr>
+        <tr><td>Can greedy fail here?</td><td>Does a local best block a global best? (0/1 knapsack)</td><td>Switch to DP</td></tr>
+      </table>
+    </div>
+    <div class="grid g2" style="margin-top:10px">
+      <div class="info-box">
+        <p><strong>Signs a problem is greedy:</strong> "minimum number of", "maximum number of", "can you reach", "arrange to minimise cost", interval/scheduling problems, fractional versions of knapsack-type problems.</p>
+      </div>
+      <div class="modal-warn" style="margin-top:0">
+        <div class="tip-label">red flags — use DP instead</div>
+        <p>If you need to pick a subset (0/1 choices), if taking one item blocks another better combination, or if you can find a counterexample where the greedy choice gives a suboptimal result.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 PATTERNS OVERVIEW -->
+  <div class="section" id="patterns">
+    <div class="sec-label">03 — The 5 patterns at a glance</div>
+    <div class="sec-desc">Greedy problems follow patterns. Once you recognise the shape, the solution almost always follows one of these skeletons.</div>
+    <div class="grid g2">
+      <div class="card amber" data-modal onclick="openModal('sort_pick')">
+        <div class="pat-header"><span class="pat-num">1</span><span class="pat-title">Sort + Pick</span></div>
+        <span class="badge bd-amber">Most common</span>
+        <div class="card-sub">Sort by end time, ratio, profit, or deadline. Then greedily pick elements in that order. The bread and butter of greedy.</div>
+        <div class="tag-row" style="margin-top:8px">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--dim)">Activity Selection &middot; Fractional Knapsack &middot; Job Scheduling</span>
+        </div>
+      </div>
+      <div class="card green" data-modal onclick="openModal('heap_pattern')">
+        <div class="pat-header"><span class="pat-num">2</span><span class="pat-title">Heap / Priority Queue</span></div>
+        <span class="badge bd-green">Dynamic selection</span>
+        <div class="card-sub">When you need the current min or max dynamically as you process elements. Poll and re-insert with updated cost.</div>
+        <div class="tag-row" style="margin-top:8px">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--dim)">Huffman &middot; Connect Ropes &middot; Meeting Rooms II</span>
+        </div>
+      </div>
+      <div class="card blue" data-modal onclick="openModal('running_pattern')">
+        <div class="pat-header"><span class="pat-num">3</span><span class="pat-title">Running Variable</span></div>
+        <span class="badge bd-blue">Simple iteration</span>
+        <div class="card-sub">No sort, no heap. Track the furthest reach or running sum as you iterate. Reset when sum goes negative.</div>
+        <div class="tag-row" style="margin-top:8px">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--dim)">Jump Game &middot; Gas Station &middot; Best Time to Buy Stock</span>
+        </div>
+      </div>
+      <div class="card purple" data-modal onclick="openModal('freq_pattern')">
+        <div class="pat-header"><span class="pat-num">4</span><span class="pat-title">Frequency / Counting</span></div>
+        <span class="badge bd-purple">Balancing problems</span>
+        <div class="card-sub">Count frequencies, then greedily use the most frequent element first. Combine with a max-heap for dynamic ordering.</div>
+        <div class="tag-row" style="margin-top:8px">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--dim)">Task Scheduler &middot; Rearrange String &middot; Top-K Freq</span>
+        </div>
+      </div>
+      <div class="card teal" data-modal onclick="openModal('twoptr_pattern')">
+        <div class="pat-header"><span class="pat-num">5</span><span class="pat-title">Two Pointers</span></div>
+        <span class="badge bd-teal">Pairing problems</span>
+        <div class="card-sub">Sort first. Then match smallest with largest (or smallest satisfiable). Shrink the window greedily.</div>
+        <div class="tag-row" style="margin-top:8px">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--dim)">Assign Cookies &middot; Boats to Save People &middot; Two Sum</span>
+        </div>
+      </div>
+      <div class="card red" data-modal onclick="openModal('recognition')">
+        <div class="pat-header"><span class="pat-num">?</span><span class="pat-title">Pattern recognition</span></div>
+        <span class="badge bd-red">How to identify</span>
+        <div class="card-sub">The decision tree for picking the right pattern from a problem description. What keywords map to which skeleton.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SORT + PICK -->
+  <div class="section" id="sort">
+    <div class="sec-label">04 — Pattern 1: Sort + Pick</div>
+    <div class="sec-desc">Sort elements by the right key, then greedily pick in order. The "right key" is the most common interview insight to arrive at.</div>
+    <div class="two-col">
+      <div>
+        <div class="card amber">
+          <span class="badge bd-amber">Skeleton</span>
+          <div class="cmd-block" style="margin-top:8px">
+            <div class="c">// sort by end time (activity selection)</div>
+            <div><span class="t">Arrays</span>.sort(arr, (a, b) -> a[<span class="k">1</span>] - b[<span class="k">1</span>]);</div>
+            <div><span class="t">int</span> lastEnd = <span class="k">Integer</span>.MIN_VALUE;</div>
+            <div><span class="t">int</span> count = <span class="k">0</span>;</div>
+            <div>&nbsp;</div>
+            <div><span class="v">for</span> (<span class="t">int</span>[] interval : arr) {</div>
+            <div style="padding-left:14px"><span class="v">if</span> (interval[<span class="k">0</span>] >= lastEnd) {</div>
+            <div style="padding-left:28px">count++;</div>
+            <div style="padding-left:28px">lastEnd = interval[<span class="k">1</span>];</div>
+            <div style="padding-left:14px">}</div>
+            <div>}</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card green">
+          <span class="badge bd-green">What to sort by</span>
+          <div class="kv-list" style="margin-top:8px">
+            <div class="kv"><span class="kv-key">End time</span><span class="kv-val">Activity selection, meeting rooms — earliest finish first</span></div>
+            <div class="kv"><span class="kv-key">Value/weight ratio</span><span class="kv-val">Fractional knapsack — highest ratio first</span></div>
+            <div class="kv"><span class="kv-key">Deadline</span><span class="kv-val">Job scheduling — earliest deadline first</span></div>
+            <div class="kv"><span class="kv-key">Start time</span><span class="kv-val">Merge intervals, room allocation</span></div>
+            <div class="kv"><span class="kv-key">Profit desc</span><span class="kv-val">Job sequencing with deadlines</span></div>
+            <div class="kv"><span class="kv-key">Length asc</span><span class="kv-val">Minimum cost to cut a rod / rope</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:10px">
+      <div class="card amber" data-modal onclick="openModal('activity')">
+        <span class="badge bd-amber">Activity Selection</span>
+        <div class="card-title">Maximum non-overlapping intervals</div>
+        <div class="card-sub">Sort by end time. Pick the interval that ends earliest and doesn&#39;t overlap with the last picked. Classic greedy proof.</div>
+      </div>
+      <div class="card green" data-modal onclick="openModal('fractional_knapsack')">
+        <span class="badge bd-green">Fractional Knapsack</span>
+        <div class="card-title">Sort by value/weight ratio</div>
+        <div class="card-sub">Unlike 0/1 knapsack, you can take fractions. Sort by ratio desc, fill greedily. O(n log n) vs DP&#39;s O(nW).</div>
+      </div>
+      <div class="card blue" data-modal onclick="openModal('job_scheduling')">
+        <span class="badge bd-blue">Job Scheduling</span>
+        <div class="card-title">Maximise profit with deadlines</div>
+        <div class="card-sub">Sort by profit desc. For each job, assign to the latest available slot before its deadline. Use a boolean slot array.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEAP -->
+  <div class="section" id="heap">
+    <div class="sec-label">05 — Pattern 2: Heap / Priority Queue</div>
+    <div class="sec-desc">When you need to dynamically pick the smallest or largest element as you process the input. Sort + Pick won&#39;t work because the "best" choice changes as costs accumulate.</div>
+    <div class="two-col">
+      <div>
+        <div class="card green">
+          <span class="badge bd-green">Skeleton — min-heap merge</span>
+          <div class="cmd-block" style="margin-top:8px">
+            <div class="c">// connect ropes / huffman</div>
+            <div><span class="t">PriorityQueue</span>&lt;<span class="t">Integer</span>&gt; pq =</div>
+            <div style="padding-left:14px"><span class="v">new</span> <span class="t">PriorityQueue</span>&lt;&gt;();</div>
+            <div><span class="v">for</span> (<span class="t">int</span> num : arr) pq.add(num);</div>
+            <div>&nbsp;</div>
+            <div><span class="t">int</span> totalCost = <span class="k">0</span>;</div>
+            <div><span class="v">while</span> (pq.size() > <span class="k">1</span>) {</div>
+            <div style="padding-left:14px"><span class="t">int</span> a = pq.poll();</div>
+            <div style="padding-left:14px"><span class="t">int</span> b = pq.poll();</div>
+            <div style="padding-left:14px"><span class="t">int</span> cost = a + b;</div>
+            <div style="padding-left:14px">totalCost += cost;</div>
+            <div style="padding-left:14px">pq.add(cost);</div>
+            <div>}</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card purple">
+          <span class="badge bd-purple">Skeleton — meeting rooms II</span>
+          <div class="cmd-block" style="margin-top:8px">
+            <div class="c">// min-heap of end times</div>
+            <div><span class="t">Arrays</span>.sort(intervals, (a,b) -> a[<span class="k">0</span>]-b[<span class="k">0</span>]);</div>
+            <div><span class="t">PriorityQueue</span>&lt;<span class="t">Integer</span>&gt; ends =</div>
+            <div style="padding-left:14px"><span class="v">new</span> <span class="t">PriorityQueue</span>&lt;&gt;();</div>
+            <div>&nbsp;</div>
+            <div><span class="v">for</span> (<span class="t">int</span>[] i : intervals) {</div>
+            <div style="padding-left:14px"><span class="v">if</span> (!ends.isEmpty() &&</div>
+            <div style="padding-left:22px">ends.peek() &lt;= i[<span class="k">0</span>]) {</div>
+            <div style="padding-left:28px">ends.poll(); <span class="c">// reuse room</span></div>
+            <div style="padding-left:14px">}</div>
+            <div style="padding-left:14px">ends.add(i[<span class="k">1</span>]); <span class="c">// new/reused room</span></div>
+            <div>}</div>
+            <div><span class="v">return</span> ends.size();</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:10px">
+      <div class="card green" data-modal onclick="openModal('huffman')">
+        <span class="badge bd-green">Huffman Encoding</span>
+        <div class="card-title">Optimal prefix-free codes</div>
+        <div class="card-sub">Always merge the two lowest frequency nodes. Min-heap gives O(n log n). Assigns shorter codes to more frequent chars.</div>
+      </div>
+      <div class="card purple" data-modal onclick="openModal('meeting_rooms')">
+        <span class="badge bd-purple">Meeting Rooms II</span>
+        <div class="card-title">Minimum rooms needed</div>
+        <div class="card-sub">Sort by start. Min-heap of end times. If earliest-ending room is free, reuse it. Heap size = rooms needed. LC 253.</div>
+      </div>
+      <div class="card amber" data-modal onclick="openModal('connect_ropes')">
+        <span class="badge bd-amber">Connect Ropes</span>
+        <div class="card-title">Minimum cost to connect</div>
+        <div class="card-sub">Always connect the two shortest ropes first. The cost is the sum of lengths. Classic Huffman variant.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RUNNING VARIABLE -->
+  <div class="section" id="running">
+    <div class="sec-label">06 — Pattern 3: Running Variable</div>
+    <div class="sec-desc">No sorting, no heap. Just iterate and maintain a running variable that tracks the furthest reach, maximum sum, or cumulative state. Reset when the running variable goes negative.</div>
+    <div class="two-col">
+      <div>
+        <div class="card blue">
+          <span class="badge bd-blue">Skeleton — Jump Game</span>
+          <div class="cmd-block" style="margin-top:8px">
+            <div class="c">// LC 55 — can you reach the end?</div>
+            <div><span class="t">int</span> maxReach = <span class="k">0</span>;</div>
+            <div><span class="v">for</span> (<span class="t">int</span> i = <span class="k">0</span>; i &lt; nums.length; i++) {</div>
+            <div style="padding-left:14px"><span class="v">if</span> (i > maxReach) <span class="v">return false</span>;</div>
+            <div style="padding-left:14px">maxReach = <span class="t">Math</span>.max(</div>
+            <div style="padding-left:28px">maxReach, i + nums[i]);</div>
+            <div>}</div>
+            <div><span class="v">return true</span>;</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card teal">
+          <span class="badge bd-teal">Skeleton — Gas Station</span>
+          <div class="cmd-block" style="margin-top:8px">
+            <div class="c">// LC 134 — find starting station</div>
+            <div><span class="t">int</span> total = <span class="k">0</span>, tank = <span class="k">0</span>, start = <span class="k">0</span>;</div>
+            <div><span class="v">for</span> (<span class="t">int</span> i = <span class="k">0</span>; i &lt; gas.length; i++) {</div>
+            <div style="padding-left:14px"><span class="t">int</span> diff = gas[i] - cost[i];</div>
+            <div style="padding-left:14px">total += diff;</div>
+            <div style="padding-left:14px">tank += diff;</div>
+            <div style="padding-left:14px"><span class="v">if</span> (tank &lt; <span class="k">0</span>) {</div>
+            <div style="padding-left:28px">start = i + <span class="k">1</span>;</div>
+            <div style="padding-left:28px">tank = <span class="k">0</span>;</div>
+            <div style="padding-left:14px">}</div>
+            <div>}</div>
+            <div><span class="v">return</span> total >= <span class="k">0</span> ? start : <span class="k">-1</span>;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:10px">
+      <div class="card blue" data-modal onclick="openModal('jump_game')">
+        <span class="badge bd-blue">Jump Game I & II</span>
+        <div class="card-title">LC 55 & 45</div>
+        <div class="card-sub">Track maxReach. For min jumps (LC 45), track current boundary and next boundary — increment jumps when you reach the boundary.</div>
+      </div>
+      <div class="card teal" data-modal onclick="openModal('gas_station')">
+        <span class="badge bd-teal">Gas Station</span>
+        <div class="card-title">LC 134 — circular route</div>
+        <div class="card-sub">If total gas >= total cost, a solution exists. Reset start whenever tank goes negative — the segment before was unviable.</div>
+      </div>
+      <div class="card amber" data-modal onclick="openModal('stock')">
+        <span class="badge bd-amber">Best Time to Buy Stock II</span>
+        <div class="card-title">LC 122 — unlimited trades</div>
+        <div class="card-sub">Collect every positive daily difference. If tomorrow is higher than today, buy today and sell tomorrow. Pure greedy.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FREQUENCY -->
+  <div class="section" id="freq">
+    <div class="sec-label">07 — Pattern 4: Frequency / Counting</div>
+    <div class="sec-desc">Count character or task frequencies. Then greedily use the most frequent element first to avoid constraint violations (adjacent same, cooldown, etc.).</div>
+    <div class="two-col">
+      <div>
+        <div class="card purple">
+          <span class="badge bd-purple">Skeleton — max-heap by frequency</span>
+          <div class="cmd-block" style="margin-top:8px">
+            <div class="c">// rearrange string / task scheduler</div>
+            <div><span class="t">Map</span>&lt;<span class="t">Character</span>, <span class="t">Integer</span>&gt; freq =</div>
+            <div style="padding-left:14px"><span class="v">new</span> <span class="t">HashMap</span>&lt;&gt;();</div>
+            <div><span class="v">for</span> (<span class="t">char</span> c : s.toCharArray())</div>
+            <div style="padding-left:14px">freq.merge(c, <span class="k">1</span>, <span class="t">Integer</span>::sum);</div>
+            <div>&nbsp;</div>
+            <div><span class="c">// max-heap by frequency</span></div>
+            <div><span class="t">PriorityQueue</span>&lt;<span class="t">int[]</span>&gt; pq =</div>
+            <div style="padding-left:14px"><span class="v">new</span> <span class="t">PriorityQueue</span>&lt;&gt;((a,b)->b[<span class="k">1</span>]-a[<span class="k">1</span>]);</div>
+            <div><span class="v">for</span> (<span class="v">var</span> e : freq.entrySet())</div>
+            <div style="padding-left:14px">pq.offer(<span class="v">new</span> <span class="t">int</span>[]{e.getKey(), e.getValue()});</div>
+            <div>&nbsp;</div>
+            <div><span class="c">// greedily place most frequent first</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card pink">
+          <span class="badge bd-pink">Task Scheduler — math trick</span>
+          <div class="cmd-block" style="margin-top:8px">
+            <div class="c">// LC 621 — O(n) without simulation</div>
+            <div><span class="t">int</span>[] count = <span class="v">new</span> <span class="t">int</span>[<span class="k">26</span>];</div>
+            <div><span class="v">for</span> (<span class="t">char</span> c : tasks) count[c-<span class="k">'A'</span>]++;</div>
+            <div><span class="t">Arrays</span>.sort(count);</div>
+            <div><span class="t">int</span> maxFreq = count[<span class="k">25</span>];</div>
+            <div><span class="t">int</span> maxCount = <span class="k">0</span>;</div>
+            <div><span class="v">for</span> (<span class="t">int</span> c : count)</div>
+            <div style="padding-left:14px"><span class="v">if</span> (c == maxFreq) maxCount++;</div>
+            <div>&nbsp;</div>
+            <div><span class="t">int</span> frames = (maxFreq - <span class="k">1</span>) * (n + <span class="k">1</span>) + maxCount;</div>
+            <div><span class="v">return</span> <span class="t">Math</span>.max(frames, tasks.length);</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:10px">
+      <div class="card purple" data-modal onclick="openModal('task_scheduler')">
+        <span class="badge bd-purple">Task Scheduler</span>
+        <div class="card-title">LC 621 — cooldown constraint</div>
+        <div class="card-sub">Most frequent task determines the frame structure. Formula: (maxFreq-1)*(n+1) + countOfMaxFreq. Take max with tasks.length.</div>
+      </div>
+      <div class="card pink" data-modal onclick="openModal('rearrange_string')">
+        <span class="badge bd-pink">Rearrange String k Distance</span>
+        <div class="card-title">No same char within k positions</div>
+        <div class="card-sub">Max-heap + queue of size k. Poll most frequent, place it, decrement count, re-add to heap after k steps.</div>
+      </div>
+      <div class="card amber" data-modal onclick="openModal('reorganize')">
+        <span class="badge bd-amber">Reorganize String</span>
+        <div class="card-title">LC 767 — no adjacent same</div>
+        <div class="card-sub">Special case where k=2. Check max frequency &lt;= (n+1)/2. Fill even indices first with most frequent character.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TWO POINTERS -->
+  <div class="section" id="twoptr">
+    <div class="sec-label">08 — Pattern 5: Two Pointers</div>
+    <div class="sec-desc">Sort first. Then use two pointers to greedily match or pair elements. The key insight is always trying to satisfy the hardest constraint with the best available match.</div>
+    <div class="two-col">
+      <div>
+        <div class="card teal">
+          <span class="badge bd-teal">Skeleton — assign cookies (LC 455)</span>
+          <div class="cmd-block" style="margin-top:8px">
+            <div class="c">// match smallest child with smallest cookie</div>
+            <div><span class="t">Arrays</span>.sort(children);</div>
+            <div><span class="t">Arrays</span>.sort(cookies);</div>
+            <div><span class="t">int</span> child = <span class="k">0</span>, cookie = <span class="k">0</span>;</div>
+            <div><span class="v">while</span> (child &lt; children.length &&</div>
+            <div style="padding-left:14px">cookie &lt; cookies.length) {</div>
+            <div style="padding-left:14px"><span class="v">if</span> (cookies[cookie] >= children[child])</div>
+            <div style="padding-left:28px">child++; <span class="c">// satisfied</span></div>
+            <div style="padding-left:14px">cookie++; <span class="c">// try next cookie</span></div>
+            <div>}</div>
+            <div><span class="v">return</span> child;</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card blue">
+          <span class="badge bd-blue">Skeleton — boats (LC 881)</span>
+          <div class="cmd-block" style="margin-top:8px">
+            <div class="c">// pair heaviest with lightest</div>
+            <div><span class="t">Arrays</span>.sort(people);</div>
+            <div><span class="t">int</span> i = <span class="k">0</span>, j = people.length - <span class="k">1</span>;</div>
+            <div><span class="t">int</span> boats = <span class="k">0</span>;</div>
+            <div><span class="v">while</span> (i &lt;= j) {</div>
+            <div style="padding-left:14px"><span class="v">if</span> (people[i] + people[j] &lt;= limit)</div>
+            <div style="padding-left:28px">i++; <span class="c">// lightest fits too</span></div>
+            <div style="padding-left:14px">j--; <span class="c">// heaviest always goes</span></div>
+            <div style="padding-left:14px">boats++;</div>
+            <div>}</div>
+            <div><span class="v">return</span> boats;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:10px">
+      <div class="card teal" data-modal onclick="openModal('assign_cookies')">
+        <span class="badge bd-teal">Assign Cookies</span>
+        <div class="card-title">LC 455 — smallest satisfying match</div>
+        <div class="card-sub">Sort both. Match each child with the smallest cookie that satisfies them. Move cookie pointer regardless; move child only on success.</div>
+      </div>
+      <div class="card blue" data-modal onclick="openModal('boats')">
+        <span class="badge bd-blue">Boats to Save People</span>
+        <div class="card-title">LC 881 — pair heavy + light</div>
+        <div class="card-sub">Sort. Heaviest person must go on a boat. Try pairing with lightest. If they fit, both go. Otherwise heaviest goes alone.</div>
+      </div>
+      <div class="card purple" data-modal onclick="openModal('two_city')">
+        <span class="badge bd-purple">Two City Scheduling</span>
+        <div class="card-title">LC 1029 — send n to each city</div>
+        <div class="card-sub">Sort by cost difference (costA - costB). Send first n to city A (greedy: lowest extra cost), rest to city B.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROBLEMS -->
+  <div class="section" id="problems">
+    <div class="sec-label">09 — Problem bank</div>
+    <div class="sec-desc">Classic greedy problems mapped to their pattern, approach, and time complexity.</div>
+    <div class="card amber">
+      <table class="ref-table">
+        <tr><th>Problem</th><th>Pattern</th><th>Key insight</th><th>TC</th></tr>
+        <tr><td>Activity Selection</td><td>Sort + Pick</td><td>Sort by end time, pick earliest finishing non-overlapping</td><td>O(n log n)</td></tr>
+        <tr><td>Fractional Knapsack</td><td>Sort + Pick</td><td>Sort by value/weight ratio desc, fill greedily</td><td>O(n log n)</td></tr>
+        <tr><td>Job Scheduling w/ Deadlines</td><td>Sort + Pick</td><td>Sort by profit desc, assign to latest free slot</td><td>O(n&sup2;)</td></tr>
+        <tr><td>Minimum Platforms (LC 253)</td><td>Sort + Heap</td><td>Sort by start, min-heap of end times, heap size = answer</td><td>O(n log n)</td></tr>
+        <tr><td>Connect Ropes / Huffman</td><td>Heap</td><td>Always merge 2 smallest, add cost to total</td><td>O(n log n)</td></tr>
+        <tr><td>Jump Game I (LC 55)</td><td>Running Var</td><td>Track maxReach, return false if i > maxReach</td><td>O(n)</td></tr>
+        <tr><td>Jump Game II (LC 45)</td><td>Running Var</td><td>Track current + next boundary, count jumps</td><td>O(n)</td></tr>
+        <tr><td>Gas Station (LC 134)</td><td>Running Var</td><td>Reset start when tank goes negative, check total &ge; 0</td><td>O(n)</td></tr>
+        <tr><td>Best Time Stock II (LC 122)</td><td>Running Var</td><td>Sum all positive daily diffs</td><td>O(n)</td></tr>
+        <tr><td>Task Scheduler (LC 621)</td><td>Frequency</td><td>(maxFreq-1)*(n+1)+countOfMax, max with tasks.length</td><td>O(n)</td></tr>
+        <tr><td>Reorganize String (LC 767)</td><td>Frequency</td><td>Max freq &le; (n+1)/2, fill even indices with most frequent</td><td>O(n log n)</td></tr>
+        <tr><td>Assign Cookies (LC 455)</td><td>Two Pointers</td><td>Sort both, match smallest satisfying cookie</td><td>O(n log n)</td></tr>
+        <tr><td>Boats to Save People (LC 881)</td><td>Two Pointers</td><td>Sort, pair heaviest with lightest</td><td>O(n log n)</td></tr>
+        <tr><td>Two City Scheduling (LC 1029)</td><td>Sort + Pick</td><td>Sort by costA-costB diff, send first n to A</td><td>O(n log n)</td></tr>
+        <tr><td>Non-overlapping Intervals (LC 435)</td><td>Sort + Pick</td><td>Sort by end time, count removals (n - max non-overlapping)</td><td>O(n log n)</td></tr>
+        <tr><td>Minimum Arrow Bursts (LC 452)</td><td>Sort + Pick</td><td>Sort by end, shoot at end of first balloon</td><td>O(n log n)</td></tr>
+        <tr><td>Lemonade Change (LC 860)</td><td>Running Var</td><td>Greedily give $10 bills before $5 for $15 change</td><td>O(n)</td></tr>
+        <tr><td>Queue Reconstruction by Height (LC 406)</td><td>Sort + Pick</td><td>Sort tall first, then insert at index k</td><td>O(n&sup2;)</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- GREEDY VS DP -->
+  <div class="section" id="vs_dp">
+    <div class="sec-label">10 — Greedy vs Dynamic Programming</div>
+    <div class="sec-desc">The hardest skill is knowing when to use greedy and when to switch to DP. Both require optimal substructure — the difference is whether greedy choices are always safe.</div>
+    <div class="two-col">
+      <div class="card green">
+        <span class="badge bd-green">Use Greedy when</span>
+        <div class="kv-list" style="margin-top:8px">
+          <div class="kv"><span class="kv-key">Fractional choices</span><span class="kv-val">You can take partial items (fractional knapsack)</span></div>
+          <div class="kv"><span class="kv-key">Provably safe</span><span class="kv-val">Exchange argument proves greedy choice never costs you</span></div>
+          <div class="kv"><span class="kv-key">Locally = globally</span><span class="kv-val">Best local choice is always part of a global best</span></div>
+          <div class="kv"><span class="kv-key">Intervals</span><span class="kv-val">Most interval scheduling problems have greedy solutions</span></div>
+          <div class="kv"><span class="kv-key">Simpler</span><span class="kv-val">O(n log n) vs DP&#39;s O(n&#178;) or O(nW)</span></div>
+        </div>
+      </div>
+      <div class="card red">
+        <span class="badge bd-red">Use DP when</span>
+        <div class="kv-list" style="margin-top:8px">
+          <div class="kv"><span class="kv-key">0/1 choices</span><span class="kv-val">Take or leave each item (0/1 knapsack)</span></div>
+          <div class="kv"><span class="kv-key">Counterexample exists</span><span class="kv-val">You can find a case where greedy fails</span></div>
+          <div class="kv"><span class="kv-key">Paths/sequences</span><span class="kv-val">Longest common subsequence, edit distance</span></div>
+          <div class="kv"><span class="kv-key">Multiple states</span><span class="kv-val">Decision depends on previous decisions</span></div>
+          <div class="kv"><span class="kv-key">Overlapping subproblems</span><span class="kv-val">Same subproblem solved many times</span></div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <div class="card amber" data-modal onclick="openModal('knapsack_diff')">
+        <span class="badge bd-amber">Fractional vs 0/1 Knapsack — the canonical example</span>
+        <div class="card-sub" style="margin-top:6px">The same problem, two completely different algorithms. Understanding why one is greedy and one needs DP is the key interview insight.</div>
+      </div>
+    </div>
+    <div class="grid g2" style="margin-top:10px">
+      <div class="card blue" data-modal onclick="openModal('coin_change')">
+        <span class="badge bd-blue">Coin Change — greedy fails!</span>
+        <div class="card-title">LC 322 — use DP not greedy</div>
+        <div class="card-sub">With coins [1,3,4] and target 6: greedy picks 4+1+1=3 coins but optimal is 3+3=2 coins. Classic counterexample.</div>
+      </div>
+      <div class="card purple" data-modal onclick="openModal('interval_dp')">
+        <span class="badge bd-purple">Interval problems — greedy vs DP</span>
+        <div class="card-title">Which interval problems need DP?</div>
+        <div class="card-sub">Max non-overlapping = greedy. Weighted interval scheduling (each interval has a value) = DP. The weight is the deciding factor.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <span id="modalBadge"></span>
+        <span id="modalTitle" style="font-size:15px;font-weight:500;color:var(--text)"></span>
+      </div>
+      <button class="modal-close" onclick="closeModalBtn()">&#x2715; close</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+var MODALS = {
+  greedy_choice: {
+    badge: '<span class="badge bd-amber">Greedy-choice property</span>',
+    title: 'The greedy-choice property explained',
+    body: '<p>A problem has the greedy-choice property if a globally optimal solution can always be constructed by making locally optimal choices — without ever needing to reconsider a past decision.</p><h3>Formal definition</h3><p>At each step, choose the option that looks best right now. If you can prove that this choice is always part of SOME optimal solution, the property holds.</p><h3>How to verify</h3><p>Use the exchange argument: assume an optimal solution O does NOT include the greedy choice G. Show you can swap G into O without making it worse. Therefore O with G is still optimal — contradicting the assumption that greedy choice is wrong.</p><div class="cmd-block"><div class="c">// Example: Activity Selection</div><div class="c">// Greedy: pick the activity with earliest end time</div><div class="c">// Exchange argument: if O starts with an activity A</div><div class="c">// that ends later than G, swap A for G.</div><div class="c">// G ends earlier so it can only free up MORE time.</div><div class="c">// Therefore O is still valid and at least as good.</div></div><div class="modal-tip"><div class="tip-label">interview tip</div><p>You don&#39;t always need a formal proof in an interview. Show one or two examples and explain why the greedy choice never "costs" you future options.</p></div>'
+  },
+  optimal_sub: {
+    badge: '<span class="badge bd-green">Optimal substructure</span>',
+    title: 'Optimal substructure',
+    body: '<p>A problem has optimal substructure if an optimal solution to the whole problem contains optimal solutions to its subproblems.</p><h3>Greedy vs DP</h3><p>Both greedy and DP require optimal substructure. The difference is how they use it:</p><ul><li><strong>Greedy:</strong> makes one greedy choice, then solves the single remaining subproblem</li><li><strong>DP:</strong> solves ALL subproblems and picks the best combination</li></ul><h3>Example</h3><p>Shortest path: if A-B-C is the shortest path from A to C, then A-B must be the shortest path from A to B, and B-C must be the shortest path from B to C. This is optimal substructure — Dijkstra&#39;s algorithm exploits it greedily.</p><div class="modal-tip"><div class="tip-label">key insight</div><p>Optimal substructure is necessary but not sufficient for greedy. You also need the greedy-choice property. Without it, you need DP.</p></div>'
+  },
+  when_fails: {
+    badge: '<span class="badge bd-red">When greedy fails</span>',
+    title: 'When greedy gives wrong answers',
+    body: '<h3>The classic counterexample: 0/1 Knapsack</h3><p>Items: [(weight=1, value=6), (weight=2, value=10), (weight=3, value=12)], capacity=5</p><ul><li>Greedy by ratio: 6/1=6, 10/2=5, 12/3=4 → take item 1 (val 6) + item 2 (val 10) = 16</li><li>Optimal: item 2 + item 3 = 10+12 = 22</li></ul><p>The greedy choice (highest ratio first) blocks the better combination.</p><h3>Coin change with arbitrary denominations</h3><p>Coins [1, 3, 4], target = 6:<br>Greedy: 4 + 1 + 1 = 3 coins<br>Optimal: 3 + 3 = 2 coins</p><h3>How to find counterexamples</h3><ul><li>Try small inputs where a greedy choice forces a worse path</li><li>Look for cases where taking a slightly worse option now enables a much better option later</li><li>If you find one, the problem needs DP</li></ul>'
+  },
+  proof: {
+    badge: '<span class="badge bd-blue">Exchange argument</span>',
+    title: 'Proving greedy correctness — the exchange argument',
+    body: '<h3>The template</h3><ol style="padding-left:1.2rem;margin-bottom:.75rem"><li style="font-size:13px;color:var(--muted);line-height:1.9">Assume OPT is an optimal solution that does NOT make the greedy choice G at some step.</li><li style="font-size:13px;color:var(--muted);line-height:1.9">Show that you can "exchange" G into OPT (replace whatever OPT chose with G).</li><li style="font-size:13px;color:var(--muted);line-height:1.9">Show the exchange does not make the solution worse (and may make it better or equal).</li><li style="font-size:13px;color:var(--muted);line-height:1.9">Conclude that OPT with G substituted in is still optimal.</li><li style="font-size:13px;color:var(--muted);line-height:1.9">By induction, there is an optimal solution that agrees with every greedy choice.</li></ol><h3>Activity Selection proof sketch</h3><p>Greedy picks activity with earliest end time E. Suppose OPT picks activity A instead (ends later). Swap A for E in OPT: E ends earlier, so anything compatible with A is also compatible with E. The solution is still valid and has the same number of activities. &#10003;</p><div class="modal-tip"><div class="tip-label">in interviews</div><p>Say: "I can prove this greedily works by an exchange argument — any optimal solution that doesn&#39;t make this choice can be modified to include it without losing optimality."</p></div>'
+  },
+  complexity: {
+    badge: '<span class="badge bd-purple">Time complexity</span>',
+    title: 'Time complexity of greedy algorithms',
+    body: '<table class="ref-table"><tr><th>Algorithm</th><th>Complexity</th><th>Bottleneck</th></tr><tr><td>Activity Selection</td><td>O(n log n)</td><td>Sorting</td></tr><tr><td>Fractional Knapsack</td><td>O(n log n)</td><td>Sorting</td></tr><tr><td>Jump Game I</td><td>O(n)</td><td>Single pass</td></tr><tr><td>Gas Station</td><td>O(n)</td><td>Single pass</td></tr><tr><td>Huffman Encoding</td><td>O(n log n)</td><td>n heap operations</td></tr><tr><td>Meeting Rooms II</td><td>O(n log n)</td><td>Sort + heap</td></tr><tr><td>Task Scheduler</td><td>O(n)</td><td>Count + formula</td></tr><tr><td>Assign Cookies</td><td>O(n log n)</td><td>Sorting</td></tr><tr><td>Job Scheduling</td><td>O(n&#178;)</td><td>Slot search</td></tr></table><div class="modal-tip"><div class="tip-label">space complexity</div><p>Most greedy algorithms are O(1) or O(n) space. Heap-based ones are O(n) for the heap. This is a significant advantage over DP which often needs O(n&#178;) space.</p></div>'
+  },
+  sort_pick: {
+    badge: '<span class="badge bd-amber">Sort + Pick</span>',
+    title: 'Sort + Pick — full pattern guide',
+    body: '<h3>When to use</h3><p>Sort elements by the right key, then iterate and greedily pick those that satisfy your constraint. The hard part is figuring out WHAT to sort by.</p><h3>What to sort by (decision guide)</h3><ul><li><strong>Earliest end time</strong> → interval selection, meeting rooms (maximise count)</li><li><strong>Value/weight ratio desc</strong> → fractional knapsack</li><li><strong>Deadline asc</strong> → minimize lateness, EDF scheduling</li><li><strong>Profit desc + deadline</strong> → job scheduling with deadlines</li><li><strong>Start time asc</strong> → merge intervals, room allocation</li><li><strong>costA-costB asc</strong> → two city scheduling</li></ul><div class="cmd-block"><div class="c">// general skeleton</div><div>Arrays.sort(items, comparatorBasedOnProblem);</div><div>int lastAccepted = initialValue;</div><div>for (int[] item : items) {</div><div style="padding-left:14px">if (canAccept(item, lastAccepted)) {</div><div style="padding-left:28px">accept(item);</div><div style="padding-left:28px">lastAccepted = item;</div><div style="padding-left:14px">}</div><div>}</div></div><div class="modal-warn"><div class="tip-label">most common mistake</div><p>Sorting by the wrong key. If greedy gives wrong answers, first question to ask: "am I sorting by the right thing?" Try sorting by a different attribute and trace through an example.</p></div>'
+  },
+  heap_pattern: {
+    badge: '<span class="badge bd-green">Heap pattern</span>',
+    title: 'Heap / Priority Queue — full pattern guide',
+    body: '<h3>When Sort + Pick is not enough</h3><p>Sort + Pick works when the "best" choice is determined by a static ordering. Use a heap when the best choice changes dynamically as you process elements (because you add new items or costs accumulate).</p><h3>Min-heap vs Max-heap</h3><ul><li><strong>Min-heap:</strong> always process/merge the smallest items (connect ropes, Huffman)</li><li><strong>Max-heap:</strong> always use the most frequent / highest priority item (task scheduler, rearrange string)</li></ul><h3>Two-heap pattern</h3><p>For problems like "find median of a stream": keep a max-heap for the lower half and a min-heap for the upper half. Balance their sizes to get the median in O(1).</p><div class="cmd-block"><div class="c">// min-heap: natural ordering</div><div>PriorityQueue&lt;Integer&gt; minHeap = new PriorityQueue&lt;&gt;();</div><div>&nbsp;</div><div class="c">// max-heap: reverse ordering</div><div>PriorityQueue&lt;Integer&gt; maxHeap = new PriorityQueue&lt;&gt;(Collections.reverseOrder());</div><div>&nbsp;</div><div class="c">// custom comparator</div><div>PriorityQueue&lt;int[]&gt; pq = new PriorityQueue&lt;&gt;((a,b) -&gt; a[1]-b[1]);</div></div>'
+  },
+  running_pattern: {
+    badge: '<span class="badge bd-blue">Running variable</span>',
+    title: 'Running Variable — full pattern guide',
+    body: '<h3>The idea</h3><p>Iterate once. Maintain a running variable that tracks the current "state" (furthest reach, current fuel, running sum). Make greedy decisions based on this variable.</p><h3>Sub-variants</h3><ul><li><strong>maxReach tracking:</strong> track the furthest index you can reach. If current index exceeds it, return false. (Jump Game)</li><li><strong>Reset on negative:</strong> if running sum goes negative, it can only hurt future choices — reset it and start fresh. (Gas Station, Kadane&#39;s)</li><li><strong>Collect all gains:</strong> if tomorrow is better than today, collect the difference. (Stock Trading II)</li></ul><div class="cmd-block"><div class="c">// Jump Game II — min jumps</div><div>int jumps = 0, curEnd = 0, farthest = 0;</div><div>for (int i = 0; i &lt; nums.length - 1; i++) {</div><div style="padding-left:14px">farthest = Math.max(farthest, i + nums[i]);</div><div style="padding-left:14px">if (i == curEnd) {  <span class="c">// must jump here</span></div><div style="padding-left:28px">jumps++;</div><div style="padding-left:28px">curEnd = farthest;</div><div style="padding-left:14px">}</div><div>}</div><div>return jumps;</div></div>'
+  },
+  freq_pattern: {
+    badge: '<span class="badge bd-purple">Frequency pattern</span>',
+    title: 'Frequency / Counting — full pattern guide',
+    body: '<h3>The idea</h3><p>When a problem involves arranging characters or scheduling tasks with constraints (no adjacent duplicates, cooldown periods), count frequencies and always use the most frequent item first.</p><h3>Why most frequent first?</h3><p>The most frequent item is the hardest constraint to satisfy. If you don&#39;t use it greedily, you might run out of valid positions for it. By placing it as often as possible (within constraints), you ensure it always has valid spots.</p><h3>Two variants</h3><ul><li><strong>Simulation with heap:</strong> O(n log n). Poll most frequent, place it, re-add after cooldown. More general.</li><li><strong>Math formula:</strong> O(n). For task scheduler — derive the answer from max frequency without simulating.</li></ul><div class="modal-tip"><div class="tip-label">feasibility check</div><p>For "no adjacent same" problems, first check: maxFreq &lt;= (n+1)/2. If this fails, rearrangement is impossible. Return "" or -1 before attempting to build the solution.</p></div>'
+  },
+  twoptr_pattern: {
+    badge: '<span class="badge bd-teal">Two pointers</span>',
+    title: 'Two Pointers — full pattern guide',
+    body: '<h3>The idea</h3><p>Sort first. Then use two pointers (one at each end) to greedily match or pair elements. The key greedy insight varies by problem.</p><h3>Common greedy insights</h3><ul><li><strong>Assign Cookies:</strong> satisfy the least greedy child with the smallest cookie that works</li><li><strong>Boats:</strong> heaviest must go on a boat; try pairing with lightest — if they fit, great; if not, heaviest goes alone</li><li><strong>Two Sum (sorted):</strong> if sum too big, move right pointer left; if too small, move left pointer right</li></ul><h3>Why sort first?</h3><p>Sorting makes the greedy choice obvious and provably correct. Without sorting, you&#39;d need to search for the optimal match — O(n&#178;). With sorting, one pointer sweep gives O(n).</p><div class="cmd-block"><div class="c">// general two-pointer greedy skeleton</div><div>Arrays.sort(arr);</div><div>int lo = 0, hi = arr.length - 1;</div><div>while (lo &lt; hi) {</div><div style="padding-left:14px">if (greedyCondition(arr[lo], arr[hi])) {</div><div style="padding-left:28px">lo++; <span class="c">// both move</span></div><div style="padding-left:14px">}</div><div style="padding-left:14px">hi--; <span class="c">// always move hi</span></div><div>}</div></div>'
+  },
+  recognition: {
+    badge: '<span class="badge bd-red">Pattern recognition</span>',
+    title: 'How to identify which pattern to use',
+    body: '<h3>Decision tree</h3><div class="kv-list"><div class="kv"><span class="kv-key">Scheduling / intervals</span><span class="kv-val">Sort by end time → Sort+Pick. If rooms needed → Sort+Heap</span></div><div class="kv"><span class="kv-key">Merge smallest items</span><span class="kv-val">Min-heap. Connect Ropes, Huffman pattern</span></div><div class="kv"><span class="kv-key">Can you reach X?</span><span class="kv-val">Running variable (maxReach). Jump Game pattern</span></div><div class="kv"><span class="kv-key">Characters / tasks</span><span class="kv-val">Frequency + max-heap. Task Scheduler pattern</span></div><div class="kv"><span class="kv-key">Match/pair items</span><span class="kv-val">Sort both + two pointers. Assign Cookies pattern</span></div><div class="kv"><span class="kv-key">Circular / route</span><span class="kv-val">Running var + reset. Gas Station pattern</span></div><div class="kv"><span class="kv-key">Maximize profit</span><span class="kv-val">Try greedy. If 0/1 choices → DP instead</span></div></div><h3>Keywords that suggest greedy</h3><p>minimum number of, maximum count, can you reach, arrange to minimize, non-overlapping, interval scheduling, fractional, unlimited trades.</p><div class="modal-warn"><div class="tip-label">when stuck</div><p>Try the simplest greedy approach on 2-3 examples. If it gives wrong answers, find the counterexample, then switch to DP. Don&#39;t spend more than 2-3 minutes trying to force a greedy solution that isn&#39;t working.</p></div>'
+  },
+  activity: {
+    badge: '<span class="badge bd-amber">Activity Selection</span>',
+    title: 'Activity Selection / Non-overlapping Intervals',
+    body: '<p>Maximise the number of non-overlapping intervals you can pick. Classic greedy — sort by end time, always pick the interval that finishes earliest.</p><h3>Why earliest end time?</h3><p>By picking the activity that finishes earliest, you leave the maximum possible time for future activities. Any other choice would end later and can only reduce future options.</p><div class="cmd-block"><div class="c">// LC 435 — count removals = n - maxSelected</div><div>Arrays.sort(intervals, (a,b) -&gt; a[1]-b[1]);</div><div>int count = 0, lastEnd = Integer.MIN_VALUE;</div><div>for (int[] interval : intervals) {</div><div style="padding-left:14px">if (interval[0] &gt;= lastEnd) {</div><div style="padding-left:28px">count++;</div><div style="padding-left:28px">lastEnd = interval[1];</div><div style="padding-left:14px">}</div><div>}</div><div>return n - count;  <span class="c">// intervals to remove</span></div></div><div class="modal-tip"><div class="tip-label">variants</div><p>LC 452 (Min Arrow Bursts): same sort, but pick = shoot at end of first balloon. LC 435 (Non-overlapping Intervals): n minus max selected. All three use the same core logic.</p></div>'
+  },
+  fractional_knapsack: {
+    badge: '<span class="badge bd-green">Fractional Knapsack</span>',
+    title: 'Fractional Knapsack',
+    body: '<p>You can take fractions of items. Unlike 0/1 knapsack, you never need to "choose" — always take as much of the highest ratio item as possible.</p><div class="cmd-block"><div class="c">// sort by value/weight ratio descending</div><div>Arrays.sort(items, (a,b) -&gt; Double.compare((double)b[0]/b[1], (double)a[0]/a[1]));</div><div>double totalValue = 0;</div><div>int capacity = W;</div><div>for (int[] item : items) {</div><div style="padding-left:14px">int value = item[0], weight = item[1];</div><div style="padding-left:14px">if (weight &lt;= capacity) {</div><div style="padding-left:28px">totalValue += value;</div><div style="padding-left:28px">capacity -= weight;</div><div style="padding-left:14px">} else {</div><div style="padding-left:28px">totalValue += (double) value / weight * capacity;</div><div style="padding-left:28px">break;  <span class="c">// knapsack full</span></div><div style="padding-left:14px">}</div><div>}</div></div><div class="modal-warn"><div class="tip-label">vs 0/1 knapsack</div><p>0/1 knapsack: you can&#39;t take fractions. Greedy by ratio FAILS. Counterexample: weights [1,2,3] values [6,10,12] capacity=5. Greedy gives 16 but optimal is 22. Use DP for 0/1.</p></div>'
+  },
+  job_scheduling: {
+    badge: '<span class="badge bd-blue">Job Scheduling</span>',
+    title: 'Job Scheduling with Deadlines',
+    body: '<p>Given jobs with profits and deadlines, maximise total profit. Each job takes 1 unit of time. Can only do one job per slot.</p><h3>Algorithm</h3><div class="cmd-block"><div class="c">// sort by profit descending</div><div>Arrays.sort(jobs, (a,b) -&gt; b[1]-a[1]);</div><div>boolean[] slot = new boolean[maxDeadline + 1];</div><div>int totalProfit = 0;</div><div>for (int[] job : jobs) {</div><div style="padding-left:14px">int deadline = job[0], profit = job[1];</div><div style="padding-left:14px"><span class="c">// find latest free slot before deadline</span></div><div style="padding-left:14px">for (int t = deadline; t &gt;= 1; t--) {</div><div style="padding-left:28px">if (!slot[t]) {</div><div style="padding-left:42px">slot[t] = true;</div><div style="padding-left:42px">totalProfit += profit;</div><div style="padding-left:42px">break;</div><div style="padding-left:28px">}</div><div style="padding-left:14px">}</div><div>}</div></div><div class="modal-tip"><div class="tip-label">time complexity</div><p>O(n&#178;) with the naive slot search. Can be improved to O(n log n) using Union-Find (disjoint sets) to find the next available slot.</p></div>'
+  },
+  huffman: {
+    badge: '<span class="badge bd-green">Huffman Encoding</span>',
+    title: 'Huffman Encoding',
+    body: '<p>Build an optimal prefix-free binary code. More frequent characters get shorter codes. Always merge the two lowest frequency nodes.</p><h3>Why merge smallest two?</h3><p>Merging larger frequencies first would give them shorter codes — but those are already frequent, so they should have shorter codes. Merging smallest first gives them longer codes (they appear at the bottom of the tree), which is optimal since they appear less often.</p><div class="cmd-block"><div class="c">// min-heap approach</div><div>PriorityQueue&lt;int[]&gt; pq = new PriorityQueue&lt;&gt;((a,b) -&gt; a[0]-b[0]);</div><div>for (int freq : frequencies) pq.offer(new int[]{freq});</div><div>int totalCost = 0;</div><div>while (pq.size() &gt; 1) {</div><div style="padding-left:14px">int a = pq.poll()[0];</div><div style="padding-left:14px">int b = pq.poll()[0];</div><div style="padding-left:14px">int merged = a + b;</div><div style="padding-left:14px">totalCost += merged;</div><div style="padding-left:14px">pq.offer(new int[]{merged});</div><div>}</div></div><div class="modal-tip"><div class="tip-label">time complexity</div><p>O(n log n) for building the tree. O(n log n) for assigning codes. Total: O(n log n).</p></div>'
+  },
+  meeting_rooms: {
+    badge: '<span class="badge bd-purple">Meeting Rooms II</span>',
+    title: 'Meeting Rooms II — minimum rooms needed',
+    body: '<p>Given intervals representing meetings, find the minimum number of conference rooms required.</p><h3>Greedy insight</h3><p>Sort by start time. Use a min-heap of end times. For each new meeting, if the room that frees up earliest is free (end &lt;= current start), reuse it. Otherwise, open a new room. The heap size at the end is the answer.</p><div class="cmd-block"><div class="c">// LC 253</div><div>Arrays.sort(intervals, (a,b) -&gt; a[0]-b[0]);</div><div>PriorityQueue&lt;Integer&gt; ends = new PriorityQueue&lt;&gt;();</div><div>for (int[] interval : intervals) {</div><div style="padding-left:14px">if (!ends.isEmpty() &amp;&amp; ends.peek() &lt;= interval[0])</div><div style="padding-left:28px">ends.poll();  <span class="c">// room is free, reuse it</span></div><div style="padding-left:14px">ends.add(interval[1]);  <span class="c">// assign this meeting to a room</span></div><div>}</div><div>return ends.size();</div></div><div class="modal-tip"><div class="tip-label">alternative: sort + count</div><p>Separate start and end arrays, sort both, use two pointers. If start[i] &lt; end[j], rooms++, i++. Else rooms--, j++. Same O(n log n) but O(n) space instead of heap.</p></div>'
+  },
+  connect_ropes: {
+    badge: '<span class="badge bd-amber">Connect Ropes</span>',
+    title: 'Connect Ropes — minimum cost',
+    body: '<p>Given ropes of various lengths, connect them all into one rope. Cost of connecting two ropes = sum of their lengths. Minimise total cost.</p><h3>Why smallest first?</h3><p>Each rope&#39;s length contributes to the cost every time it is included in a merge. The more merges a rope participates in, the more it costs. Short ropes should participate in MORE merges (earlier merges), long ropes in FEWER. So merge shortest first.</p><div class="cmd-block"><div class="c">// same as Huffman — min-heap merge</div><div>PriorityQueue&lt;Integer&gt; pq = new PriorityQueue&lt;&gt;();</div><div>for (int r : ropes) pq.offer(r);</div><div>int cost = 0;</div><div>while (pq.size() &gt; 1) {</div><div style="padding-left:14px">int a = pq.poll(), b = pq.poll();</div><div style="padding-left:14px">cost += a + b;</div><div style="padding-left:14px">pq.offer(a + b);</div><div>}</div><div>return cost;</div></div>'
+  },
+  jump_game: {
+    badge: '<span class="badge bd-blue">Jump Game I & II</span>',
+    title: 'Jump Game — LC 55 and LC 45',
+    body: '<h3>LC 55 — Can you reach the end?</h3><div class="cmd-block"><div>int maxReach = 0;</div><div>for (int i = 0; i &lt; nums.length; i++) {</div><div style="padding-left:14px">if (i &gt; maxReach) return false;</div><div style="padding-left:14px">maxReach = Math.max(maxReach, i + nums[i]);</div><div>}</div><div>return true;</div></div><h3>LC 45 — Minimum jumps to reach end</h3><div class="cmd-block"><div>int jumps = 0, curEnd = 0, farthest = 0;</div><div>for (int i = 0; i &lt; nums.length - 1; i++) {</div><div style="padding-left:14px">farthest = Math.max(farthest, i + nums[i]);</div><div style="padding-left:14px">if (i == curEnd) {  <span class="c">// reached boundary, must jump</span></div><div style="padding-left:28px">jumps++;</div><div style="padding-left:28px">curEnd = farthest;</div><div style="padding-left:14px">}</div><div>}</div><div>return jumps;</div></div><div class="modal-tip"><div class="tip-label">key insight for LC 45</div><p>You don&#39;t greedily pick WHERE to jump — you greedily delay the jump as long as possible. When forced to jump (reached current boundary), you know the farthest reachable point in the next jump window.</p></div>'
+  },
+  gas_station: {
+    badge: '<span class="badge bd-teal">Gas Station</span>',
+    title: 'Gas Station — LC 134',
+    body: '<p>Can you complete a circular route? If yes, find the starting station.</p><h3>Two key observations</h3><ul><li>If total gas &gt;= total cost, a solution ALWAYS exists (and is unique).</li><li>If you get "stuck" at some segment (tank goes negative), none of the stations in that segment can be the starting station.</li></ul><div class="cmd-block"><div>int total = 0, tank = 0, start = 0;</div><div>for (int i = 0; i &lt; gas.length; i++) {</div><div style="padding-left:14px">int diff = gas[i] - cost[i];</div><div style="padding-left:14px">total += diff;   <span class="c">// track overall feasibility</span></div><div style="padding-left:14px">tank += diff;    <span class="c">// track current segment</span></div><div style="padding-left:14px">if (tank &lt; 0) {  <span class="c">// segment failed</span></div><div style="padding-left:28px">start = i + 1;  <span class="c">// try next station</span></div><div style="padding-left:28px">tank = 0;</div><div style="padding-left:14px">}</div><div>}</div><div>return total &gt;= 0 ? start : -1;</div></div><div class="modal-tip"><div class="tip-label">why this works</div><p>When tank goes negative at station i, starting at ANY station from the current start to i is impossible (they would accumulate the same negative segment). So we skip to i+1.</p></div>'
+  },
+  stock: {
+    badge: '<span class="badge bd-amber">Best Time to Buy Stock II</span>',
+    title: 'Best Time to Buy Stock II — LC 122',
+    body: '<p>You can make unlimited trades. Maximise profit.</p><h3>Greedy insight</h3><p>Collect every upward price movement. If prices[i+1] &gt; prices[i], buy at i and sell at i+1. This is equivalent to summing all positive day-over-day differences.</p><div class="cmd-block"><div>int profit = 0;</div><div>for (int i = 1; i &lt; prices.length; i++) {</div><div style="padding-left:14px">if (prices[i] &gt; prices[i-1])</div><div style="padding-left:28px">profit += prices[i] - prices[i-1];</div><div>}</div><div>return profit;</div></div><div class="modal-warn"><div class="tip-label">compare to LC 121 and 188</div><p>LC 121 (one transaction): DP, track min so far. LC 122 (unlimited): greedy, sum all gains. LC 188 (k transactions): DP, O(nk). The number of allowed transactions determines whether greedy works.</p></div>'
+  },
+  task_scheduler: {
+    badge: '<span class="badge bd-purple">Task Scheduler</span>',
+    title: 'Task Scheduler — LC 621',
+    body: '<p>Given tasks with a cooldown n between same-type tasks, find the minimum intervals to finish all tasks.</p><h3>Math formula (O(n), no simulation)</h3><div class="cmd-block"><div>int[] count = new int[26];</div><div>for (char c : tasks) count[c-&#39;A&#39;]++;</div><div>Arrays.sort(count);</div><div>int maxFreq = count[25];</div><div>int maxCount = 0;</div><div>for (int c : count) if (c == maxFreq) maxCount++;</div><div>&nbsp;</div><div><span class="c">// frames of size (n+1), last frame may be partial</span></div><div>int frames = (maxFreq - 1) * (n + 1) + maxCount;</div><div>return Math.max(frames, tasks.length);</div></div><h3>Intuition</h3><p>The most frequent task(s) create the "frame" structure. If maxFreq = 3 and n = 2, we have: [A _ _] [A _ _] [A]. The frame is (maxFreq-1) * (n+1). The last frame has maxCount tasks (all tasks tied for max frequency). If other tasks fill all idle slots, take max with tasks.length.</p><div class="modal-tip"><div class="tip-label">follow-up</div><p>If you need the actual schedule (not just the length), use the simulation approach with a max-heap and a queue of size n for cooldown.</p></div>'
+  },
+  rearrange_string: {
+    badge: '<span class="badge bd-pink">Rearrange String k Distance</span>',
+    title: 'Rearrange String k Distance Apart',
+    body: '<p>Rearrange a string so no two same characters are within k positions of each other.</p><div class="cmd-block"><div><span class="c">// max-heap + cooldown queue</span></div><div>Map&lt;Character, Integer&gt; freq = new HashMap&lt;&gt;();</div><div>for (char c : s.toCharArray()) freq.merge(c, 1, Integer::sum);</div><div>PriorityQueue&lt;int[]&gt; pq = new PriorityQueue&lt;&gt;((a,b)-&gt;b[1]-a[1]);</div><div>for (var e : freq.entrySet()) pq.offer(new int[]{e.getKey(), e.getValue()});</div><div>Queue&lt;int[]&gt; cooldown = new LinkedList&lt;&gt;();</div><div>StringBuilder sb = new StringBuilder();</div><div>while (!pq.isEmpty()) {</div><div style="padding-left:14px">int[] cur = pq.poll();</div><div style="padding-left:14px">sb.append((char) cur[0]);</div><div style="padding-left:14px">cur[1]--;</div><div style="padding-left:14px">cooldown.offer(cur);</div><div style="padding-left:14px">if (cooldown.size() == k) {</div><div style="padding-left:28px">int[] back = cooldown.poll();</div><div style="padding-left:28px">if (back[1] &gt; 0) pq.offer(back);</div><div style="padding-left:14px">}</div><div>}</div><div>return sb.length() == s.length() ? sb.toString() : "";</div></div>'
+  },
+  reorganize: {
+    badge: '<span class="badge bd-amber">Reorganize String</span>',
+    title: 'Reorganize String — LC 767',
+    body: '<p>Rearrange so no two adjacent characters are the same. Special case of k=2.</p><h3>Feasibility check first</h3><div class="cmd-block"><div><span class="c">// feasibility: max frequency &lt;= (n+1)/2</span></div><div>int[] count = new int[26];</div><div>for (char c : s.toCharArray()) count[c-&#39;A&#39;]++;</div><div>int maxFreq = 0, maxChar = 0;</div><div>for (int i = 0; i &lt; 26; i++)</div><div style="padding-left:14px">if (count[i] &gt; maxFreq) { maxFreq = count[i]; maxChar = i; }</div><div>if (maxFreq &gt; (s.length() + 1) / 2) return "";</div><div>&nbsp;</div><div><span class="c">// fill even indices first with most frequent char</span></div><div>char[] res = new char[s.length()];</div><div>int idx = 0;</div><div>while (count[maxChar] &gt; 0) { res[idx] = (char)(&#39;A&#39;+maxChar); idx += 2; count[maxChar]--; }</div><div>for (int i = 0; i &lt; 26; i++) {</div><div style="padding-left:14px">while (count[i] &gt; 0) {</div><div style="padding-left:28px">if (idx &gt;= res.length) idx = 1;</div><div style="padding-left:28px">res[idx] = (char)(&#39;A&#39;+i); idx += 2; count[i]--;</div><div style="padding-left:14px">}</div><div>}</div><div>return new String(res);</div></div>'
+  },
+  assign_cookies: {
+    badge: '<span class="badge bd-teal">Assign Cookies</span>',
+    title: 'Assign Cookies — LC 455',
+    body: '<p>Each child has a greed factor. Each cookie has a size. A cookie satisfies a child if size &gt;= greed factor. Maximise satisfied children.</p><h3>Greedy insight</h3><p>Satisfy the least greedy child with the smallest sufficient cookie. Trying to satisfy a greedier child with a cookie that could satisfy a less greedy one wastes the cookie.</p><div class="cmd-block"><div>Arrays.sort(children);</div><div>Arrays.sort(cookies);</div><div>int child = 0, cookie = 0;</div><div>while (child &lt; children.length &amp;&amp; cookie &lt; cookies.length) {</div><div style="padding-left:14px">if (cookies[cookie] &gt;= children[child])</div><div style="padding-left:28px">child++;  <span class="c">// satisfied this child</span></div><div style="padding-left:14px">cookie++;  <span class="c">// always move to next cookie</span></div><div>}</div><div>return child;</div></div><div class="modal-tip"><div class="tip-label">key insight</div><p>Move cookie pointer regardless. Move child pointer only on satisfaction. This ensures every cookie gets a chance to satisfy the current child, and we never use a big cookie when a small one would do.</p></div>'
+  },
+  boats: {
+    badge: '<span class="badge bd-blue">Boats to Save People</span>',
+    title: 'Boats to Save People — LC 881',
+    body: '<p>Each boat carries at most 2 people with a weight limit. Minimise boats needed.</p><h3>Greedy insight</h3><p>The heaviest person must go on some boat. Try to pair them with the lightest person. If they fit together, both go. If not, the heaviest goes alone. Either way, the heaviest person is handled in this step.</p><div class="cmd-block"><div>Arrays.sort(people);</div><div>int lo = 0, hi = people.length - 1, boats = 0;</div><div>while (lo &lt;= hi) {</div><div style="padding-left:14px">if (people[lo] + people[hi] &lt;= limit)</div><div style="padding-left:28px">lo++;  <span class="c">// lightest fits too</span></div><div style="padding-left:14px">hi--;  <span class="c">// heaviest always placed</span></div><div style="padding-left:14px">boats++;</div><div>}</div><div>return boats;</div></div><div class="modal-tip"><div class="tip-label">why this is optimal</div><p>The lightest person can only go with the heaviest person who they can fit with. If the heaviest can&#39;t take the lightest, NO ONE can take the heaviest in a pair — they must go alone. Greedy is provably optimal here.</p></div>'
+  },
+  two_city: {
+    badge: '<span class="badge bd-purple">Two City Scheduling</span>',
+    title: 'Two City Scheduling — LC 1029',
+    body: '<p>2n people, send exactly n to city A and n to city B. Each person has cost to fly to A and cost to fly to B. Minimise total cost.</p><h3>Greedy insight</h3><p>If we send everyone to city B first (total = sum of all costB), then for each person we "upgrade" to city A, the extra cost is costA[i] - costB[i]. Sort by this difference and upgrade the n cheapest.</p><div class="cmd-block"><div><span class="c">// sort by costA - costB ascending</div></span><div>Arrays.sort(costs, (a,b) -&gt; (a[0]-a[1]) - (b[0]-b[1]));</div><div>int total = 0;</div><div>for (int i = 0; i &lt; costs.length; i++) {</div><div style="padding-left:14px"><span class="c">// first n go to city A, rest to city B</span></div><div style="padding-left:14px">total += (i &lt; costs.length/2) ? costs[i][0] : costs[i][1];</div><div>}</div><div>return total;</div></div>'
+  },
+  knapsack_diff: {
+    badge: '<span class="badge bd-amber">Fractional vs 0/1 Knapsack</span>',
+    title: 'Why fractional is greedy, 0/1 needs DP',
+    body: '<h3>Fractional Knapsack — greedy works</h3><p>You can take partial items. If the highest-ratio item doesn&#39;t fill the knapsack, you take all of it and move to the next. You never "give up" a whole item for a potentially better combination — you always take as much as you can of the best available item.</p><h3>0/1 Knapsack — greedy fails</h3><p>You must take or leave each item. A greedy choice (highest ratio) might take a heavy item that leaves too little capacity for a better combination of lighter items.</p><h3>Counterexample</h3><div class="cmd-block"><div>Items: [(value=60, weight=10), (value=100, weight=20), (value=120, weight=30)]</div><div>Capacity: 50</div><div>&nbsp;</div><div>Ratios: 6, 5, 4</div><div>Greedy: take item1(60) + item2(100) = 160 (weight 30 left, take 20/30 of item3 = 80)</div><div>Fractional optimal: 60 + 100 + 80 = 240 ✓</div><div>&nbsp;</div><div>0/1 Greedy: takes item1(60) + item2(100) = 160 (can&#39;t take partial item3)</div><div>0/1 Optimal: item2(100) + item3(120) = 220 ✓</div><div>Greedy got it WRONG for 0/1 &#x2717;</div></div>'
+  },
+  coin_change: {
+    badge: '<span class="badge bd-blue">Coin Change — greedy fails</span>',
+    title: 'Coin Change — why greedy doesn&#39;t work',
+    body: '<p>With standard denominations (1, 5, 10, 25), greedy (always pick largest) works. But with arbitrary denominations, it fails.</p><h3>Counterexample</h3><div class="cmd-block"><div>Coins: [1, 3, 4], Target: 6</div><div>&nbsp;</div><div>Greedy: pick 4 (largest &lt;= 6) → remaining 2</div><div>        pick 1 (largest &lt;= 2) → remaining 1</div><div>        pick 1 → 0. Total: 3 coins</div><div>&nbsp;</div><div>Optimal: 3 + 3 = 2 coins ✓</div><div>&nbsp;</div><div>Greedy picked 4 which blocked the 3+3 solution.</div></div><h3>Why DP works</h3><p>DP tries all combinations via: dp[amount] = min(dp[amount - coin] + 1) for all coins. It doesn&#39;t commit to a choice — it explores all options and takes the minimum.</p><div class="modal-warn"><div class="tip-label">when does greedy work for coins?</div><p>Only for "canonical" coin systems where each denomination divides the next one evenly (like 1, 5, 10, 25). For arbitrary denominations, always use DP.</p></div>'
+  },
+  interval_dp: {
+    badge: '<span class="badge bd-purple">Interval problems — greedy vs DP</span>',
+    title: 'When do interval problems need DP?',
+    body: '<h3>Greedy works for unweighted intervals</h3><p>Maximum number of non-overlapping intervals, minimum rooms needed, minimum arrows to burst balloons. The "value" of each interval is 1 — just count them.</p><h3>DP needed for weighted intervals</h3><p>Weighted Job Scheduling: each interval has a value/profit. You want to maximise total profit. Greedy by earliest end fails because a low-value interval might block a much higher-value one.</p><div class="cmd-block"><div><span class="c">// Weighted Interval Scheduling — DP</div></span><div><span class="c">// Sort by end time. For each job, binary search</span></div><div><span class="c">// for last compatible job. dp[i] = max profit</span></div><div><span class="c">// considering first i jobs.</span></div><div>Arrays.sort(jobs, (a,b) -&gt; a[1]-b[1]);</div><div>int[] dp = new int[n+1];</div><div>for (int i = 1; i &lt;= n; i++) {</div><div style="padding-left:14px">int lastCompatible = binarySearch(jobs, i);</div><div style="padding-left:14px">dp[i] = Math.max(dp[i-1],</div><div style="padding-left:28px">jobs[i-1][2] + dp[lastCompatible]);</div><div>}</div></div><div class="modal-tip"><div class="tip-label">the deciding factor</div><p>If all intervals have equal weight → greedy. If intervals have different values/profits → DP. This is the single most important distinction to know.</p></div>'
+  }
+};
+
+window.openModal = function(key) {
+  var data = MODALS[key];
+  if (!data) return;
+  document.getElementById('modalBadge').innerHTML = data.badge;
+  document.getElementById('modalTitle').textContent = data.title;
+  document.getElementById('modalBody').innerHTML = data.body;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+
+window.closeModal = function(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalBtn();
+};
+
+window.closeModalBtn = function() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+};
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModalBtn();
+});
+
+window.navTo = function(id) {
+  document.getElementById(id).scrollIntoView({behavior: 'smooth'});
+  document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
+  event.target.classList.add('active');
+};
+
+var sections = document.querySelectorAll('.section');
+var btns = document.querySelectorAll('.nav-btn');
+var obs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) {
+      var idx = Array.from(sections).indexOf(e.target);
+      btns.forEach(function(b) { b.classList.remove('active'); });
+      if (btns[idx]) btns[idx].classList.add('active');
+    }
+  });
+}, {rootMargin: '-30% 0px -60% 0px'});
+sections.forEach(function(s) { obs.observe(s); });
+</script>
+</body>
+</html>
