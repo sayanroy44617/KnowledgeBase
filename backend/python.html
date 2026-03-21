@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python — Intermediate to Advanced</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0f14;--bg2:#13161d;--bg3:#1a1d27;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#e8eaf0;--muted:#7a7f94;--dim:#4a4f64;
+  --accent:#3776ab;--accent2:#3ecf8e;--amber:#f0a03e;
+  --red:#e05252;--purple:#9b7ef0;--pink:#e06ea0;--teal:#0f9d9d;--blue:#4a90e2;
+  --mono:'JetBrains Mono',monospace;--sans:'Sora',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;font-size:14px}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.page{max-width:1100px;margin:0 auto;padding:0 1.5rem 5rem}
+.hero{padding:3rem 0 2rem;border-bottom:1px solid var(--border);margin-bottom:0}
+.hero-eyebrow{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.75rem}
+.hero h1{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:600;line-height:1.2;letter-spacing:-.02em}
+.hero h1 span{color:var(--accent)}
+.hero-sub{margin-top:.75rem;font-size:13px;color:var(--muted);max-width:680px;line-height:1.7}
+.hero-badges{margin-top:1rem;display:flex;gap:.5rem;flex-wrap:wrap}
+.nav{position:sticky;top:0;z-index:100;background:rgba(13,15,20,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.6rem 0}
+.nav-inner{max-width:1100px;margin:0 auto;padding:0 1.5rem;display:flex;gap:.25rem;overflow-x:auto;scrollbar-width:none}
+.nav-inner::-webkit-scrollbar{display:none}
+.nav-btn{font-family:var(--mono);font-size:11px;padding:.3rem .75rem;border-radius:4px;border:1px solid transparent;color:var(--muted);cursor:pointer;background:none;white-space:nowrap;transition:all .15s}
+.nav-btn:hover{color:var(--text);background:var(--bg3)}
+.nav-btn.active{color:var(--accent);border-color:rgba(55,118,171,.3);background:rgba(55,118,171,.08)}
+.section{margin:3rem 0;scroll-margin-top:56px}
+.sec-label{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1.25rem;display:flex;align-items:center;gap:.5rem}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.sec-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:1.25rem;max-width:800px}
+.grid{display:grid;gap:10px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.9rem 1rem;transition:border-color .15s,background .15s;position:relative;overflow:hidden}
+.card:hover{border-color:var(--border2);background:var(--bg3)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .2s}
+.card:hover::before{opacity:1}
+.card.blue::before{background:var(--accent)}
+.card.green::before{background:var(--accent2)}
+.card.amber::before{background:var(--amber)}
+.card.purple::before{background:var(--purple)}
+.card.red::before{background:var(--red)}
+.card.pink::before{background:var(--pink)}
+.card.teal::before{background:var(--teal)}
+.card[data-modal]{cursor:pointer}
+.card[data-modal]::after{content:'&#x2197;';position:absolute;bottom:.6rem;right:.75rem;font-size:11px;color:var(--dim);transition:color .15s}
+.card[data-modal]:hover::after{color:var(--muted)}
+.card-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:5px}
+.card-sub{font-size:12px;color:var(--muted);line-height:1.6}
+.badge{display:inline-flex;align-items:center;font-family:var(--mono);font-size:10px;font-weight:500;padding:2px 8px;border-radius:3px;margin-bottom:7px;letter-spacing:.03em}
+.bd-blue{background:rgba(55,118,171,.15);color:var(--accent)}
+.bd-green{background:rgba(62,207,142,.12);color:var(--accent2)}
+.bd-amber{background:rgba(240,160,62,.12);color:var(--amber)}
+.bd-purple{background:rgba(155,126,240,.12);color:var(--purple)}
+.bd-red{background:rgba(224,82,82,.12);color:var(--red)}
+.bd-pink{background:rgba(224,110,160,.12);color:var(--pink)}
+.bd-teal{background:rgba(15,157,157,.15);color:var(--teal)}
+.cmd-block{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.65rem .9rem;font-family:var(--mono);font-size:11px;line-height:2;overflow-x:auto;margin-top:.6rem}
+.cmd-block .k{color:#cc99cd}
+.cmd-block .s{color:var(--accent2)}
+.cmd-block .c{color:var(--dim)}
+.cmd-block .f{color:#f0e68c}
+.cmd-block .n{color:#f0a03e}
+.cmd-block .t{color:var(--accent)}
+.cmd-block .d{color:#e05252}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kv-list{margin-top:.5rem}
+.kv{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.kv:last-child{border-bottom:none}
+.kv-key{color:var(--text);font-weight:500;min-width:140px;font-family:var(--mono);font-size:11px}
+.kv-val{color:var(--muted);line-height:1.5}
+.hi-box{background:rgba(55,118,171,.06);border:1px solid rgba(55,118,171,.2);border-radius:8px;padding:.9rem 1rem;margin:.75rem 0}
+.hi-box p{font-size:13px;color:#6ab4f0;line-height:1.7;margin:0}
+.warn-box{background:rgba(240,160,62,.06);border:1px solid rgba(240,160,62,.2);border-radius:8px;padding:.9rem 1rem;margin:.75rem 0}
+.warn-box p{font-size:13px;color:#c8883a;line-height:1.7;margin:0}
+.warn-box .wl{font-family:var(--mono);font-size:10px;color:var(--amber);margin-bottom:.3rem}
+.mono{font-family:var(--mono);font-size:10px;background:var(--bg);padding:1px 5px;border-radius:3px;color:var(--muted);border:1px solid var(--border)}
+.ref-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:.5rem}
+.ref-table th{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:6px 10px;border-bottom:1px solid var(--border);text-align:left;font-weight:500}
+.ref-table td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;line-height:1.5}
+.ref-table td:first-child{color:var(--text);font-weight:500;font-family:var(--mono);font-size:11px}
+.ref-table tr:last-child td{border-bottom:none}
+.ref-table tr:hover td{background:var(--bg3)}
+/* modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;width:min(740px,94vw);max-height:85vh;overflow-y:auto;transform:translateY(12px) scale(.98);transition:transform .2s}
+.modal-overlay.open .modal-box{transform:translateY(0) scale(1)}
+.modal-header{padding:1.2rem 1.4rem .8rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.modal-header-left{display:flex;flex-direction:column;gap:.4rem}
+.modal-close{background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;border-radius:4px;padding:2px 8px;font-size:13px;transition:all .15s;flex-shrink:0}
+.modal-close:hover{color:var(--text);border-color:var(--border2)}
+.modal-body{padding:1.2rem 1.4rem 1.8rem}
+.modal-body h3{font-size:13px;font-weight:500;color:var(--text);margin:1.2rem 0 .5rem}
+.modal-body h3:first-child{margin-top:0}
+.modal-body p{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:.75rem}
+.modal-body ul{padding-left:1.2rem;margin-bottom:.75rem}
+.modal-body li{font-size:13px;color:var(--muted);line-height:1.9}
+.modal-body li strong{color:var(--text)}
+.modal-body .cmd-block{margin-top:0}
+.modal-tip{background:rgba(62,207,142,.06);border:1px solid rgba(62,207,142,.15);border-radius:6px;padding:.75rem 1rem;margin-top:1rem}
+.modal-tip .tip-label{font-family:var(--mono);font-size:10px;color:var(--accent2);margin-bottom:.3rem}
+.modal-tip p{font-size:12px;color:#5ec99a;margin:0}
+.modal-warn{background:rgba(240,160,62,.06);border:1px solid rgba(240,160,62,.15);border-radius:6px;padding:.75rem 1rem;margin-top:.75rem}
+.modal-warn .tip-label{font-family:var(--mono);font-size:10px;color:var(--amber);margin-bottom:.3rem}
+.modal-warn p{font-size:12px;color:#c8883a;margin:0}
+@media(max-width:700px){.g3,.g4,.two-col{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+@media(max-width:480px){.g2,.g3,.g4,.two-col{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="nav">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="navTo('datatypes')">Data Types</button>
+    <button class="nav-btn" onclick="navTo('comprehensions')">Comprehensions</button>
+    <button class="nav-btn" onclick="navTo('oop')">OOP</button>
+    <button class="nav-btn" onclick="navTo('decorators')">Decorators</button>
+    <button class="nav-btn" onclick="navTo('generators')">Generators</button>
+    <button class="nav-btn" onclick="navTo('typehints')">Type Hints</button>
+    <button class="nav-btn" onclick="navTo('async')">Async</button>
+    <button class="nav-btn" onclick="navTo('errors')">Errors</button>
+    <button class="nav-btn" onclick="navTo('stdlib')">Stdlib</button>
+    <button class="nav-btn" onclick="navTo('patterns')">Patterns</button>
+  </div>
+</div>
+
+<div class="page">
+  <div class="hero">
+    <div class="hero-eyebrow">Backend dev · revision guide</div>
+    <h1>Python <span>Intermediate → Advanced</span></h1>
+    <div class="hero-sub">Data types, OOP, decorators, generators, async, type hints, error handling, and the standard library — the parts that matter most for backend and FastAPI development.</div>
+    <div class="hero-badges">
+      <span class="badge bd-blue">Python 3.12+</span>
+      <span class="badge bd-green">Backend focused</span>
+      <span class="badge bd-purple">FastAPI ready</span>
+      <span style="color:var(--dim);font-size:12px">Click any card for deep dive</span>
+    </div>
+  </div>
+
+  <!-- DATA TYPES -->
+  <div class="section" id="datatypes">
+    <div class="sec-label">01 — Data types &amp; builtins</div>
+    <div class="sec-desc">Python&#39;s built-in types and the operations that matter. Know the time complexity of each operation — it comes up in code reviews and interviews.</div>
+    <div class="grid g4">
+      <div class="card blue" data-modal onclick="openModal('list_ops')">
+        <span class="badge bd-blue">list</span>
+        <div class="card-title">Ordered, mutable sequence</div>
+        <div class="card-sub">O(1) append/pop from end. O(n) insert/delete at index. O(n) search. Dynamic array underneath.</div>
+      </div>
+      <div class="card green" data-modal onclick="openModal('dict_ops')">
+        <span class="badge bd-green">dict</span>
+        <div class="card-title">Hash map — O(1) average</div>
+        <div class="card-sub">Insertion-ordered since Python 3.7. O(1) get/set/delete average. O(n) worst case (hash collision).</div>
+      </div>
+      <div class="card amber" data-modal onclick="openModal('set_ops')">
+        <span class="badge bd-amber">set / frozenset</span>
+        <div class="card-title">Hash set — unique elements</div>
+        <div class="card-sub">O(1) add/remove/in. O(n) union/intersection. frozenset is immutable and hashable — can be a dict key.</div>
+      </div>
+      <div class="card purple" data-modal onclick="openModal('tuple_ops')">
+        <span class="badge bd-purple">tuple</span>
+        <div class="card-title">Immutable sequence</div>
+        <div class="card-sub">Hashable (if elements are). Used as dict keys, namedtuple for readable records. Faster than list for iteration.</div>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:10px">
+      <div class="card teal" data-modal onclick="openModal('string_ops')">
+        <span class="badge bd-teal">str</span>
+        <div class="card-title">Immutable sequence of chars</div>
+        <div class="card-sub">f-strings, join, split, strip, replace, startswith/endswith, encode/decode. Strings are interned for short literals.</div>
+      </div>
+      <div class="card blue" data-modal onclick="openModal('builtins_ref')">
+        <span class="badge bd-blue">Essential builtins</span>
+        <div class="card-title">map, filter, zip, enumerate</div>
+        <div class="card-sub">All return lazy iterators. zip stops at shortest. enumerate adds index. map/filter replaced by comprehensions in modern Python.</div>
+      </div>
+      <div class="card pink" data-modal onclick="openModal('unpacking')">
+        <span class="badge bd-pink">Unpacking &amp; *args/**kwargs</span>
+        <div class="card-title">Starred expressions</div>
+        <div class="card-sub">a, *b, c = [1,2,3,4,5]. Spread iterables into function calls. Merge dicts with {**d1, **d2}.</div>
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <div class="card amber">
+        <span class="badge bd-amber">Time complexity quick reference</span>
+        <table class="ref-table" style="margin-top:8px">
+          <tr><th>Operation</th><th>list</th><th>dict / set</th><th>deque</th></tr>
+          <tr><td>append / add</td><td>O(1) amortised</td><td>O(1) avg</td><td>O(1)</td></tr>
+          <tr><td>pop (end)</td><td>O(1)</td><td>O(1) avg</td><td>O(1)</td></tr>
+          <tr><td>pop (front)</td><td>O(n)</td><td>—</td><td>O(1)</td></tr>
+          <tr><td>insert at i</td><td>O(n)</td><td>—</td><td>O(n)</td></tr>
+          <tr><td>search (in)</td><td>O(n)</td><td>O(1) avg</td><td>O(n)</td></tr>
+          <tr><td>sort</td><td>O(n log n)</td><td>—</td><td>—</td></tr>
+          <tr><td>index access</td><td>O(1)</td><td>O(1) avg</td><td>O(n)</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPREHENSIONS -->
+  <div class="section" id="comprehensions">
+    <div class="sec-label">02 — Comprehensions &amp; expressions</div>
+    <div class="sec-desc">Python&#39;s most expressive feature. Prefer comprehensions over map/filter for readability. Use generator expressions to avoid materialising large lists.</div>
+    <div class="two-col">
+      <div class="card blue">
+        <span class="badge bd-blue">List / dict / set comprehensions</span>
+        <div class="cmd-block" style="margin-top:8px">
+          <div class="c"># list comprehension</div>
+          <div>squares = [x**<span class="n">2</span> <span class="k">for</span> x <span class="k">in</span> range(<span class="n">10</span>) <span class="k">if</span> x % <span class="n">2</span> == <span class="n">0</span>]</div>
+          <div>&nbsp;</div>
+          <div class="c"># dict comprehension</div>
+          <div>inv = {v: k <span class="k">for</span> k, v <span class="k">in</span> d.items()}</div>
+          <div>&nbsp;</div>
+          <div class="c"># set comprehension</div>
+          <div>unique = {x.lower() <span class="k">for</span> x <span class="k">in</span> words}</div>
+          <div>&nbsp;</div>
+          <div class="c"># nested — flatten a 2D list</div>
+          <div>flat = [x <span class="k">for</span> row <span class="k">in</span> matrix <span class="k">for</span> x <span class="k">in</span> row]</div>
+          <div>&nbsp;</div>
+          <div class="c"># conditional expression (ternary)</div>
+          <div>label = <span class="s">"even"</span> <span class="k">if</span> n % <span class="n">2</span> == <span class="n">0</span> <span class="k">else</span> <span class="s">"odd"</span></div>
+        </div>
+      </div>
+      <div class="card green">
+        <span class="badge bd-green">Generator expressions</span>
+        <div class="cmd-block" style="margin-top:8px">
+          <div class="c"># generator expression — lazy, no list created</div>
+          <div>total = <span class="f">sum</span>(x**<span class="n">2</span> <span class="k">for</span> x <span class="k">in</span> range(<span class="n">1_000_000</span>))</div>
+          <div>&nbsp;</div>
+          <div class="c"># any / all with generator</div>
+          <div><span class="f">any</span>(x &gt; <span class="n">100</span> <span class="k">for</span> x <span class="k">in</span> data)</div>
+          <div><span class="f">all</span>(isinstance(x, <span class="t">int</span>) <span class="k">for</span> x <span class="k">in</span> data)</div>
+          <div>&nbsp;</div>
+          <div class="c"># walrus operator := (Python 3.8+)</div>
+          <div>results = [y <span class="k">for</span> x <span class="k">in</span> data <span class="k">if</span> (y := transform(x)) <span class="k">is not</span> <span class="k">None</span>]</div>
+          <div>&nbsp;</div>
+          <div class="c"># generator as function argument</div>
+          <div>csv_line = <span class="s">","</span>.join(<span class="f">str</span>(v) <span class="k">for</span> v <span class="k">in</span> row)</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:10px">
+      <div class="card amber" data-modal onclick="openModal('walrus')">
+        <span class="badge bd-amber">Walrus operator :=</span>
+        <div class="card-title">Assign and test in one step</div>
+        <div class="card-sub">Avoid computing the same value twice. Useful in while loops, comprehension filters, and match expressions.</div>
+      </div>
+      <div class="card purple" data-modal onclick="openModal('sorting')">
+        <span class="badge bd-purple">Sorting &amp; key functions</span>
+        <div class="card-title">sorted, sort, key=, operator</div>
+        <div class="card-sub">key= takes a function applied to each element. operator.itemgetter and attrgetter for clean key functions. Stable sort.</div>
+      </div>
+      <div class="card teal" data-modal onclick="openModal('slicing')">
+        <span class="badge bd-teal">Slicing &amp; step</span>
+        <div class="card-title">a[start:stop:step]</div>
+        <div class="card-sub">a[::-1] reverses. a[::2] every other. a[:n] first n. Slices create copies. slice() object for reusable slices.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OOP -->
+  <div class="section" id="oop">
+    <div class="sec-label">03 — OOP &amp; magic methods</div>
+    <div class="sec-desc">Python&#39;s object model is protocol-based. Magic methods (dunder methods) let your classes integrate with Python&#39;s built-in syntax and operators.</div>
+    <div class="two-col">
+      <div class="card blue">
+        <span class="badge bd-blue">Class essentials</span>
+        <div class="cmd-block" style="margin-top:8px">
+          <div><span class="k">class</span> <span class="t">Vector</span>:</div>
+          <div style="padding-left:14px"><span class="k">def</span> <span class="f">__init__</span>(<span class="k">self</span>, x: <span class="t">float</span>, y: <span class="t">float</span>):</div>
+          <div style="padding-left:28px"><span class="k">self</span>.x = x; <span class="k">self</span>.y = y</div>
+          <div>&nbsp;</div>
+          <div style="padding-left:14px"><span class="c"># readable repr</span></div>
+          <div style="padding-left:14px"><span class="k">def</span> <span class="f">__repr__</span>(<span class="k">self</span>) -&gt; <span class="t">str</span>:</div>
+          <div style="padding-left:28px"><span class="k">return</span> <span class="s">f"Vector({self.x}, {self.y})"</span></div>
+          <div>&nbsp;</div>
+          <div style="padding-left:14px"><span class="c"># addition operator</span></div>
+          <div style="padding-left:14px"><span class="k">def</span> <span class="f">__add__</span>(<span class="k">self</span>, other) -&gt; <span class="s">"Vector"</span>:</div>
+          <div style="padding-left:28px"><span class="k">return</span> <span class="t">Vector</span>(<span class="k">self</span>.x + other.x, <span class="k">self</span>.y + other.y)</div>
+          <div>&nbsp;</div>
+          <div style="padding-left:14px"><span class="c"># equality</span></div>
+          <div style="padding-left:14px"><span class="k">def</span> <span class="f">__eq__</span>(<span class="k">self</span>, other) -&gt; <span class="t">bool</span>:</div>
+          <div style="padding-left:28px"><span class="k">return</span> (<span class="k">self</span>.x, <span class="k">self</span>.y) == (other.x, other.y)</div>
+          <div>&nbsp;</div>
+          <div style="padding-left:14px"><span class="c"># make hashable</span></div>
+          <div style="padding-left:14px"><span class="k">def</span> <span class="f">__hash__</span>(<span class="k">self</span>) -&gt; <span class="t">int</span>:</div>
+          <div style="padding-left:28px"><span class="k">return</span> <span class="f">hash</span>((<span class="k">self</span>.x, <span class="k">self</span>.y))</div>
+        </div>
+      </div>
+      <div class="card purple">
+        <span class="badge bd-purple">Class methods &amp; properties</span>
+        <div class="cmd-block" style="margin-top:8px">
+          <div><span class="k">class</span> <span class="t">Temperature</span>:</div>
+          <div style="padding-left:14px"><span class="k">def</span> <span class="f">__init__</span>(<span class="k">self</span>, celsius: <span class="t">float</span>):</div>
+          <div style="padding-left:28px"><span class="k">self</span>._celsius = celsius</div>
+          <div>&nbsp;</div>
+          <div style="padding-left:14px"><span class="c"># classmethod — alternative constructor</span></div>
+          <div style="padding-left:14px">@<span class="f">classmethod</span></div>
+          <div style="padding-left:14px"><span class="k">def</span> <span class="f">from_fahrenheit</span>(cls, f: <span class="t">float</span>) -&gt; <span class="s">"Temperature"</span>:</div>
+          <div style="padding-left:28px"><span class="k">return</span> cls((f - <span class="n">32</span>) * <span class="n">5</span> / <span class="n">9</span>)</div>
+          <div>&nbsp;</div>
+          <div style="padding-left:14px"><span class="c"># property — computed attribute</span></div>
+          <div style="padding-left:14px">@<span class="f">property</span></div>
+          <div style="padding-left:14px"><span class="k">def</span> <span class="f">fahrenheit</span>(<span class="k">self</span>) -&gt; <span class="t">float</span>:</div>
+          <div style="padding-left:28px"><span class="k">return</span> <span class="k">self</span>._celsius * <span class="n">9</span>/<span class="n">5</span> + <span class="n">32</span></div>
+          <div>&nbsp;</div>
+          <div style="padding-left:14px"><span class="c"># staticmethod — no self or cls</span></div>
+          <div style="padding-left:14px">@<span class="f">staticmethod</span></div>
+          <div style="padding-left:14px"><span class="k">def</span> <span class="f">is_valid</span>(c: <span class="t">float</span>) -&gt; <span class="t">bool</span>:</div>
+          <div style="padding-left:28px"><span class="k">return</span> c &gt;= <span class="n">-273.15</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:10px">
+      <div class="card green" data-modal onclick="openModal('dataclass')">
+        <span class="badge bd-green">dataclass</span>
+        <div class="card-title">Auto-generate boilerplate</div>
+        <div class="card-sub">@dataclass generates __init__, __repr__, __eq__. frozen=True adds __hash__. field() for defaults. slots=True for memory efficiency.</div>
+      </div>
+      <div class="card amber" data-modal onclick="openModal('magic_methods')">
+        <span class="badge bd-amber">Magic methods reference</span>
+        <div class="card-title">The full dunder protocol</div>
+        <div class="card-sub">__len__, __getitem__, __iter__, __contains__, __enter__/__exit__, __call__, __slots__, __class_getitem__.</div>
+      </div>
+      <div class="card teal" data-modal onclick="openModal('inheritance')">
+        <span class="badge bd-teal">Inheritance &amp; MRO</span>
+        <div class="card-title">super(), ABC, MRO</div>
+        <div class="card-sub">super() without args in Python 3. Multiple inheritance resolution via C3 linearisation. ABC for abstract base classes.</div>
+      </div>
+    </div>
+    <div class="grid g2" style="margin-top:10px">
+      <div class="card pink" data-modal onclick="openModal('context_manager')">
+        <span class="badge bd-pink">Context managers</span>
+        <div class="card-title">__enter__ / __exit__ / contextlib</div>
+        <div class="card-sub">with statement. Custom via __enter__/__exit__ or @contextmanager. suppress(), ExitStack for multiple resources.</div>
+      </div>
+      <div class="card blue" data-modal onclick="openModal('slots')">
+        <span class="badge bd-blue">__slots__</span>
+        <div class="card-title">Memory optimisation</div>
+        <div class="card-sub">Prevents __dict__ creation per instance. Reduces memory by 40-50% for classes with many instances. Loses dynamic attribute setting.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DECORATORS -->
+  <div class="section" id="decorators">
+    <div class="sec-label">04 — Decorators &amp; closures</div>
+    <div class="sec-desc">Decorators are just functions that take a function and return a function. Understanding closures is the key to understanding decorators.</div>
+    <div class="two-col">
+      <div class="card blue">
+        <span class="badge bd-blue">Closure &amp; decorator anatomy</span>
+        <div class="cmd-block" style="margin-top:8px">
+          <div class="c"># closure — function that captures outer scope</div>
+          <div><span class="k">def</span> <span class="f">make_multiplier</span>(n: <span class="t">int</span>):</div>
+          <div style="padding-left:14px"><span class="k">def</span> <span class="f">multiply</span>(x: <span class="t">int</span>) -&gt; <span class="t">int</span>:</div>
+          <div style="padding-left:28px"><span class="k">return</span> x * n  <span class="c"># n captured from outer</span></div>
+          <div style="padding-left:14px"><span class="k">return</span> multiply</div>
+          <div>&nbsp;</div>
+          <div class="c"># basic decorator</div>
+          <div><span class="k">from</span> functools <span class="k">import</span> wraps</div>
+          <div><span class="k">def</span> <span class="f">log_call</span>(func):</div>
+          <div style="padding-left:14px">@<span class="f">wraps</span>(func)  <span class="c"># preserve metadata</span></div>
+          <div style="padding-left:14px"><span class="k">def</span> <span class="f">wrapper</span>(*args, **kwargs):</div>
+          <div style="padding-left:28px"><span class="f">print</span>(<span class="s">f"Calling {func.__name__}"</span>)</div>
+          <div style="padding-left:28px">result = func(*args, **kwargs)</div>
+          <div style="padding-left:28px"><span class="f">print</span>(<span class="s">f"Done"</span>)</div>
+          <div style="padding-left:28px"><span class="k">return</span> result</div>
+          <div style="padding-left:14px"><span class="k">return</span> wrapper</div>
+          <div><span class="k">return</span> wrapper</div>
+        </div>
+      </div>
+      <div class="card purple">
+        <span class="badge bd-purple">Decorator with arguments</span>
+        <div class="cmd-block" style="margin-top:8px">
+          <div class="c"># decorator factory (takes args)</div>
+          <div><span class="k">def</span> <span class="f">retry</span>(times: <span class="t">int</span> = <span class="n">3</span>, exceptions=(<span class="t">Exception</span>,)):</div>
+          <div style="padding-left:14px"><span class="k">def</span> <span class="f">decorator</span>(func):</div>
+          <div style="padding-left:28px">@<span class="f">wraps</span>(func)</div>
+          <div style="padding-left:28px"><span class="k">def</span> <span class="f">wrapper</span>(*args, **kwargs):</div>
+          <div style="padding-left:42px"><span class="k">for</span> attempt <span class="k">in</span> range(times):</div>
+          <div style="padding-left:56px"><span class="k">try</span>:</div>
+          <div style="padding-left:70px"><span class="k">return</span> func(*args, **kwargs)</div>
+          <div style="padding-left:56px"><span class="k">except</span> exceptions:</div>
+          <div style="padding-left:70px"><span class="k">if</span> attempt == times - <span class="n">1</span>:</div>
+          <div style="padding-left:84px"><span class="k">raise</span></div>
+          <div style="padding-left:28px"><span class="k">return</span> wrapper</div>
+          <div style="padding-left:14px"><span class="k">return</span> decorator</div>
+          <div><span class="k">return</span> decorator</div>
+          <div>&nbsp;</div>
+          <div>@<span class="f">retry</span>(times=<span class="n">3</span>, exceptions=(<span class="t">ConnectionError</span>,))</div>
+          <div><span class="k">def</span> <span class="f">fetch_data</span>(url: <span class="t">str</span>): ...</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:10px">
+      <div class="card green" data-modal onclick="openModal('functools_cache')">
+        <span class="badge bd-green">functools.cache / lru_cache</span>
+        <div class="card-title">Memoisation in one line</div>
+        <div class="card-sub">@cache (unbounded) or @lru_cache(maxsize=128). Cache function results. cache_info() and cache_clear(). Works with any hashable args.</div>
+      </div>
+      <div class="card amber" data-modal onclick="openModal('class_decorator')">
+        <span class="badge bd-amber">Class-based decorators</span>
+        <div class="card-title">__call__ on a class</div>
+        <div class="card-sub">A class with __call__ can be used as a decorator. Useful when you need state across calls (rate limiter, call counter).</div>
+      </div>
+      <div class="card teal" data-modal onclick="openModal('decorator_stacking')">
+        <span class="badge bd-teal">Stacking decorators</span>
+        <div class="card-title">Order matters</div>
+        <div class="card-sub">Applied bottom-up. @A @B def f → A(B(f)). @wraps is critical — without it, __name__, __doc__, and type hints are lost.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GENERATORS -->
+  <div class="section" id="generators">
+    <div class="sec-label">05 — Generators &amp; iterators</div>
+    <div class="sec-desc">Generators produce values lazily — one at a time, on demand. They are the backbone of memory-efficient data processing in Python.</div>
+    <div class="two-col">
+      <div class="card blue">
+        <span class="badge bd-blue">Generator functions</span>
+        <div class="cmd-block" style="margin-top:8px">
+          <div class="c"># yield pauses execution, resumes on next()</div>
+          <div><span class="k">def</span> <span class="f">infinite_counter</span>(start: <span class="t">int</span> = <span class="n">0</span>):</div>
+          <div style="padding-left:14px"><span class="k">while</span> <span class="k">True</span>:</div>
+          <div style="padding-left:28px"><span class="k">yield</span> start</div>
+          <div style="padding-left:28px">start += <span class="n">1</span></div>
+          <div>&nbsp;</div>
+          <div class="c"># yield from — delegate to sub-generator</div>
+          <div><span class="k">def</span> <span class="f">chain</span>(*iterables):</div>
+          <div style="padding-left:14px"><span class="k">for</span> it <span class="k">in</span> iterables:</div>
+          <div style="padding-left:28px"><span class="k">yield from</span> it</div>
+          <div>&nbsp;</div>
+          <div class="c"># generator pipeline</div>
+          <div>lines = (line.strip() <span class="k">for</span> line <span class="k">in</span> open(<span class="s">"file.txt"</span>))</div>
+          <div>non_empty = (line <span class="k">for</span> line <span class="k">in</span> lines <span class="k">if</span> line)</div>
+          <div>parsed = (json.loads(line) <span class="k">for</span> line <span class="k">in</span> non_empty)</div>
+        </div>
+      </div>
+      <div class="card green">
+        <span class="badge bd-green">Custom iterators</span>
+        <div class="cmd-block" style="margin-top:8px">
+          <div class="c"># implement __iter__ and __next__</div>
+          <div><span class="k">class</span> <span class="t">Range</span>:</div>
+          <div style="padding-left:14px"><span class="k">def</span> <span class="f">__init__</span>(<span class="k">self</span>, n): <span class="k">self</span>.n = n; <span class="k">self</span>.i = <span class="n">0</span></div>
+          <div style="padding-left:14px"><span class="k">def</span> <span class="f">__iter__</span>(<span class="k">self</span>): <span class="k">return self</span></div>
+          <div style="padding-left:14px"><span class="k">def</span> <span class="f">__next__</span>(<span class="k">self</span>):</div>
+          <div style="padding-left:28px"><span class="k">if</span> <span class="k">self</span>.i >= <span class="k">self</span>.n: <span class="k">raise</span> <span class="t">StopIteration</span></div>
+          <div style="padding-left:28px">val = <span class="k">self</span>.i; <span class="k">self</span>.i += <span class="n">1</span>; <span class="k">return</span> val</div>
+          <div>&nbsp;</div>
+          <div class="c"># send() — two-way communication</div>
+          <div><span class="k">def</span> <span class="f">accumulator</span>():</div>
+          <div style="padding-left:14px">total = <span class="n">0</span></div>
+          <div style="padding-left:14px"><span class="k">while</span> <span class="k">True</span>:</div>
+          <div style="padding-left:28px">value = <span class="k">yield</span> total</div>
+          <div style="padding-left:28px"><span class="k">if</span> value <span class="k">is not None</span>: total += value</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:10px">
+      <div class="card amber" data-modal onclick="openModal('itertools_ref')">
+        <span class="badge bd-amber">itertools</span>
+        <div class="card-title">The iterator toolkit</div>
+        <div class="card-sub">chain, islice, product, combinations, permutations, groupby, cycle, repeat, accumulate, takewhile, dropwhile.</div>
+      </div>
+      <div class="card purple" data-modal onclick="openModal('generator_patterns')">
+        <span class="badge bd-purple">Generator patterns</span>
+        <div class="card-title">Pipelines &amp; streaming</div>
+        <div class="card-sub">Process large files line-by-line. Build ETL pipelines where each stage is a generator. Avoid loading everything into memory.</div>
+      </div>
+      <div class="card teal" data-modal onclick="openModal('yield_from')">
+        <span class="badge bd-teal">yield from</span>
+        <div class="card-title">Sub-generator delegation</div>
+        <div class="card-sub">Delegates to a sub-generator. Propagates send() and throw(). Simpler than manually forwarding values. Used in async internally.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TYPE HINTS -->
+  <div class="section" id="typehints">
+    <div class="sec-label">06 — Type hints &amp; generics</div>
+    <div class="sec-desc">Python 3.10+ has dramatically improved type hint syntax. Use them for IDE support, documentation, and runtime validation with Pydantic.</div>
+    <div class="two-col">
+      <div class="card blue">
+        <span class="badge bd-blue">Modern type hint syntax</span>
+        <div class="cmd-block" style="margin-top:8px">
+          <div><span class="k">from</span> __future__ <span class="k">import</span> annotations  <span class="c"># defer eval</span></div>
+          <div><span class="k">from</span> typing <span class="k">import</span> TypeVar, Generic, Protocol</div>
+          <div>&nbsp;</div>
+          <div class="c"># built-in generics (3.9+)</div>
+          <div><span class="k">def</span> <span class="f">process</span>(items: list[<span class="t">int</span>]) -&gt; dict[<span class="t">str</span>, <span class="t">int</span>]: ...</div>
+          <div>&nbsp;</div>
+          <div class="c"># union types (3.10+)</div>
+          <div><span class="k">def</span> <span class="f">parse</span>(val: <span class="t">str</span> | <span class="t">int</span> | <span class="k">None</span>) -&gt; <span class="t">float</span>: ...</div>
+          <div>&nbsp;</div>
+          <div class="c"># TypeAlias (3.10+)</div>
+          <div>Vector = list[<span class="t">float</span>]</div>
+          <div>&nbsp;</div>
+          <div class="c"># Optional shorthand</div>
+          <div>name: <span class="t">str</span> | <span class="k">None</span> = <span class="k">None</span>  <span class="c"># same as Optional[str]</span></div>
+          <div>&nbsp;</div>
+          <div class="c"># Callable</div>
+          <div><span class="k">from</span> typing <span class="k">import</span> Callable</div>
+          <div>Handler = Callable[[<span class="t">str</span>, <span class="t">int</span>], <span class="k">None</span>]</div>
+        </div>
+      </div>
+      <div class="card purple">
+        <span class="badge bd-purple">Generics &amp; TypeVar</span>
+        <div class="cmd-block" style="margin-top:8px">
+          <div class="c"># TypeVar for generic functions</div>
+          <div>T = TypeVar(<span class="s">"T"</span>)</div>
+          <div><span class="k">def</span> <span class="f">first</span>(items: list[T]) -&gt; T:</div>
+          <div style="padding-left:14px"><span class="k">return</span> items[<span class="n">0</span>]</div>
+          <div>&nbsp;</div>
+          <div class="c"># Generic class</div>
+          <div><span class="k">class</span> <span class="t">Stack</span>(<span class="t">Generic</span>[T]):</div>
+          <div style="padding-left:14px"><span class="k">def</span> <span class="f">__init__</span>(<span class="k">self</span>): <span class="k">self</span>._items: list[T] = []</div>
+          <div style="padding-left:14px"><span class="k">def</span> <span class="f">push</span>(<span class="k">self</span>, item: T) -&gt; <span class="k">None</span>: ...</div>
+          <div style="padding-left:14px"><span class="k">def</span> <span class="f">pop</span>(<span class="k">self</span>) -&gt; T: ...</div>
+          <div>&nbsp;</div>
+          <div class="c"># Protocol — structural subtyping (duck typing)</div>
+          <div><span class="k">class</span> <span class="t">Drawable</span>(<span class="t">Protocol</span>):</div>
+          <div style="padding-left:14px"><span class="k">def</span> <span class="f">draw</span>(<span class="k">self</span>) -&gt; <span class="k">None</span>: ...</div>
+          <div>&nbsp;</div>
+          <div class="c"># ParamSpec for decorator typing (3.10+)</div>
+          <div><span class="k">from</span> typing <span class="k">import</span> ParamSpec, Concatenate</div>
+          <div>P = ParamSpec(<span class="s">"P"</span>)</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:10px">
+      <div class="card green" data-modal onclick="openModal('literal_final')">
+        <span class="badge bd-green">Literal, Final, TypedDict</span>
+        <div class="card-title">Precise type constraints</div>
+        <div class="card-sub">Literal["GET","POST"] for exact string values. Final for constants. TypedDict for typed dict shapes. Annotated for metadata.</div>
+      </div>
+      <div class="card amber" data-modal onclick="openModal('runtime_types')">
+        <span class="badge bd-amber">Type narrowing</span>
+        <div class="card-title">isinstance, assert, match</div>
+        <div class="card-sub">isinstance() narrows union types. assert narrows Optional. match/case for structural pattern matching. TypeGuard for custom narrowing.</div>
+      </div>
+      <div class="card teal" data-modal onclick="openModal('pydantic_types')">
+        <span class="badge bd-teal">Types + Pydantic</span>
+        <div class="card-title">Runtime validation from hints</div>
+        <div class="card-sub">Pydantic v2 uses Python type hints for runtime validation and serialisation. Field, validator, model_validator, computed_field.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASYNC -->
+  <div class="section" id="async">
+    <div class="sec-label">07 — Async / asyncio</div>
+    <div class="sec-desc">Python&#39;s async model is single-threaded cooperative multitasking. async/await lets you write concurrent code that looks synchronous. Critical for FastAPI.</div>
+    <div class="two-col">
+      <div class="card blue">
+        <span class="badge bd-blue">async / await fundamentals</span>
+        <div class="cmd-block" style="margin-top:8px">
+          <div class="c"># coroutine — defined with async def</div>
+          <div><span class="k">async def</span> <span class="f">fetch</span>(url: <span class="t">str</span>) -&gt; <span class="t">str</span>:</div>
+          <div style="padding-left:14px"><span class="k">async with</span> httpx.<span class="t">AsyncClient</span>() <span class="k">as</span> client:</div>
+          <div style="padding-left:28px">resp = <span class="k">await</span> client.get(url)</div>
+          <div style="padding-left:28px"><span class="k">return</span> resp.text</div>
+          <div>&nbsp;</div>
+          <div class="c"># run multiple coroutines concurrently</div>
+          <div><span class="k">async def</span> <span class="f">main</span>():</div>
+          <div style="padding-left:14px">results = <span class="k">await</span> asyncio.<span class="f">gather</span>(</div>
+          <div style="padding-left:28px"><span class="f">fetch</span>(<span class="s">"https://api1.com"</span>),</div>
+          <div style="padding-left:28px"><span class="f">fetch</span>(<span class="s">"https://api2.com"</span>),</div>
+          <div style="padding-left:28px">return_exceptions=<span class="k">True</span></div>
+          <div style="padding-left:14px">)</div>
+          <div>&nbsp;</div>
+          <div class="c"># create tasks (fire and forget)</div>
+          <div>task = asyncio.<span class="f">create_task</span>(<span class="f">some_coroutine</span>())</div>
+          <div><span class="k">await</span> task</div>
+        </div>
+      </div>
+      <div class="card green">
+        <span class="badge bd-green">Async patterns</span>
+        <div class="cmd-block" style="margin-top:8px">
+          <div class="c"># async context manager</div>
+          <div><span class="k">async with</span> asyncpg.<span class="f">create_pool</span>(...) <span class="k">as</span> pool:</div>
+          <div style="padding-left:14px">row = <span class="k">await</span> pool.<span class="f">fetchrow</span>(<span class="s">"SELECT ..."</span>)</div>
+          <div>&nbsp;</div>
+          <div class="c"># async generator</div>
+          <div><span class="k">async def</span> <span class="f">stream_rows</span>(db):</div>
+          <div style="padding-left:14px"><span class="k">async for</span> row <span class="k">in</span> db.<span class="f">cursor</span>(<span class="s">"SELECT ..."</span>):</div>
+          <div style="padding-left:28px"><span class="k">yield</span> row</div>
+          <div>&nbsp;</div>
+          <div class="c"># timeout</div>
+          <div><span class="k">async with</span> asyncio.<span class="f">timeout</span>(<span class="n">5.0</span>):</div>
+          <div style="padding-left:14px">result = <span class="k">await</span> slow_operation()</div>
+          <div>&nbsp;</div>
+          <div class="c"># run sync code in thread pool</div>
+          <div>result = <span class="k">await</span> asyncio.<span class="f">to_thread</span>(blocking_fn, arg)</div>
+          <div>&nbsp;</div>
+          <div class="c"># TaskGroup (3.11+) — structured concurrency</div>
+          <div><span class="k">async with</span> asyncio.<span class="t">TaskGroup</span>() <span class="k">as</span> tg:</div>
+          <div style="padding-left:14px">t1 = tg.<span class="f">create_task</span>(<span class="f">coro1</span>())</div>
+          <div style="padding-left:14px">t2 = tg.<span class="f">create_task</span>(<span class="f">coro2</span>())</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:10px">
+      <div class="card amber" data-modal onclick="openModal('event_loop')">
+        <span class="badge bd-amber">Event loop &amp; tasks</span>
+        <div class="card-title">How asyncio actually works</div>
+        <div class="card-sub">Single-threaded event loop. await yields control back to the loop. CPU-bound work blocks — use ProcessPoolExecutor or to_thread.</div>
+      </div>
+      <div class="card purple" data-modal onclick="openModal('async_sync')">
+        <span class="badge bd-purple">async vs sync — when to use</span>
+        <div class="card-title">IO-bound vs CPU-bound</div>
+        <div class="card-sub">async for IO (HTTP, DB, files). ThreadPoolExecutor for blocking IO. ProcessPoolExecutor for CPU. Never await a CPU-bound task.</div>
+      </div>
+      <div class="card teal" data-modal onclick="openModal('async_pitfalls')">
+        <span class="badge bd-teal">Common async pitfalls</span>
+        <div class="card-title">Mistakes that break concurrency</div>
+        <div class="card-sub">Forgetting await. Calling sync IO in async code. Shared mutable state. Not using gather for concurrent tasks. Blocking the event loop.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ERRORS -->
+  <div class="section" id="errors">
+    <div class="sec-label">08 — Error handling</div>
+    <div class="sec-desc">Python exceptions are objects. Build a clean error hierarchy, use specific except clauses, and always clean up resources with finally or context managers.</div>
+    <div class="two-col">
+      <div class="card blue">
+        <span class="badge bd-blue">Exception hierarchy &amp; patterns</span>
+        <div class="cmd-block" style="margin-top:8px">
+          <div class="c"># custom exception hierarchy</div>
+          <div><span class="k">class</span> <span class="t">AppError</span>(<span class="t">Exception</span>):</div>
+          <div style="padding-left:14px"><span class="k">def</span> <span class="f">__init__</span>(<span class="k">self</span>, msg: <span class="t">str</span>, code: <span class="t">int</span> = <span class="n">500</span>):</div>
+          <div style="padding-left:28px"><span class="k">super</span>().__init__(msg); <span class="k">self</span>.code = code</div>
+          <div>&nbsp;</div>
+          <div><span class="k">class</span> <span class="t">NotFoundError</span>(<span class="t">AppError</span>):</div>
+          <div style="padding-left:14px"><span class="k">def</span> <span class="f">__init__</span>(<span class="k">self</span>, resource: <span class="t">str</span>):</div>
+          <div style="padding-left:28px"><span class="k">super</span>().__init__(<span class="s">f"{resource} not found"</span>, <span class="n">404</span>)</div>
+          <div>&nbsp;</div>
+          <div class="c"># exception chaining</div>
+          <div><span class="k">try</span>:</div>
+          <div style="padding-left:14px">db.<span class="f">query</span>(...)</div>
+          <div><span class="k">except</span> <span class="t">DBError</span> <span class="k">as</span> e:</div>
+          <div style="padding-left:14px"><span class="k">raise</span> <span class="t">AppError</span>(<span class="s">"DB failed"</span>) <span class="k">from</span> e</div>
+          <div>&nbsp;</div>
+          <div class="c"># suppress specific exceptions</div>
+          <div><span class="k">from</span> contextlib <span class="k">import</span> suppress</div>
+          <div><span class="k">with</span> suppress(<span class="t">FileNotFoundError</span>):</div>
+          <div style="padding-left:14px">os.<span class="f">remove</span>(<span class="s">"file.txt"</span>)</div>
+        </div>
+      </div>
+      <div class="card red">
+        <span class="badge bd-red">try / except / else / finally</span>
+        <div class="cmd-block" style="margin-top:8px">
+          <div><span class="k">try</span>:</div>
+          <div style="padding-left:14px">result = risky_operation()</div>
+          <div><span class="k">except</span> (<span class="t">ValueError</span>, <span class="t">TypeError</span>) <span class="k">as</span> e:</div>
+          <div style="padding-left:14px"><span class="c"># handle multiple types</span></div>
+          <div style="padding-left:14px">logger.<span class="f">error</span>(<span class="s">"Bad input: %s"</span>, e)</div>
+          <div><span class="k">except</span> <span class="t">Exception</span>:</div>
+          <div style="padding-left:14px"><span class="c"># catch-all — use sparingly</span></div>
+          <div style="padding-left:14px"><span class="k">raise</span>  <span class="c"># always re-raise if you catch all</span></div>
+          <div><span class="k">else</span>:</div>
+          <div style="padding-left:14px"><span class="c"># runs ONLY if no exception raised</span></div>
+          <div style="padding-left:14px"><span class="f">save</span>(result)</div>
+          <div><span class="k">finally</span>:</div>
+          <div style="padding-left:14px"><span class="c"># always runs — cleanup here</span></div>
+          <div style="padding-left:14px"><span class="f">cleanup</span>()</div>
+          <div>&nbsp;</div>
+          <div class="c"># ExceptionGroup (3.11+)</div>
+          <div><span class="k">try</span>: ...</div>
+          <div><span class="k">except</span>* <span class="t">ValueError</span> <span class="k">as</span> eg:</div>
+          <div style="padding-left:14px"><span class="k">for</span> exc <span class="k">in</span> eg.exceptions: ...</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:10px">
+      <div class="card green" data-modal onclick="openModal('exception_best')">
+        <span class="badge bd-green">Exception best practices</span>
+        <div class="card-title">What to catch, what to raise</div>
+        <div class="card-sub">Never catch Exception silently. Catch specific types. Raise early, fail loudly. Use else for success path. Chain with raise...from.</div>
+      </div>
+      <div class="card amber" data-modal onclick="openModal('exception_groups')">
+        <span class="badge bd-amber">ExceptionGroup (3.11+)</span>
+        <div class="card-title">Multiple concurrent exceptions</div>
+        <div class="card-sub">TaskGroup raises ExceptionGroup when multiple tasks fail. except* syntax to handle groups by type. New in 3.11.</div>
+      </div>
+      <div class="card purple" data-modal onclick="openModal('warnings')">
+        <span class="badge bd-purple">warnings module</span>
+        <div class="card-title">DeprecationWarning &amp; filters</div>
+        <div class="card-sub">warnings.warn() for deprecation notices. filterwarnings() to control display. Different from exceptions — don&#39;t stop execution.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STDLIB -->
+  <div class="section" id="stdlib">
+    <div class="sec-label">09 — Standard library essentials</div>
+    <div class="sec-desc">The batteries included. These modules replace thousands of lines of custom code.</div>
+    <div class="grid g3">
+      <div class="card blue" data-modal onclick="openModal('collections_ref')">
+        <span class="badge bd-blue">collections</span>
+        <div class="card-title">Specialised data structures</div>
+        <div class="card-sub">defaultdict, Counter, OrderedDict, deque, namedtuple, ChainMap. The most useful module in the stdlib.</div>
+      </div>
+      <div class="card green" data-modal onclick="openModal('itertools_detail')">
+        <span class="badge bd-green">itertools</span>
+        <div class="card-title">Iterator building blocks</div>
+        <div class="card-sub">chain, islice, groupby, product, combinations, permutations, accumulate, cycle, repeat, takewhile, dropwhile, pairwise.</div>
+      </div>
+      <div class="card purple" data-modal onclick="openModal('functools_ref')">
+        <span class="badge bd-purple">functools</span>
+        <div class="card-title">Higher-order functions</div>
+        <div class="card-sub">partial, reduce, cache, lru_cache, wraps, total_ordering, singledispatch, cached_property.</div>
+      </div>
+      <div class="card amber" data-modal onclick="openModal('pathlib_ref')">
+        <span class="badge bd-amber">pathlib</span>
+        <div class="card-title">Modern file system paths</div>
+        <div class="card-sub">Path objects instead of os.path strings. /operator for joining. read_text, write_text, glob, rglob, stat, mkdir, exists.</div>
+      </div>
+      <div class="card teal" data-modal onclick="openModal('dataclasses_ref')">
+        <span class="badge bd-teal">dataclasses</span>
+        <div class="card-title">Structured data containers</div>
+        <div class="card-sub">@dataclass, field(), fields(), asdict(), astuple(). slots=True, frozen=True, kw_only=True. Better than namedtuple for complex data.</div>
+      </div>
+      <div class="card pink" data-modal onclick="openModal('concurrent_ref')">
+        <span class="badge bd-pink">concurrent.futures</span>
+        <div class="card-title">ThreadPool &amp; ProcessPool</div>
+        <div class="card-sub">ThreadPoolExecutor for IO-bound. ProcessPoolExecutor for CPU-bound. submit(), map(), as_completed(). Works with asyncio.to_thread.</div>
+      </div>
+    </div>
+    <div class="two-col" style="margin-top:10px">
+      <div class="card blue">
+        <span class="badge bd-blue">collections — quick reference</span>
+        <div class="cmd-block" style="margin-top:8px">
+          <div><span class="k">from</span> collections <span class="k">import</span> defaultdict, Counter, deque</div>
+          <div>&nbsp;</div>
+          <div class="c"># defaultdict — no KeyError</div>
+          <div>graph = defaultdict(<span class="t">list</span>)</div>
+          <div>graph[<span class="s">"a"</span>].append(<span class="s">"b"</span>)  <span class="c"># no init needed</span></div>
+          <div>&nbsp;</div>
+          <div class="c"># Counter — count anything</div>
+          <div>c = Counter(<span class="s">"banana"</span>)  <span class="c"># {"a":3,"n":2,"b":1}</span></div>
+          <div>c.most_common(<span class="n">2</span>)  <span class="c"># [("a",3),("n",2)]</span></div>
+          <div>c1 + c2  <span class="c"># merge counters</span></div>
+          <div>&nbsp;</div>
+          <div class="c"># deque — O(1) both ends</div>
+          <div>dq = deque(maxlen=<span class="n">3</span>)  <span class="c"># fixed-size sliding window</span></div>
+          <div>dq.appendleft(x)  <span class="c"># O(1)</span></div>
+          <div>dq.rotate(<span class="n">1</span>)  <span class="c"># rotate right by 1</span></div>
+        </div>
+      </div>
+      <div class="card green">
+        <span class="badge bd-green">functools — quick reference</span>
+        <div class="cmd-block" style="margin-top:8px">
+          <div><span class="k">from</span> functools <span class="k">import</span> partial, reduce, cache, singledispatch</div>
+          <div>&nbsp;</div>
+          <div class="c"># partial — fix some arguments</div>
+          <div>double = partial(<span class="f">pow</span>, exp=<span class="n">2</span>)  <span class="c"># pow(x, exp=2)</span></div>
+          <div>&nbsp;</div>
+          <div class="c"># reduce — fold left</div>
+          <div>product = reduce(<span class="k">lambda</span> a, b: a * b, [<span class="n">1</span>,<span class="n">2</span>,<span class="n">3</span>,<span class="n">4</span>])</div>
+          <div>&nbsp;</div>
+          <div class="c"># cache — unbounded memoisation</div>
+          <div>@<span class="f">cache</span></div>
+          <div><span class="k">def</span> <span class="f">fib</span>(n): <span class="k">return</span> n <span class="k">if</span> n &lt; <span class="n">2</span> <span class="k">else</span> <span class="f">fib</span>(n-<span class="n">1</span>) + <span class="f">fib</span>(n-<span class="n">2</span>)</div>
+          <div>&nbsp;</div>
+          <div class="c"># singledispatch — method overloading by type</div>
+          <div>@<span class="f">singledispatch</span></div>
+          <div><span class="k">def</span> <span class="f">process</span>(val): <span class="k">raise</span> <span class="t">NotImplementedError</span></div>
+          <div>@process.<span class="f">register</span>(<span class="t">int</span>)</div>
+          <div><span class="k">def</span> <span class="f">_</span>(val): <span class="k">return</span> val * <span class="n">2</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PATTERNS -->
+  <div class="section" id="patterns">
+    <div class="sec-label">10 — Pythonic patterns &amp; interview topics</div>
+    <div class="sec-desc">Patterns that distinguish intermediate Python from advanced Python. Things that come up in code reviews and technical interviews.</div>
+    <div class="grid g2">
+      <div class="card blue" data-modal onclick="openModal('match_case')">
+        <span class="badge bd-blue">match / case (3.10+)</span>
+        <div class="card-title">Structural pattern matching</div>
+        <div class="card-sub">Match on structure, not just values. Destructure dicts, lists, dataclasses. Guard clauses with if. Replaces isinstance chains.</div>
+      </div>
+      <div class="card green" data-modal onclick="openModal('descriptor')">
+        <span class="badge bd-green">Descriptors</span>
+        <div class="card-title">How property works under the hood</div>
+        <div class="card-sub">__get__, __set__, __delete__. Data vs non-data descriptors. This is how @property, @staticmethod, @classmethod are implemented.</div>
+      </div>
+      <div class="card amber" data-modal onclick="openModal('metaclass')">
+        <span class="badge bd-amber">Metaclasses</span>
+        <div class="card-title">Classes that create classes</div>
+        <div class="card-sub">type is the metaclass of all classes. __init_subclass__ is the modern alternative. Used by SQLAlchemy, Pydantic, Django ORM.</div>
+      </div>
+      <div class="card purple" data-modal onclick="openModal('gc_memory')">
+        <span class="badge bd-purple">Memory &amp; GC</span>
+        <div class="card-title">Reference counting &amp; cycles</div>
+        <div class="card-sub">CPython uses reference counting + cyclic GC. sys.getrefcount(), weakref for caches, __del__ pitfalls, tracemalloc for leaks.</div>
+      </div>
+      <div class="card teal" data-modal onclick="openModal('protocol_abc')">
+        <span class="badge bd-teal">Protocol vs ABC</span>
+        <div class="card-title">Static vs runtime duck typing</div>
+        <div class="card-sub">Protocol = structural (no explicit inheritance). ABC = nominal (must inherit). Protocol is preferred for type hints; ABC for runtime isinstance checks.</div>
+      </div>
+      <div class="card pink" data-modal onclick="openModal('gil')">
+        <span class="badge bd-pink">The GIL</span>
+        <div class="card-title">Global Interpreter Lock</div>
+        <div class="card-sub">Only one thread executes Python bytecode at a time. IO-bound: use threading. CPU-bound: use multiprocessing. GIL removed in 3.13 (opt-in).</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <span id="modalBadge"></span>
+        <span id="modalTitle" style="font-size:15px;font-weight:500;color:var(--text)"></span>
+      </div>
+      <button class="modal-close" onclick="closeModalBtn()">&#x2715; close</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+var MODALS = {
+  list_ops: {
+    badge: '<span class="badge bd-blue">list</span>',
+    title: 'List — operations and complexity',
+    body: '<h3>Core operations</h3><div class="cmd-block"><div class="c"># creation</div><div>a = [1, 2, 3]</div><div>a = list(range(10))</div><div>a = [0] * 5  <span class="c"># [0,0,0,0,0]</span></div><div>&nbsp;</div><div class="c"># modification</div><div>a.append(x)         <span class="c"># O(1) amortised</span></div><div>a.extend([1,2,3])   <span class="c"># O(k) where k is len of added</span></div><div>a.insert(i, x)      <span class="c"># O(n) — shifts elements</span></div><div>a.pop()             <span class="c"># O(1) — from end</span></div><div>a.pop(i)            <span class="c"># O(n) — from middle</span></div><div>a.remove(x)         <span class="c"># O(n) — removes first x</span></div><div>del a[i:j]          <span class="c"># O(n)</span></div><div>&nbsp;</div><div class="c"># search</div><div>x in a              <span class="c"># O(n) linear scan</span></div><div>a.index(x)          <span class="c"># O(n), raises ValueError if missing</span></div><div>a.count(x)          <span class="c"># O(n)</span></div><div>&nbsp;</div><div class="c"># sort — Timsort, stable</div><div>a.sort()                      <span class="c"># in-place</span></div><div>a.sort(key=lambda x: x[1])    <span class="c"># by second element</span></div><div>a.sort(reverse=True)</div><div>sorted(a)                     <span class="c"># returns new list</span></div></div><div class="modal-warn"><div class="tip-label">common gotcha</div><p>a = b = [] makes BOTH variables point to the same list. Use a, b = [], [] or b = a.copy(). Same applies to list multiplication: [[0]*3]*3 creates 3 references to the same inner list.</p></div>'
+  },
+  dict_ops: {
+    badge: '<span class="badge bd-green">dict</span>',
+    title: 'dict — operations and patterns',
+    body: '<h3>Core operations</h3><div class="cmd-block"><div class="c"># creation</div><div>d = {"key": "value"}</div><div>d = dict(a=1, b=2)</div><div>d = dict.fromkeys(["a","b"], 0)</div><div>&nbsp;</div><div class="c"># access</div><div>d["key"]                <span class="c"># KeyError if missing</span></div><div>d.get("key", default)   <span class="c"># safe, returns default</span></div><div>d.setdefault("key", []).append(x)  <span class="c"># init if missing</span></div><div>&nbsp;</div><div class="c"># iteration</div><div>for k in d:              <span class="c"># keys</span></div><div>for v in d.values():     <span class="c"># values</span></div><div>for k, v in d.items():   <span class="c"># key-value pairs</span></div><div>&nbsp;</div><div class="c"># merge (3.9+)</div><div>merged = d1 | d2         <span class="c"># new dict, d2 wins on conflict</span></div><div>d1 |= d2                 <span class="c"># in-place update</span></div><div>&nbsp;</div><div class="c"># dict comprehension</div><div>inv = {v: k for k, v in d.items()}</div><div>filtered = {k: v for k, v in d.items() if v &gt; 0}</div></div><div class="modal-tip"><div class="tip-label">ordered since 3.7</div><p>Dicts maintain insertion order as a language guarantee since Python 3.7. Use dict instead of OrderedDict in most cases. OrderedDict still useful for move_to_end() and reversed iteration.</p></div>'
+  },
+  set_ops: {
+    badge: '<span class="badge bd-amber">set / frozenset</span>',
+    title: 'set and frozenset',
+    body: '<h3>Set operations</h3><div class="cmd-block"><div>s = {1, 2, 3}</div><div>s = set([1, 2, 2, 3])   <span class="c"># {1, 2, 3} — deduplication</span></div><div>&nbsp;</div><div class="c"># set operations</div><div>s1 | s2    <span class="c"># union</span></div><div>s1 &amp; s2    <span class="c"># intersection</span></div><div>s1 - s2    <span class="c"># difference (in s1 not s2)</span></div><div>s1 ^ s2    <span class="c"># symmetric difference</span></div><div>s1 &lt;= s2   <span class="c"># s1 is subset of s2</span></div><div>&nbsp;</div><div class="c"># mutation</div><div>s.add(x)        <span class="c"># O(1)</span></div><div>s.discard(x)    <span class="c"># O(1), no error if missing</span></div><div>s.remove(x)     <span class="c"># O(1), KeyError if missing</span></div><div>s.pop()         <span class="c"># O(1), arbitrary element</span></div><div>&nbsp;</div><div class="c"># frozenset — immutable, hashable</div><div>fs = frozenset([1, 2, 3])</div><div>d = {fs: "value"}   <span class="c"># can be a dict key</span></div></div><div class="modal-tip"><div class="tip-label">use sets for O(1) membership</div><p>Convert a list to a set before doing repeated "in" checks. list lookup is O(n), set lookup is O(1). valid_ids = set(all_ids); then "x in valid_ids" is O(1).</p></div>'
+  },
+  tuple_ops: {
+    badge: '<span class="badge bd-purple">tuple</span>',
+    title: 'tuple and namedtuple',
+    body: '<h3>Tuple basics</h3><div class="cmd-block"><div class="c"># creation</div><div>t = (1, 2, 3)</div><div>t = 1, 2, 3       <span class="c"># parens optional</span></div><div>t = (1,)          <span class="c"># single element — comma required</span></div><div>&nbsp;</div><div class="c"># unpacking</div><div>a, b, c = t</div><div>first, *rest = t</div><div>*head, last = t</div><div>&nbsp;</div><div class="c"># namedtuple — readable field access</div><div>from collections import namedtuple</div><div>Point = namedtuple("Point", ["x", "y"])</div><div>p = Point(1, 2)</div><div>p.x, p.y    <span class="c"># named access</span></div><div>p._asdict() <span class="c"># to dict</span></div><div>&nbsp;</div><div class="c"># typing.NamedTuple — typed version</div><div>from typing import NamedTuple</div><div>class Point(NamedTuple):</div><div style="padding-left:14px">x: float</div><div style="padding-left:14px">y: float = 0.0   <span class="c"># default value</span></div></div><div class="modal-tip"><div class="tip-label">tuple as dict key</div><p>Tuples are hashable (if all elements are hashable), making them useful as composite dict keys. Use (user_id, date) as a key instead of a nested dict.</p></div>'
+  },
+  string_ops: {
+    badge: '<span class="badge bd-teal">str</span>',
+    title: 'String operations — the essentials',
+    body: '<div class="cmd-block"><div class="c"># f-strings (3.12+: = for debugging)</div><div>name = "world"</div><div>f"Hello {name}"           <span class="c"># Hello world</span></div><div>f"{name!r}"               <span class="c"># "world" (repr)</span></div><div>f"{value:.2f}"            <span class="c"># 2 decimal places</span></div><div>f"{name=}"                <span class="c"># name=\'world\' (3.8+)</span></div><div>f"{value:,}"              <span class="c"># thousands separator</span></div><div>&nbsp;</div><div class="c"># common methods</div><div>s.strip()        <span class="c"># remove whitespace both ends</span></div><div>s.split(",")     <span class="c"># split by delimiter</div><div>s.split()        <span class="c"># split on whitespace runs</span></div><div>",".join(lst)    <span class="c"># join list into string</span></div><div>s.replace(a, b)  <span class="c"># replace all occurrences</span></div><div>s.startswith(p)  <span class="c"># also accepts tuple of prefixes</span></div><div>s.endswith(p)    </div><div>s.find(sub)      <span class="c"># index or -1</span></div><div>s.count(sub)     <span class="c"># count non-overlapping</span></div><div>s.encode()       <span class="c"># str to bytes</span></div><div>b.decode()       <span class="c"># bytes to str</span></div><div>&nbsp;</div><div class="c"># build strings efficiently</div><div>"".join([str(x) for x in lst])  <span class="c"># not +=</span></div></div><div class="modal-warn"><div class="tip-label">never concatenate in a loop</div><p>s += x in a loop is O(n&#178;) because strings are immutable. Build a list and join at the end: parts = []; parts.append(x); result = "".join(parts).</p></div>'
+  },
+  builtins_ref: {
+    badge: '<span class="badge bd-blue">Builtins</span>',
+    title: 'Essential builtin functions',
+    body: '<div class="cmd-block"><div class="c"># all return lazy iterators</div><div>map(fn, iterable)             <span class="c"># apply fn to each</span></div><div>filter(pred, iterable)        <span class="c"># keep where pred is True</span></div><div>zip(a, b, c)                  <span class="c"># stops at shortest</span></div><div>zip(a, b, strict=True)        <span class="c"># raises if lengths differ</span></div><div>enumerate(a, start=1)         <span class="c"># (index, value) pairs</span></div><div>reversed(a)                   <span class="c"># reverse iterator</span></div><div>&nbsp;</div><div class="c"># aggregation</div><div>sum(a)                        <span class="c"># sum</span></div><div>min(a), max(a)                <span class="c"># min/max value</span></div><div>min(a, key=lambda x: x[1])   <span class="c"># min by key</span></div><div>any(pred(x) for x in a)      <span class="c"># any True</span></div><div>all(pred(x) for x in a)      <span class="c"># all True</span></div><div>&nbsp;</div><div class="c"># type conversion</div><div>int("42"), float("3.14"), str(42)</div><div>list(range(10)), tuple(a), set(a)</div><div>&nbsp;</div><div class="c"># introspection</div><div>isinstance(x, (int, float))   <span class="c"># type check</span></div><div>issubclass(Child, Parent)</div><div>hasattr(obj, "attr")</div><div>getattr(obj, "attr", default)</div><div>vars(obj)                     <span class="c"># __dict__</span></div></div>'
+  },
+  unpacking: {
+    badge: '<span class="badge bd-pink">Unpacking</span>',
+    title: 'Unpacking, *args, **kwargs',
+    body: '<div class="cmd-block"><div class="c"># basic unpacking</div><div>a, b = 1, 2</div><div>a, *rest = [1, 2, 3, 4]    <span class="c"># rest = [2,3,4]</span></div><div>*head, last = [1, 2, 3, 4] <span class="c"># head = [1,2,3]</span></div><div>a, _, c = (1, 2, 3)         <span class="c"># _ is convention for "discard"</span></div><div>&nbsp;</div><div class="c"># spread into function call</div><div>args = [1, 2, 3]</div><div>fn(*args)              <span class="c"># fn(1, 2, 3)</span></div><div>kwargs = {"x": 1, "y": 2}</div><div>fn(**kwargs)           <span class="c"># fn(x=1, y=2)</span></div><div>&nbsp;</div><div class="c"># merge dicts (3.9+)</div><div>merged = {**d1, **d2}  <span class="c"># d2 wins on conflict</span></div><div>&nbsp;</div><div class="c"># function signature</div><div>def fn(*args, **kwargs):</div><div style="padding-left:14px">pass   <span class="c"># args=tuple, kwargs=dict</span></div><div>&nbsp;</div><div class="c"># keyword-only args (after *)</div><div>def fn(a, b, *, timeout=30):</div><div style="padding-left:14px">pass   <span class="c"># timeout must be named</span></div><div>&nbsp;</div><div class="c"># positional-only args (before /)</div><div>def fn(a, b, /, c):</div><div style="padding-left:14px">pass   <span class="c"># a, b must be positional</span></div></div>'
+  },
+  walrus: {
+    badge: '<span class="badge bd-amber">Walrus :=</span>',
+    title: 'Walrus operator := (Python 3.8+)',
+    body: '<p>The walrus operator assigns a value AND returns it in the same expression. Avoids computing the same value twice.</p><div class="cmd-block"><div class="c"># while loop with assignment</div><div>while chunk := f.read(8192):</div><div style="padding-left:14px">process(chunk)</div><div>&nbsp;</div><div class="c"># filter + transform in one pass</div><div>results = [y for x in data if (y := transform(x)) is not None]</div><div>&nbsp;</div><div class="c"># avoid double call</div><div>if m := re.match(pattern, s):  <span class="c"># assign and test</span></div><div style="padding-left:14px">print(m.group(1))</div><div>&nbsp;</div><div class="c"># in comprehension filter</div><div>values = [n for x in range(100) if (n := expensive(x)) &gt; 0]</div></div><div class="modal-warn"><div class="tip-label">use sparingly</div><p>The walrus operator can reduce readability if overused. Prefer it only when it eliminates a clear duplicate computation or simplifies a while-loop pattern. Never use it just to be clever.</p></div>'
+  },
+  sorting: {
+    badge: '<span class="badge bd-purple">Sorting</span>',
+    title: 'Sorting with key functions',
+    body: '<div class="cmd-block"><div class="c"># sort by second element</div><div>items.sort(key=lambda x: x[1])</div><div>&nbsp;</div><div class="c"># operator module — faster than lambda</div><div>from operator import itemgetter, attrgetter</div><div>items.sort(key=itemgetter(1))        <span class="c"># by index</span></div><div>items.sort(key=itemgetter("name"))   <span class="c"># by dict key</span></div><div>objs.sort(key=attrgetter("name"))    <span class="c"># by attribute</span></div><div>&nbsp;</div><div class="c"># multi-key sort</div><div>items.sort(key=itemgetter(1, 0))     <span class="c"># secondary sort</span></div><div>items.sort(key=lambda x: (x[1], -x[0]))  <span class="c"># mixed asc/desc</span></div><div>&nbsp;</div><div class="c"># sort strings case-insensitively</div><div>words.sort(key=str.lower)</div><div>&nbsp;</div><div class="c"># sort by multiple criteria</div><div>from functools import cmp_to_key</div><div>items.sort(key=cmp_to_key(compare_fn))</div><div>&nbsp;</div><div class="c"># heapq — partial sort</div><div>import heapq</div><div>heapq.nlargest(5, items, key=lambda x: x[1])</div><div>heapq.nsmallest(5, items)</div></div>'
+  },
+  slicing: {
+    badge: '<span class="badge bd-teal">Slicing</span>',
+    title: 'Slicing syntax and patterns',
+    body: '<div class="cmd-block"><div class="c"># a[start:stop:step]</div><div>a[2:5]      <span class="c"># index 2,3,4</span></div><div>a[:5]       <span class="c"># first 5</span></div><div>a[5:]       <span class="c"># from index 5 to end</span></div><div>a[::2]      <span class="c"># every other element</span></div><div>a[::-1]     <span class="c"># reversed</span></div><div>a[-3:]      <span class="c"># last 3</span></div><div>a[:-3]      <span class="c"># all except last 3</span></div><div>a[1:-1]     <span class="c"># drop first and last</span></div><div>&nbsp;</div><div class="c"># slice object for reuse</div><div>FIRST_FIVE = slice(None, 5)</div><div>a[FIRST_FIVE]   <span class="c"># same as a[:5]</span></div><div>&nbsp;</div><div class="c"># slices create shallow copies</div><div>b = a[:]    <span class="c"># copy of a</span></div><div>&nbsp;</div><div class="c"># assignment via slice</div><div>a[2:5] = [10, 20, 30]   <span class="c"># replace a range</span></div><div>a[::2] = [0] * len(a[::2])   <span class="c"># zero out even indices</span></div></div>'
+  },
+  dataclass: {
+    badge: '<span class="badge bd-green">dataclass</span>',
+    title: '@dataclass — structured data',
+    body: '<div class="cmd-block"><div>from dataclasses import dataclass, field</div><div>&nbsp;</div><div>@dataclass</div><div>class User:</div><div style="padding-left:14px">name: str</div><div style="padding-left:14px">age: int</div><div style="padding-left:14px">tags: list[str] = field(default_factory=list)  <span class="c"># mutable default</span></div><div style="padding-left:14px">id: int = field(default=0, repr=False)          <span class="c"># hide from repr</span></div><div>&nbsp;</div><div class="c"># frozen=True: immutable + hashable</div><div>@dataclass(frozen=True)</div><div>class Point:</div><div style="padding-left:14px">x: float; y: float</div><div>&nbsp;</div><div class="c"># slots=True: no __dict__ per instance (faster)</div><div>@dataclass(slots=True)</div><div>class Config:</div><div style="padding-left:14px">host: str; port: int</div><div>&nbsp;</div><div class="c"># __post_init__ for validation</div><div>@dataclass</div><div>class Rectangle:</div><div style="padding-left:14px">w: float; h: float</div><div style="padding-left:14px">def __post_init__(self):</div><div style="padding-left:28px">if self.w &lt;= 0: raise ValueError("w must be positive")</div><div>&nbsp;</div><div class="c"># convert</div><div>from dataclasses import asdict, astuple</div><div>asdict(u)    <span class="c"># to dict (recursive)</span></div></div>'
+  },
+  magic_methods: {
+    badge: '<span class="badge bd-amber">Magic methods</span>',
+    title: 'Magic methods (dunder) reference',
+    body: '<table class="ref-table"><tr><th>Method</th><th>Triggered by</th></tr><tr><td>__init__</td><td>obj = Class()</td></tr><tr><td>__repr__</td><td>repr(obj), REPL output</td></tr><tr><td>__str__</td><td>str(obj), print(obj)</td></tr><tr><td>__len__</td><td>len(obj)</td></tr><tr><td>__getitem__</td><td>obj[key]</td></tr><tr><td>__setitem__</td><td>obj[key] = val</td></tr><tr><td>__delitem__</td><td>del obj[key]</td></tr><tr><td>__contains__</td><td>x in obj</td></tr><tr><td>__iter__</td><td>for x in obj, iter(obj)</td></tr><tr><td>__next__</td><td>next(obj)</td></tr><tr><td>__call__</td><td>obj()</td></tr><tr><td>__enter__ / __exit__</td><td>with obj as x</td></tr><tr><td>__add__, __radd__</td><td>a + b, b + a</td></tr><tr><td>__eq__, __hash__</td><td>a == b, hash(a)</td></tr><tr><td>__lt__, __gt__</td><td>a < b, a > b</td></tr><tr><td>__bool__</td><td>bool(obj), if obj</td></tr><tr><td>__slots__</td><td>class definition</td></tr><tr><td>__class_getitem__</td><td>Class[T] generic syntax</td></tr></table><div class="modal-tip"><div class="tip-label">__repr__ vs __str__</div><p>__repr__ should return an unambiguous representation (ideally eval-able). __str__ is for human-readable output. print() uses __str__ first, falls back to __repr__. Always implement __repr__; __str__ is optional.</p></div>'
+  },
+  inheritance: {
+    badge: '<span class="badge bd-teal">Inheritance</span>',
+    title: 'Inheritance, MRO, and ABCs',
+    body: '<div class="cmd-block"><div class="c"># super() without args (Python 3)</div><div>class Child(Parent):</div><div style="padding-left:14px">def __init__(self, x, y):</div><div style="padding-left:28px">super().__init__(x)  <span class="c"># calls Parent.__init__</span></div><div style="padding-left:28px">self.y = y</div><div>&nbsp;</div><div class="c"># MRO — C3 linearisation</div><div>class A: pass</div><div>class B(A): pass</div><div>class C(A): pass</div><div>class D(B, C): pass</div><div>D.__mro__  <span class="c"># (D, B, C, A, object)</span></div><div>&nbsp;</div><div class="c"># Abstract base class</div><div>from abc import ABC, abstractmethod</div><div>class Shape(ABC):</div><div style="padding-left:14px">@abstractmethod</div><div style="padding-left:14px">def area(self) -&gt; float: ...</div><div>&nbsp;</div><div class="c"># __init_subclass__ — hook on inheritance</div><div>class Plugin:</div><div style="padding-left:14px">registry = {}</div><div style="padding-left:14px">def __init_subclass__(cls, name, **kw):</div><div style="padding-left:28px">super().__init_subclass__(**kw)</div><div style="padding-left:28px">Plugin.registry[name] = cls</div></div>'
+  },
+  context_manager: {
+    badge: '<span class="badge bd-pink">Context managers</span>',
+    title: 'Context managers — with statement',
+    body: '<div class="cmd-block"><div class="c"># implement __enter__ and __exit__</div><div>class Timer:</div><div style="padding-left:14px">def __enter__(self):</div><div style="padding-left:28px">self.start = time.perf_counter()</div><div style="padding-left:28px">return self</div><div style="padding-left:14px">def __exit__(self, exc_type, exc_val, exc_tb):</div><div style="padding-left:28px">self.elapsed = time.perf_counter() - self.start</div><div style="padding-left:28px">return False  <span class="c"># False = don\'t suppress exceptions</span></div><div>&nbsp;</div><div class="c"># @contextmanager — simpler</div><div>from contextlib import contextmanager</div><div>@contextmanager</div><div>def managed_resource():</div><div style="padding-left:14px">resource = acquire()</div><div style="padding-left:14px">try:</div><div style="padding-left:28px">yield resource</div><div style="padding-left:14px">finally:</div><div style="padding-left:28px">release(resource)</div><div>&nbsp;</div><div class="c"># suppress — ignore specific exceptions</div><div>from contextlib import suppress</div><div>with suppress(FileNotFoundError):</div><div style="padding-left:14px">os.remove("tmp.txt")</div><div>&nbsp;</div><div class="c"># ExitStack — dynamic number of CMs</div><div>from contextlib import ExitStack</div><div>with ExitStack() as stack:</div><div style="padding-left:14px">files = [stack.enter_context(open(f)) for f in paths]</div></div>'
+  },
+  slots: {
+    badge: '<span class="badge bd-blue">__slots__</span>',
+    title: '__slots__ — memory optimisation',
+    body: '<p>By default, each instance has a __dict__ for dynamic attribute storage. __slots__ replaces this with a fixed array of slot descriptors, saving 40-50% memory per instance.</p><div class="cmd-block"><div>class Point:</div><div style="padding-left:14px">__slots__ = ("x", "y")</div><div style="padding-left:14px">def __init__(self, x, y):</div><div style="padding-left:28px">self.x = x; self.y = y</div><div>&nbsp;</div><div class="c"># with slots: can\'t add arbitrary attributes</div><div>p = Point(1, 2)</div><div>p.z = 3  <span class="c"># AttributeError!</span></div><div>&nbsp;</div><div class="c"># @dataclass(slots=True) does this automatically</div><div>@dataclass(slots=True)</div><div>class Config:</div><div style="padding-left:14px">host: str</div><div style="padding-left:14px">port: int</div></div><div class="modal-warn"><div class="tip-label">tradeoffs</div><p>With __slots__: no __dict__ (can\'t pickle easily by default), no dynamic attributes, can\'t use weakref (unless __weakref__ in slots). Only use when you have MANY instances (10k+) and memory matters.</p></div>'
+  },
+  functools_cache: {
+    badge: '<span class="badge bd-green">functools.cache</span>',
+    title: 'Memoisation with cache and lru_cache',
+    body: '<div class="cmd-block"><div>from functools import cache, lru_cache</div><div>&nbsp;</div><div class="c"># @cache — unbounded (Python 3.9+)</div><div>@cache</div><div>def fib(n: int) -&gt; int:</div><div style="padding-left:14px">return n if n &lt; 2 else fib(n-1) + fib(n-2)</div><div>&nbsp;</div><div class="c"># @lru_cache — bounded LRU eviction</div><div>@lru_cache(maxsize=128)</div><div>def expensive(x: int, y: int) -&gt; int: ...</div><div>&nbsp;</div><div class="c"># inspect cache</div><div>expensive.cache_info()   <span class="c"># hits, misses, maxsize, currsize</span></div><div>expensive.cache_clear()  <span class="c"># clear the cache</span></div><div>&nbsp;</div><div class="c"># cached_property — compute once per instance</div><div>from functools import cached_property</div><div>class Circle:</div><div style="padding-left:14px">def __init__(self, r): self.r = r</div><div style="padding-left:14px">@cached_property</div><div style="padding-left:14px">def area(self): return 3.14159 * self.r ** 2</div><div><span class="c"># circle.area computed once, then stored</span></div></div><div class="modal-warn"><div class="tip-label">hashable args required</div><p>All arguments must be hashable. Mutable arguments (list, dict) will raise TypeError. Convert to tuple before calling: cached_fn(tuple(my_list)).</p></div>'
+  },
+  class_decorator: {
+    badge: '<span class="badge bd-amber">Class-based decorators</span>',
+    title: 'Class-based decorators with __call__',
+    body: '<p>A class with __call__ can be used as a decorator. Useful when you need to maintain state across calls.</p><div class="cmd-block"><div>class RateLimiter:</div><div style="padding-left:14px">def __init__(self, max_calls: int, period: float):</div><div style="padding-left:28px">self.max_calls = max_calls</div><div style="padding-left:28px">self.period = period</div><div style="padding-left:28px">self.calls = []</div><div>&nbsp;</div><div style="padding-left:14px">def __call__(self, func):</div><div style="padding-left:28px">@wraps(func)</div><div style="padding-left:28px">def wrapper(*args, **kwargs):</div><div style="padding-left:42px">now = time.time()</div><div style="padding-left:42px">self.calls = [t for t in self.calls if now - t &lt; self.period]</div><div style="padding-left:42px">if len(self.calls) &gt;= self.max_calls:</div><div style="padding-left:56px">raise Exception("Rate limit exceeded")</div><div style="padding-left:42px">self.calls.append(now)</div><div style="padding-left:42px">return func(*args, **kwargs)</div><div style="padding-left:28px">return wrapper</div><div>&nbsp;</div><div>@RateLimiter(max_calls=10, period=60)</div><div>def api_call(): ...</div></div>'
+  },
+  decorator_stacking: {
+    badge: '<span class="badge bd-teal">Stacking decorators</span>',
+    title: 'Decorator stacking and @wraps',
+    body: '<div class="cmd-block"><div class="c"># applied bottom-up</div><div>@A</div><div>@B</div><div>@C</div><div>def fn(): ...</div><div class="c"># equivalent to: fn = A(B(C(fn)))</div><div>&nbsp;</div><div class="c"># @wraps is critical — without it:</div><div>def bad_decorator(func):</div><div style="padding-left:14px">def wrapper(*args, **kwargs): ...</div><div style="padding-left:14px">return wrapper  <span class="c"># wrapper.__name__ = "wrapper" (wrong!)</span></div><div>&nbsp;</div><div class="c"># with @wraps — preserves metadata</div><div>def good_decorator(func):</div><div style="padding-left:14px">@wraps(func)   <span class="c"># copies __name__, __doc__, __annotations__</span></div><div style="padding-left:14px">def wrapper(*args, **kwargs): ...</div><div style="padding-left:14px">return wrapper  <span class="c"># wrapper.__name__ = func.__name__</span></div><div>&nbsp;</div><div class="c"># real-world stack (FastAPI style)</div><div>@router.get("/users/{id}")</div><div>@require_auth</div><div>@cache(ttl=60)</div><div>async def get_user(id: int): ...</div></div><div class="modal-tip"><div class="tip-label">functools.wraps</div><p>Always use @wraps(func) in decorators. Without it, tools like pytest, Sphinx docs, IDE introspection, and isinstance checks on the function break because the wrapper hides the original function\'s identity.</p></div>'
+  },
+  itertools_ref: {
+    badge: '<span class="badge bd-amber">itertools</span>',
+    title: 'itertools — essential functions',
+    body: '<div class="cmd-block"><div>from itertools import (chain, islice, groupby, product,</div><div style="padding-left:14px">combinations, permutations, accumulate,</div><div style="padding-left:14px">cycle, repeat, takewhile, dropwhile, pairwise)</div><div>&nbsp;</div><div class="c"># chain — flatten iterables</div><div>list(chain([1,2], [3,4], [5]))   <span class="c"># [1,2,3,4,5]</span></div><div>list(chain.from_iterable([[1,2],[3,4]]))  <span class="c"># same</span></div><div>&nbsp;</div><div class="c"># islice — lazy slicing</div><div>list(islice(counter, 5))   <span class="c"># first 5 of infinite counter</span></div><div>&nbsp;</div><div class="c"># groupby — consecutive groups</div><div>for key, group in groupby(sorted_data, key=lambda x: x["dept"]):</div><div style="padding-left:14px">print(key, list(group))</div><div>&nbsp;</div><div class="c"># combinations / permutations</div><div>list(combinations([1,2,3], 2))   <span class="c"># [(1,2),(1,3),(2,3)]</span></div><div>list(permutations([1,2,3], 2))   <span class="c"># 6 items</span></div><div>list(product([1,2], [3,4]))      <span class="c"># cartesian product</span></div><div>&nbsp;</div><div class="c"># accumulate — running total</div><div>list(accumulate([1,2,3,4]))      <span class="c"># [1,3,6,10]</span></div><div>list(accumulate([1,2,3], max))   <span class="c"># running max</span></div><div>&nbsp;</div><div class="c"># pairwise (3.10+)</div><div>list(pairwise([1,2,3,4]))  <span class="c"># [(1,2),(2,3),(3,4)]</span></div></div>'
+  },
+  generator_patterns: {
+    badge: '<span class="badge bd-purple">Generator patterns</span>',
+    title: 'Generator patterns for real-world use',
+    body: '<h3>Process large files without loading into memory</h3><div class="cmd-block"><div>def read_chunks(path: str, size: int = 8192):</div><div style="padding-left:14px">with open(path, "rb") as f:</div><div style="padding-left:28px">while chunk := f.read(size):</div><div style="padding-left:42px">yield chunk</div><div>&nbsp;</div><div class="c"># pipeline — each stage is a generator</div><div>def parse_lines(lines):</div><div style="padding-left:14px">for line in lines:</div><div style="padding-left:28px">if line.strip():</div><div style="padding-left:42px">yield json.loads(line)</div><div>&nbsp;</div><div>def filter_active(records):</div><div style="padding-left:14px">for r in records:</div><div style="padding-left:28px">if r["active"]:</div><div style="padding-left:42px">yield r</div><div>&nbsp;</div><div class="c"># compose the pipeline — lazy, memory efficient</div><div>pipeline = filter_active(parse_lines(open("data.jsonl")))</div><div>for record in pipeline:</div><div style="padding-left:14px">process(record)</div></div><div class="modal-tip"><div class="tip-label">streaming in FastAPI</div><p>Use async generators for streaming HTTP responses in FastAPI: async def generate(): yield chunk. StreamingResponse(generate(), media_type="text/plain").</p></div>'
+  },
+  yield_from: {
+    badge: '<span class="badge bd-teal">yield from</span>',
+    title: 'yield from — sub-generator delegation',
+    body: '<div class="cmd-block"><div class="c"># without yield from</div><div>def chain_manual(*iterables):</div><div style="padding-left:14px">for it in iterables:</div><div style="padding-left:28px">for item in it:</div><div style="padding-left:42px">yield item</div><div>&nbsp;</div><div class="c"># with yield from — cleaner, propagates send/throw</div><div>def chain_clean(*iterables):</div><div style="padding-left:14px">for it in iterables:</div><div style="padding-left:28px">yield from it</div><div>&nbsp;</div><div class="c"># flatten nested structure</div><div>def flatten(nested):</div><div style="padding-left:14px">for item in nested:</div><div style="padding-left:28px">if isinstance(item, list):</div><div style="padding-left:42px">yield from flatten(item)</div><div style="padding-left:28px">else:</div><div style="padding-left:42px">yield item</div><div>&nbsp;</div><div class="c"># yield from also returns the sub-generator\'s return value</div><div>result = yield from sub_generator()</div></div>'
+  },
+  literal_final: {
+    badge: '<span class="badge bd-green">Literal, Final, TypedDict</span>',
+    title: 'Precise type constraints',
+    body: '<div class="cmd-block"><div>from typing import Literal, Final, TypedDict, Annotated</div><div>&nbsp;</div><div class="c"># Literal — exact string/int values</div><div>def set_mode(mode: Literal["read", "write", "append"]): ...</div><div>Status = Literal["pending", "active", "done"]</div><div>&nbsp;</div><div class="c"># Final — constant, cannot be reassigned</div><div>MAX_RETRIES: Final = 3</div><div>MAX_RETRIES = 5  <span class="c"># type checker error</span></div><div>&nbsp;</div><div class="c"># TypedDict — typed dict shape</div><div>class UserDict(TypedDict):</div><div style="padding-left:14px">name: str</div><div style="padding-left:14px">age: int</div><div style="padding-left:14px">email: str | None   <span class="c"># optional key</span></div><div>&nbsp;</div><div class="c"># Annotated — add metadata to types</div><div>from annotated_types import Gt, Le</div><div>PositiveInt = Annotated[int, Gt(0)]</div><div>Probability = Annotated[float, Gt(0.0), Le(1.0)]</div><div class="c"># Pydantic v2 uses Annotated for Field constraints</div></div>'
+  },
+  runtime_types: {
+    badge: '<span class="badge bd-amber">Type narrowing</span>',
+    title: 'Type narrowing — helping the type checker',
+    body: '<div class="cmd-block"><div>def process(val: int | str | None) -&gt; str:</div><div style="padding-left:14px">if val is None:</div><div style="padding-left:28px">return "nothing"    <span class="c"># narrowed to NoneType</span></div><div style="padding-left:14px">if isinstance(val, int):</div><div style="padding-left:28px">return str(val)     <span class="c"># narrowed to int</span></div><div style="padding-left:14px">return val.upper()  <span class="c"># narrowed to str</span></div><div>&nbsp;</div><div class="c"># TypeGuard — custom narrowing function</div><div>from typing import TypeGuard</div><div>def is_list_of_str(val: list) -&gt; TypeGuard[list[str]]:</div><div style="padding-left:14px">return all(isinstance(x, str) for x in val)</div><div>&nbsp;</div><div class="c"># match/case narrows too (3.10+)</div><div>match command:</div><div style="padding-left:14px">case {"action": "quit"}:</div><div style="padding-left:28px">sys.exit()</div><div style="padding-left:14px">case {"action": "move", "direction": d}:</div><div style="padding-left:28px">move(d)   <span class="c"># d is narrowed to str</span></div><div style="padding-left:14px">case _:</div><div style="padding-left:28px">raise ValueError(f"Unknown: {command}")</div></div>'
+  },
+  pydantic_types: {
+    badge: '<span class="badge bd-teal">Pydantic types</span>',
+    title: 'Python types + Pydantic v2',
+    body: '<div class="cmd-block"><div>from pydantic import BaseModel, Field, field_validator, model_validator</div><div>from typing import Annotated</div><div>&nbsp;</div><div>class User(BaseModel):</div><div style="padding-left:14px">name: str = Field(min_length=1, max_length=100)</div><div style="padding-left:14px">age: int = Field(ge=0, le=150)</div><div style="padding-left:14px">email: str | None = None</div><div style="padding-left:14px">tags: list[str] = Field(default_factory=list)</div><div>&nbsp;</div><div style="padding-left:14px">@field_validator("name")</div><div style="padding-left:14px">@classmethod</div><div style="padding-left:14px">def name_must_be_title(cls, v: str) -&gt; str:</div><div style="padding-left:28px">return v.strip().title()</div><div>&nbsp;</div><div style="padding-left:14px">@model_validator(mode="after")</div><div style="padding-left:14px">def check_consistency(self) -&gt; "User":</div><div style="padding-left:28px">if self.age &lt; 18 and self.email:</div><div style="padding-left:42px">raise ValueError("Minors cannot have email")</div><div style="padding-left:28px">return self</div><div>&nbsp;</div><div class="c"># serialisation</div><div>u = User(name="Alice", age=30)</div><div>u.model_dump()          <span class="c"># to dict</span></div><div>u.model_dump_json()     <span class="c"># to JSON string</span></div><div>User.model_validate(d)  <span class="c"># from dict</span></div></div>'
+  },
+  event_loop: {
+    badge: '<span class="badge bd-amber">Event loop</span>',
+    title: 'asyncio event loop internals',
+    body: '<p>The event loop is a single-threaded scheduler. It runs coroutines, I/O callbacks, and scheduled calls. The key insight: Python can only run one coroutine at a time, but while one coroutine is awaiting I/O, the loop runs another.</p><div class="cmd-block"><div class="c"># run a coroutine</div><div>asyncio.run(main())   <span class="c"># creates a new event loop, runs main, closes it</span></div><div>&nbsp;</div><div class="c"># get the current loop</div><div>loop = asyncio.get_event_loop()</div><div>loop = asyncio.get_running_loop()  <span class="c"># only inside async context</span></div><div>&nbsp;</div><div class="c"># run blocking code without blocking the loop</div><div>result = await asyncio.to_thread(blocking_fn, *args)</div><div>&nbsp;</div><div class="c"># schedule a coroutine from sync code</div><div>future = asyncio.run_coroutine_threadsafe(coro(), loop)</div><div>result = future.result(timeout=5)</div><div>&nbsp;</div><div class="c"># gather — run concurrently, wait for all</div><div>results = await asyncio.gather(coro1(), coro2(), coro3())</div><div>&nbsp;</div><div class="c"># wait_for — with timeout</div><div>result = await asyncio.wait_for(slow_coro(), timeout=5.0)</div></div>'
+  },
+  async_sync: {
+    badge: '<span class="badge bd-purple">async vs sync</span>',
+    title: 'When to use async, threads, and processes',
+    body: '<table class="ref-table"><tr><th>Workload type</th><th>Solution</th><th>Why</th></tr><tr><td>Async I/O (HTTP, DB, files)</td><td>async/await</td><td>Native non-blocking, no threads needed</td></tr><tr><td>Blocking I/O (sync libs)</td><td>asyncio.to_thread()</td><td>Run in thread pool, doesn\'t block event loop</td></tr><tr><td>CPU-bound (computation)</td><td>ProcessPoolExecutor</td><td>Bypasses GIL, true parallelism</td></tr><tr><td>Mixed (sync + async)</td><td>loop.run_in_executor()</td><td>Integrate sync code into async context</td></tr></table><div class="modal-warn"><div class="tip-label">never do this</div><p>Never call time.sleep() in async code — use await asyncio.sleep(). Never call requests.get() in async code — use httpx.AsyncClient or aiohttp. Blocking calls freeze the entire event loop.</p></div><div class="modal-tip"><div class="tip-label">FastAPI note</div><p>FastAPI runs sync route handlers in a thread pool automatically. Only use async def if your handler actually does async I/O. A sync def with async I/O inside will deadlock.</p></div>'
+  },
+  async_pitfalls: {
+    badge: '<span class="badge bd-teal">Async pitfalls</span>',
+    title: 'Common async/await mistakes',
+    body: '<h3>1. Forgetting await</h3><div class="cmd-block"><div class="c"># WRONG — coro object created but never run</div><div>result = fetch_data()   <span class="c"># returns coroutine, not result</span></div><div class="c"># CORRECT</div><div>result = await fetch_data()</div></div><h3>2. Not running coroutines concurrently</h3><div class="cmd-block"><div class="c"># WRONG — sequential (6 seconds if each takes 2s)</div><div>r1 = await fetch("url1")</div><div>r2 = await fetch("url2")</div><div>r3 = await fetch("url3")</div><div class="c"># CORRECT — concurrent (2 seconds)</div><div>r1, r2, r3 = await asyncio.gather(fetch("url1"), fetch("url2"), fetch("url3"))</div></div><h3>3. Calling sync blocking code in async context</h3><div class="cmd-block"><div class="c"># WRONG — blocks entire event loop</div><div>async def handler():</div><div style="padding-left:14px">time.sleep(5)           <span class="c"># freezes everything</span></div><div style="padding-left:14px">requests.get(url)       <span class="c"># also blocks</span></div><div class="c"># CORRECT</div><div>async def handler():</div><div style="padding-left:14px">await asyncio.sleep(5)</div><div style="padding-left:14px">async with httpx.AsyncClient() as c:</div><div style="padding-left:28px">await c.get(url)</div></div>'
+  },
+  exception_best: {
+    badge: '<span class="badge bd-green">Exception best practices</span>',
+    title: 'Exception handling best practices',
+    body: '<h3>Do this</h3><ul><li><strong>Catch specific exceptions</strong> — except ValueError not except Exception</li><li><strong>Use else for success path</strong> — code in else only runs if no exception, cleaner than try nesting</li><li><strong>Chain exceptions with raise...from</strong> — preserves original traceback</li><li><strong>Define a hierarchy</strong> — AppError, then DatabaseError(AppError), NotFoundError(AppError)</li><li><strong>Log at the boundary</strong> — log once at the top-level handler, not in every except clause</li></ul><h3>Don\'t do this</h3><ul><li><strong>Never</strong> bare except: (catches KeyboardInterrupt, SystemExit)</li><li><strong>Never</strong> except Exception: pass (silent failures are the worst bugs)</li><li><strong>Never</strong> use exceptions for flow control — they\'re for exceptional situations</li><li><strong>Never</strong> store exception info in a variable across awaits in async code</li></ul><div class="modal-tip"><div class="tip-label">fail fast principle</div><p>Validate inputs early and raise immediately. Don\'t propagate bad state deep into the call stack. The closer the raise is to the problem, the better the error message.</p></div>'
+  },
+  exception_groups: {
+    badge: '<span class="badge bd-amber">ExceptionGroup</span>',
+    title: 'ExceptionGroup and except* (3.11+)',
+    body: '<p>TaskGroup and asyncio gather can raise multiple exceptions simultaneously. ExceptionGroup wraps them. except* handles groups by type.</p><div class="cmd-block"><div class="c"># TaskGroup raises ExceptionGroup</div><div>try:</div><div style="padding-left:14px">async with asyncio.TaskGroup() as tg:</div><div style="padding-left:28px">tg.create_task(failing_coro1())</div><div style="padding-left:28px">tg.create_task(failing_coro2())</div><div>except* ValueError as eg:</div><div style="padding-left:14px">for exc in eg.exceptions:</div><div style="padding-left:28px">print("ValueError:", exc)</div><div>except* RuntimeError as eg:</div><div style="padding-left:14px">for exc in eg.exceptions:</div><div style="padding-left:28px">print("RuntimeError:", exc)</div><div>&nbsp;</div><div class="c"># create manually</div><div>raise ExceptionGroup("multiple errors", [</div><div style="padding-left:14px">ValueError("bad value"),</div><div style="padding-left:14px">TypeError("wrong type"),</div><div>])</div></div>'
+  },
+  warnings: {
+    badge: '<span class="badge bd-purple">warnings</span>',
+    title: 'warnings module',
+    body: '<div class="cmd-block"><div>import warnings</div><div>&nbsp;</div><div class="c"># issue a deprecation warning</div><div>def old_function():</div><div style="padding-left:14px">warnings.warn(</div><div style="padding-left:28px">"old_function is deprecated, use new_function instead",</div><div style="padding-left:28px">DeprecationWarning,</div><div style="padding-left:28px">stacklevel=2  <span class="c"># points to caller, not here</span></div><div style="padding-left:14px">)</div><div>&nbsp;</div><div class="c"># filter warnings</div><div>warnings.filterwarnings("error")    <span class="c"># turn into exceptions</span></div><div>warnings.filterwarnings("ignore")   <span class="c"># suppress</span></div><div>warnings.filterwarnings("ignore", category=DeprecationWarning)</div><div>&nbsp;</div><div class="c"># in tests</div><div>import pytest</div><div>@pytest.mark.filterwarnings("error::DeprecationWarning")</div><div>def test_no_deprecations(): ...</div></div>'
+  },
+  collections_ref: {
+    badge: '<span class="badge bd-blue">collections</span>',
+    title: 'collections module — full reference',
+    body: '<div class="cmd-block"><div>from collections import (defaultdict, Counter, OrderedDict,</div><div style="padding-left:14px">deque, namedtuple, ChainMap)</div><div>&nbsp;</div><div class="c"># defaultdict</div><div>graph = defaultdict(list)       <span class="c"># value default is list()</span></div><div>counts = defaultdict(int)       <span class="c"># value default is 0</span></div><div>nested = defaultdict(dict)</div><div>&nbsp;</div><div class="c"># Counter</div><div>c = Counter("aabbcc")           <span class="c"># {"a":2,"b":2,"c":2}</span></div><div>c = Counter({"a": 3, "b": 1})</div><div>c.most_common(2)                <span class="c"># top 2</span></div><div>c.subtract(other)               <span class="c"># subtract counts</span></div><div>c + d                           <span class="c"># merge (sum counts)</span></div><div>&nbsp;</div><div class="c"># deque — O(1) both ends</div><div>dq = deque([1, 2, 3], maxlen=5)</div><div>dq.appendleft(0)   dq.popleft()</div><div>dq.rotate(1)       <span class="c"># rotate right</span></div><div>&nbsp;</div><div class="c"># ChainMap — layered dicts</div><div>env = ChainMap(os.environ, defaults)</div><div>env["KEY"]  <span class="c"># searches os.environ first, then defaults</span></div></div>'
+  },
+  itertools_detail: {
+    badge: '<span class="badge bd-green">itertools</span>',
+    title: 'itertools — complete reference',
+    body: '<table class="ref-table"><tr><th>Function</th><th>What it does</th><th>Example</th></tr><tr><td>chain(*its)</td><td>Flatten iterables</td><td>chain([1,2],[3,4]) → 1,2,3,4</td></tr><tr><td>chain.from_iterable</td><td>Flatten one iterable of iterables</td><td>chain.from_iterable([[1,2],[3]])</td></tr><tr><td>islice(it, n)</td><td>Lazy slice</td><td>islice(count(), 5) → 0,1,2,3,4</td></tr><tr><td>groupby(it, key)</td><td>Group consecutive equal keys</td><td>Sort first! Groups consecutive only</td></tr><tr><td>product(*its)</td><td>Cartesian product</td><td>product([1,2],[3,4]) → 4 tuples</td></tr><tr><td>combinations(it, r)</td><td>r-length combos, no repeats</td><td>combinations([1,2,3], 2) → 3 pairs</td></tr><tr><td>permutations(it, r)</td><td>r-length ordered arrangements</td><td>permutations([1,2,3], 2) → 6 items</td></tr><tr><td>accumulate(it, fn)</td><td>Running aggregation</td><td>accumulate([1,2,3]) → 1,3,6</td></tr><tr><td>takewhile(pred, it)</td><td>Take while predicate True</td><td>takewhile(lambda x: x&lt;5, count())</td></tr><tr><td>dropwhile(pred, it)</td><td>Drop while predicate True</td><td>Opposite of takewhile</td></tr><tr><td>pairwise(it)</td><td>Consecutive pairs (3.10+)</td><td>pairwise([1,2,3]) → (1,2),(2,3)</td></tr><tr><td>cycle(it)</td><td>Repeat infinitely</td><td>cycle([1,2,3]) → 1,2,3,1,2,3...</td></tr><tr><td>repeat(val, n)</td><td>Repeat value n times</td><td>repeat(0, 3) → 0,0,0</td></tr></table>'
+  },
+  functools_ref: {
+    badge: '<span class="badge bd-purple">functools</span>',
+    title: 'functools — complete reference',
+    body: '<div class="cmd-block"><div>from functools import (partial, reduce, cache, lru_cache,</div><div style="padding-left:14px">wraps, total_ordering, singledispatch, cached_property)</div><div>&nbsp;</div><div class="c"># partial — fix arguments</div><div>int2 = partial(int, base=2)   <span class="c"># int("1010", base=2)</span></div><div>int2("1010")  <span class="c"># 10</span></div><div>&nbsp;</div><div class="c"># total_ordering — define __eq__ + one comparison</div><div>@total_ordering</div><div>class Version:</div><div style="padding-left:14px">def __eq__(self, other): ...</div><div style="padding-left:14px">def __lt__(self, other): ...</div><div class="c"># auto-generates __le__, __gt__, __ge__</div><div>&nbsp;</div><div class="c"># singledispatch — type-based dispatch</div><div>@singledispatch</div><div>def serialize(obj): raise NotImplementedError</div><div>@serialize.register(int)</div><div>def _(obj): return str(obj)</div><div>@serialize.register(list)</div><div>def _(obj): return json.dumps(obj)</div><div>&nbsp;</div><div class="c"># cached_property — lazy instance attribute</div><div>class DB:</div><div style="padding-left:14px">@cached_property</div><div style="padding-left:14px">def connection(self):</div><div style="padding-left:28px">return create_connection()  <span class="c"># called once</span></div></div>'
+  },
+  pathlib_ref: {
+    badge: '<span class="badge bd-amber">pathlib</span>',
+    title: 'pathlib.Path — modern file handling',
+    body: '<div class="cmd-block"><div>from pathlib import Path</div><div>&nbsp;</div><div class="c"># construction</div><div>p = Path("/etc/hosts")</div><div>p = Path.home() / ".config" / "app.yaml"  <span class="c"># / joins paths</span></div><div>p = Path.cwd() / "data"</div><div>&nbsp;</div><div class="c"># inspection</div><div>p.exists()      p.is_file()     p.is_dir()</div><div>p.name          <span class="c"># "app.yaml"</span></div><div>p.stem          <span class="c"># "app"</span></div><div>p.suffix        <span class="c"># ".yaml"</span></div><div>p.parent        <span class="c"># Path to containing dir</span></div><div>p.parts         <span class="c"># tuple of path components</span></div><div>&nbsp;</div><div class="c"># reading / writing</div><div>text = p.read_text(encoding="utf-8")</div><div>data = p.read_bytes()</div><div>p.write_text("content")</div><div>p.write_bytes(b"bytes")</div><div>&nbsp;</div><div class="c"># directory operations</div><div>p.mkdir(parents=True, exist_ok=True)</div><div>list(p.glob("*.py"))       <span class="c"># non-recursive</span></div><div>list(p.rglob("*.py"))      <span class="c"># recursive</span></div><div>for f in p.iterdir(): ...  <span class="c"># list directory</span></div><div>p.unlink()                 <span class="c"># delete file</span></div><div>p.rename(new_path)</div></div>'
+  },
+  dataclasses_ref: {
+    badge: '<span class="badge bd-teal">dataclasses</span>',
+    title: 'dataclasses module — full reference',
+    body: '<div class="cmd-block"><div>from dataclasses import dataclass, field, fields, asdict, astuple, replace</div><div>&nbsp;</div><div>@dataclass(</div><div style="padding-left:14px">order=True,        <span class="c"># generate __lt__, __le__, etc.</span></div><div style="padding-left:14px">frozen=True,       <span class="c"># immutable + hashable</span></div><div style="padding-left:14px">slots=True,        <span class="c"># __slots__ for memory</span></div><div style="padding-left:14px">kw_only=True       <span class="c"># all fields must be keyword-only</span></div><div>)</div><div>class Config:</div><div style="padding-left:14px">host: str</div><div style="padding-left:14px">port: int = 8080</div><div style="padding-left:14px">tags: list[str] = field(default_factory=list)</div><div style="padding-left:14px">_secret: str = field(default="", repr=False, compare=False)</div><div>&nbsp;</div><div class="c"># field() options</div><div class="c"># default, default_factory, repr, compare, hash, init, metadata</div><div>&nbsp;</div><div class="c"># utilities</div><div>asdict(c)                  <span class="c"># to dict (recursive)</span></div><div>astuple(c)                 <span class="c"># to tuple (recursive)</span></div><div>fields(Config)             <span class="c"># inspect Field objects</span></div><div>replace(c, port=9090)      <span class="c"># copy with changes</span></div></div>'
+  },
+  concurrent_ref: {
+    badge: '<span class="badge bd-pink">concurrent.futures</span>',
+    title: 'ThreadPoolExecutor and ProcessPoolExecutor',
+    body: '<div class="cmd-block"><div>from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed</div><div>&nbsp;</div><div class="c"># ThreadPoolExecutor — IO-bound tasks</div><div>with ThreadPoolExecutor(max_workers=10) as executor:</div><div style="padding-left:14px">futures = [executor.submit(fetch, url) for url in urls]</div><div style="padding-left:14px">for future in as_completed(futures):</div><div style="padding-left:28px">result = future.result()   <span class="c"># blocks until done</span></div><div>&nbsp;</div><div class="c"># map — simpler, order preserved</div><div>with ThreadPoolExecutor() as ex:</div><div style="padding-left:14px">results = list(ex.map(process, items, timeout=30))</div><div>&nbsp;</div><div class="c"># ProcessPoolExecutor — CPU-bound tasks</div><div>with ProcessPoolExecutor(max_workers=4) as executor:</div><div style="padding-left:14px">results = list(executor.map(cpu_heavy, data))</div><div>&nbsp;</div><div class="c"># asyncio integration</div><div>loop = asyncio.get_event_loop()</div><div>result = await loop.run_in_executor(None, blocking_fn, arg)</div><div class="c"># or simpler (3.9+)</div><div>result = await asyncio.to_thread(blocking_fn, arg)</div></div><div class="modal-tip"><div class="tip-label">max_workers rule of thumb</div><p>ThreadPool: min(32, os.cpu_count() + 4) is the default. For pure I/O work, 10-50 workers is typical. ProcessPool: os.cpu_count() (one per core). Too many processes hurt due to IPC overhead.</p></div>'
+  },
+  match_case: {
+    badge: '<span class="badge bd-blue">match / case</span>',
+    title: 'Structural pattern matching (3.10+)',
+    body: '<div class="cmd-block"><div class="c"># match on value</div><div>match status_code:</div><div style="padding-left:14px">case 200: return "OK"</div><div style="padding-left:14px">case 404: return "Not Found"</div><div style="padding-left:14px">case 500 | 502 | 503: return "Server Error"</div><div style="padding-left:14px">case _: return "Unknown"</div><div>&nbsp;</div><div class="c"># match on structure</div><div>match command:</div><div style="padding-left:14px">case {"action": "move", "x": x, "y": y}:</div><div style="padding-left:28px">move(x, y)   <span class="c"># x, y bound from dict</span></div><div style="padding-left:14px">case {"action": "quit"}:</div><div style="padding-left:28px">sys.exit()</div><div>&nbsp;</div><div class="c"># match on type</div><div>match event:</div><div style="padding-left:14px">case Click(x=x, y=y):</div><div style="padding-left:28px">handle_click(x, y)</div><div style="padding-left:14px">case KeyPress(key=key) if key.isalpha():</div><div style="padding-left:28px">handle_key(key)    <span class="c"># guard clause</span></div><div>&nbsp;</div><div class="c"># match sequence</div><div>match tokens:</div><div style="padding-left:14px">case [first, *rest]: ...</div><div style="padding-left:14px">case []: ...</div></div>'
+  },
+  descriptor: {
+    badge: '<span class="badge bd-green">Descriptors</span>',
+    title: 'Descriptors — how @property works',
+    body: '<p>A descriptor is an object that defines __get__, __set__, or __delete__. When accessed via a class or instance, these methods are called instead of normal attribute access.</p><div class="cmd-block"><div>class Validated:</div><div style="padding-left:14px">def __set_name__(self, owner, name):</div><div style="padding-left:28px">self.name = "_" + name</div><div>&nbsp;</div><div style="padding-left:14px">def __get__(self, obj, objtype=None):</div><div style="padding-left:28px">if obj is None: return self</div><div style="padding-left:28px">return getattr(obj, self.name)</div><div>&nbsp;</div><div style="padding-left:14px">def __set__(self, obj, value):</div><div style="padding-left:28px">if not isinstance(value, int):</div><div style="padding-left:42px">raise TypeError("Must be int")</div><div style="padding-left:28px">setattr(obj, self.name, value)</div><div>&nbsp;</div><div>class User:</div><div style="padding-left:14px">age = Validated()  <span class="c"># class-level descriptor</span></div><div>&nbsp;</div><div class="c"># This is exactly how @property works internally</div><div class="c"># property is a descriptor that stores get/set/del functions</div></div><div class="modal-tip"><div class="tip-label">data vs non-data descriptor</div><p>Data descriptor: defines __set__ or __delete__ (like property). Takes priority over instance __dict__. Non-data descriptor: only __get__ (like function/method). Instance __dict__ takes priority.</p></div>'
+  },
+  metaclass: {
+    badge: '<span class="badge bd-amber">Metaclasses</span>',
+    title: 'Metaclasses and __init_subclass__',
+    body: '<p>A metaclass is the class of a class. type is the default metaclass. Metaclasses intercept class creation.</p><div class="cmd-block"><div class="c"># type is the default metaclass</div><div>MyClass = type("MyClass", (Base,), {"attr": 42})</div><div>&nbsp;</div><div class="c"># custom metaclass</div><div>class SingletonMeta(type):</div><div style="padding-left:14px">_instances = {}</div><div style="padding-left:14px">def __call__(cls, *args, **kwargs):</div><div style="padding-left:28px">if cls not in cls._instances:</div><div style="padding-left:42px">cls._instances[cls] = super().__call__(*args, **kwargs)</div><div style="padding-left:28px">return cls._instances[cls]</div><div>&nbsp;</div><div>class Database(metaclass=SingletonMeta): ...</div><div>&nbsp;</div><div class="c"># __init_subclass__ — modern alternative (simpler)</div><div>class Plugin:</div><div style="padding-left:14px">_registry: dict[str, type] = {}</div><div style="padding-left:14px">def __init_subclass__(cls, name: str, **kwargs):</div><div style="padding-left:28px">super().__init_subclass__(**kwargs)</div><div style="padding-left:28px">Plugin._registry[name] = cls</div><div>&nbsp;</div><div>class MyPlugin(Plugin, name="my"): ...</div><div>Plugin._registry  <span class="c"># {"my": MyPlugin}</span></div></div>'
+  },
+  gc_memory: {
+    badge: '<span class="badge bd-purple">Memory &amp; GC</span>',
+    title: 'Memory management and garbage collection',
+    body: '<p>CPython uses reference counting as the primary GC mechanism, supplemented by a cyclic garbage collector for reference cycles.</p><div class="cmd-block"><div>import sys, gc, weakref, tracemalloc</div><div>&nbsp;</div><div class="c"># reference counting</div><div>sys.getrefcount(obj)  <span class="c"># always at least 1 (the arg itself)</span></div><div>&nbsp;</div><div class="c"># weakref — reference without owning</div><div>cache = {}  <span class="c"># strong refs prevent GC</span></div><div>weak_cache = weakref.WeakValueDictionary()  <span class="c"># GC can collect values</span></div><div>ref = weakref.ref(obj)  <span class="c"># call ref() to get obj or None</span></div><div>&nbsp;</div><div class="c"># cyclic GC</div><div>gc.collect()       <span class="c"># manual collection</span></div><div>gc.disable()       <span class="c"># disable (reference counting still works)</span></div><div>gc.get_count()     <span class="c"># (gen0, gen1, gen2) counts</span></div><div>&nbsp;</div><div class="c"># find memory leaks</div><div>tracemalloc.start()</div><div># ... run code ...</div><div>snapshot = tracemalloc.take_snapshot()</div><div>top = snapshot.statistics("lineno")[:10]</div></div>'
+  },
+  protocol_abc: {
+    badge: '<span class="badge bd-teal">Protocol vs ABC</span>',
+    title: 'Protocol vs Abstract Base Class',
+    body: '<p>Both define interfaces. The difference is how conformance is checked.</p><h3>Protocol — structural (duck typing)</h3><div class="cmd-block"><div>from typing import Protocol</div><div>&nbsp;</div><div>class Drawable(Protocol):</div><div style="padding-left:14px">def draw(self) -&gt; None: ...</div><div>&nbsp;</div><div>class Circle:   <span class="c"># no inheritance needed!</span></div><div style="padding-left:14px">def draw(self) -&gt; None: ...</div><div>&nbsp;</div><div>def render(shape: Drawable) -&gt; None: ...</div><div>render(Circle())  <span class="c"># type checker: OK</span></div></div><h3>ABC — nominal (explicit inheritance)</h3><div class="cmd-block"><div>from abc import ABC, abstractmethod</div><div>&nbsp;</div><div>class Shape(ABC):</div><div style="padding-left:14px">@abstractmethod</div><div style="padding-left:14px">def area(self) -&gt; float: ...</div><div>&nbsp;</div><div>class Square(Shape):</div><div style="padding-left:14px">def area(self) -&gt; float: return self.side ** 2</div><div>&nbsp;</div><div>isinstance(Square(), Shape)  <span class="c"># True — works at runtime</span></div></div><div class="modal-tip"><div class="tip-label">which to use</div><p>Protocol for type checking and decoupling (preferred in modern Python). ABC when you need runtime isinstance checks or want to provide default implementations via regular methods.</p></div>'
+  },
+  gil: {
+    badge: '<span class="badge bd-pink">The GIL</span>',
+    title: 'Global Interpreter Lock (GIL)',
+    body: '<p>The GIL is a mutex that protects Python\'s internal state. Only one thread can execute Python bytecode at a time, even on multi-core machines.</p><h3>Impact by workload</h3><ul><li><strong>IO-bound:</strong> GIL is released during I/O wait. Threading works fine — threads release the GIL while waiting for I/O.</li><li><strong>CPU-bound:</strong> GIL prevents true parallelism. Use multiprocessing to bypass it.</li><li><strong>C extensions:</strong> NumPy, cryptography, etc. release the GIL — CPU-bound NumPy code IS parallelisable with threads.</li></ul><div class="cmd-block"><div class="c"># IO-bound: use threading (GIL released during IO)</div><div>from concurrent.futures import ThreadPoolExecutor</div><div>with ThreadPoolExecutor(10) as ex:</div><div style="padding-left:14px">results = list(ex.map(requests.get, urls))</div><div>&nbsp;</div><div class="c"># CPU-bound: use multiprocessing (bypasses GIL)</div><div>from concurrent.futures import ProcessPoolExecutor</div><div>with ProcessPoolExecutor() as ex:</div><div style="padding-left:14px">results = list(ex.map(heavy_computation, data))</div></div><div class="modal-tip"><div class="tip-label">Python 3.13</div><p>Python 3.13 introduced a "free-threaded" (no-GIL) build as an opt-in experiment. Run with python3.13t. Still experimental but shows the future direction.</p></div>'
+  }
+};
+
+window.openModal = function(key) {
+  var data = MODALS[key];
+  if (!data) return;
+  document.getElementById('modalBadge').innerHTML = data.badge;
+  document.getElementById('modalTitle').textContent = data.title;
+  document.getElementById('modalBody').innerHTML = data.body;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+window.closeModal = function(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalBtn();
+};
+window.closeModalBtn = function() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+};
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModalBtn();
+});
+window.navTo = function(id) {
+  document.getElementById(id).scrollIntoView({behavior: 'smooth'});
+  document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
+  event.target.classList.add('active');
+};
+var sections = document.querySelectorAll('.section');
+var btns = document.querySelectorAll('.nav-btn');
+var obs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) {
+      var idx = Array.from(sections).indexOf(e.target);
+      btns.forEach(function(b) { b.classList.remove('active'); });
+      if (btns[idx]) btns[idx].classList.add('active');
+    }
+  });
+}, {rootMargin: '-30% 0px -60% 0px'});
+sections.forEach(function(s) { obs.observe(s); });
+</script>
+</body>
+</html>

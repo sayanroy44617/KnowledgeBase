@@ -6,3 +6,4 @@
 - [Docker](docker.html)
 - [ci-cd](cicd.html)
 - [helm](helm.html)
+- [python](python.html)

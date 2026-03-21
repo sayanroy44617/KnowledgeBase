@@ -14,6 +14,12 @@
    - **Idempotency**: A property where performing an operation multiple times has the same result as performing it once.
    - **Why it matters**: It prevents duplicate data and allows you to safely restart or retry a failed sync script without side effects.
 5. REST constraints — the 6 principles explained simply
+   - **Client-Server**: the client handles the ui and user / the server handles the business logic.
+   - **Stateless**: the server does not store any state.
+   - **Cacheable**: responses must define themselves as cacheable or not.
+   - **Uniform Interface**: the server must provide a consistent interface for all clients.
+   - **Layered System**: the server must be composed of loosely coupled layers.
+   - **Code on Demand (optional)**: the server can dynamically generate code on demand.
 6. Stateless vs stateful services
 7. Synchronous vs asynchronous communication
 8. What happens when you type a URL and hit Enter
