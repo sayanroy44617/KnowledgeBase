@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamic Programming</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0f14;--bg2:#13161d;--bg3:#1a1d27;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#e8eaf0;--muted:#7a7f94;--dim:#4a4f64;
+  --accent:#9b7ef0;--accent2:#3ecf8e;--amber:#f0a03e;
+  --red:#e05252;--blue:#4a90e2;--pink:#e06ea0;--teal:#0f9d9d;
+  --mono:'JetBrains Mono',monospace;--sans:'Sora',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;font-size:14px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.page{max-width:1100px;margin:0 auto;padding:0 1.5rem 5rem}
+.hero{padding:3rem 0 2rem;border-bottom:1px solid var(--border)}
+.hero-eyebrow{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.75rem}
+.hero h1{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:600;letter-spacing:-.02em}
+.hero h1 span{color:var(--accent)}
+.hero-sub{margin-top:.75rem;font-size:13px;color:var(--muted);max-width:680px;line-height:1.7}
+.hero-badges{margin-top:1rem;display:flex;gap:.5rem;flex-wrap:wrap}
+.nav{position:sticky;top:0;z-index:100;background:rgba(13,15,20,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.6rem 0}
+.nav-inner{max-width:1100px;margin:0 auto;padding:0 1.5rem;display:flex;gap:.25rem;overflow-x:auto;scrollbar-width:none}
+.nav-btn{font-family:var(--mono);font-size:11px;padding:.3rem .75rem;border-radius:4px;border:1px solid transparent;color:var(--muted);cursor:pointer;background:none;white-space:nowrap;transition:all .15s}
+.nav-btn:hover{color:var(--text);background:var(--bg3)}
+.nav-btn.active{color:var(--accent);border-color:rgba(155,126,240,.3);background:rgba(155,126,240,.08)}
+.section{margin:3rem 0;scroll-margin-top:56px}
+.sec-label{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1.25rem;display:flex;align-items:center;gap:.5rem}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.sec-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:1.25rem;max-width:800px}
+.grid{display:grid;gap:10px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.9rem 1rem;transition:border-color .15s,background .15s;position:relative;overflow:hidden}
+.card:hover{border-color:var(--border2);background:var(--bg3)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .2s}
+.card:hover::before{opacity:1}
+.card.purple::before{background:var(--accent)}.card.green::before{background:var(--accent2)}
+.card.amber::before{background:var(--amber)}.card.blue::before{background:var(--blue)}
+.card.red::before{background:var(--red)}.card.teal::before{background:var(--teal)}.card.pink::before{background:var(--pink)}
+.card[data-modal]{cursor:pointer}
+.card[data-modal]::after{content:'↗';position:absolute;bottom:.6rem;right:.75rem;font-size:11px;color:var(--dim)}
+.card-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px}
+.card-sub{font-size:12px;color:var(--muted);line-height:1.6}
+.badge{display:inline-flex;font-family:var(--mono);font-size:10px;font-weight:500;padding:2px 8px;border-radius:3px;margin-bottom:7px}
+.bd-purple{background:rgba(155,126,240,.15);color:var(--accent)}
+.bd-green{background:rgba(62,207,142,.12);color:var(--accent2)}
+.bd-amber{background:rgba(240,160,62,.12);color:var(--amber)}
+.bd-blue{background:rgba(74,144,226,.15);color:var(--blue)}
+.bd-red{background:rgba(224,82,82,.12);color:var(--red)}
+.bd-teal{background:rgba(15,157,157,.15);color:var(--teal)}
+.bd-pink{background:rgba(224,110,160,.12);color:var(--pink)}
+pre{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.75rem 1rem;font-family:var(--mono);font-size:11px;line-height:2;overflow-x:auto;margin-top:.7rem;white-space:pre}
+.kw{color:#cc99cd}.st{color:#3ecf8e}.cm{color:#4a4f64}.fn{color:#f0e68c}.nm{color:#f0a03e}.ty{color:#4a90e2}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hi-box{background:rgba(155,126,240,.06);border:1px solid rgba(155,126,240,.2);border-radius:8px;padding:.9rem 1rem;margin:.75rem 0}
+.hi-box p{font-size:13px;color:#b09af0;line-height:1.7;margin:0}
+.info-box{background:rgba(62,207,142,.06);border:1px solid rgba(62,207,142,.2);border-radius:8px;padding:.9rem 1rem;margin:.75rem 0}
+.info-box p{font-size:13px;color:#5ec99a;line-height:1.7;margin:0}
+.warn-box{background:rgba(240,160,62,.06);border:1px solid rgba(240,160,62,.2);border-radius:8px;padding:.9rem 1rem;margin:.75rem 0}
+.warn-box p{font-size:13px;color:#c8883a;line-height:1.7;margin:0}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:rgba(155,126,240,.2);color:var(--accent);font-family:var(--mono);font-size:11px;font-weight:500;margin-right:8px;flex-shrink:0}
+.step-row{display:flex;align-items:flex-start;margin-bottom:.75rem}
+.step-content{font-size:13px;color:var(--muted);line-height:1.7;flex:1;padding-top:1px}
+.step-content strong{color:var(--text)}
+.ref-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:.5rem}
+.ref-table th{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:6px 10px;border-bottom:1px solid var(--border);text-align:left;font-weight:500}
+.ref-table td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;line-height:1.5}
+.ref-table td:first-child{color:var(--text);font-weight:500;font-family:var(--mono);font-size:11px}
+.ref-table tr:last-child td{border-bottom:none}
+.ref-table tr:hover td{background:var(--bg3)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;width:min(740px,94vw);max-height:85vh;overflow-y:auto;transform:translateY(12px) scale(.98);transition:transform .2s}
+.modal-overlay.open .modal-box{transform:translateY(0) scale(1)}
+.modal-header{padding:1.2rem 1.4rem .8rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.modal-header-left{display:flex;flex-direction:column;gap:.4rem}
+.modal-close{background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;border-radius:4px;padding:2px 8px;font-size:13px}
+.modal-body{padding:1.2rem 1.4rem 1.8rem}
+.modal-body h3{font-size:13px;font-weight:500;color:var(--text);margin:1.2rem 0 .5rem}
+.modal-body h3:first-child{margin-top:0}
+.modal-body p{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:.75rem}
+.modal-body ul{padding-left:1.2rem;margin-bottom:.75rem}
+.modal-body li{font-size:13px;color:var(--muted);line-height:1.9}
+.modal-body li strong{color:var(--text)}
+.modal-body pre{margin-top:0}
+.modal-tip{background:rgba(62,207,142,.06);border:1px solid rgba(62,207,142,.15);border-radius:6px;padding:.75rem 1rem;margin-top:1rem}
+.modal-tip .tip-label{font-family:var(--mono);font-size:10px;color:var(--accent2);margin-bottom:.3rem}
+.modal-tip p{font-size:12px;color:#5ec99a;margin:0}
+.modal-warn{background:rgba(240,160,62,.06);border:1px solid rgba(240,160,62,.15);border-radius:6px;padding:.75rem 1rem;margin-top:.75rem}
+.modal-warn .tip-label{font-family:var(--mono);font-size:10px;color:var(--amber);margin-bottom:.3rem}
+.modal-warn p{font-size:12px;color:#c8883a;margin:0}
+@media(max-width:700px){.g3,.g4,.two-col{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+@media(max-width:480px){.g2,.g3,.g4,.two-col{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="nav"><div class="nav-inner">
+  <button class="nav-btn active" onclick="navTo('whatisdp')">What is DP?</button>
+  <button class="nav-btn" onclick="navTo('framework')">Framework</button>
+  <button class="nav-btn" onclick="navTo('s1d')">1D DP</button>
+  <button class="nav-btn" onclick="navTo('s2d')">2D DP</button>
+  <button class="nav-btn" onclick="navTo('knapsack')">Knapsack</button>
+  <button class="nav-btn" onclick="navTo('strings')">Strings</button>
+  <button class="nav-btn" onclick="navTo('trees')">Trees</button>
+  <button class="nav-btn" onclick="navTo('spaceopt')">Space Opt.</button>
+  <button class="nav-btn" onclick="navTo('problems')">Problems</button>
+  <button class="nav-btn" onclick="navTo('interview')">Interview</button>
+</div></div>
+
+<div class="page">
+<div class="hero">
+  <div class="hero-eyebrow">DSA revision guide</div>
+  <h1>Dynamic <span>Programming</span></h1>
+  <div class="hero-sub">DP is just recursion with memory. Store results you have already computed so you never solve the same subproblem twice. Once you have a recursive solution, adding memoisation is almost mechanical.</div>
+  <div class="hero-badges">
+    <span class="badge bd-purple">Memoisation</span>
+    <span class="badge bd-green">Tabulation</span>
+    <span class="badge bd-amber">1D / 2D DP</span>
+    <span class="badge bd-blue">Knapsack</span>
+    <span class="badge bd-teal">String DP</span>
+    <span style="color:var(--dim);font-size:12px">Click cards for deep dive</span>
+  </div>
+</div>
+
+<!-- 01 WHAT IS DP -->
+<div class="section" id="whatisdp">
+  <div class="sec-label">01 — What is Dynamic Programming?</div>
+  <div class="hi-box"><p><strong>Simple definition:</strong> DP = recursion + caching. If a recursive solution solves the same subproblem more than once, store the result the first time and reuse it. That is the whole idea. The fancy name hides something simple.</p></div>
+  <div class="grid g2">
+    <div class="card purple" data-modal onclick="openModal('overlapping')">
+      <span class="badge bd-purple">Overlapping subproblems</span>
+      <div class="card-title">Same subproblem solved multiple times</div>
+      <div class="card-sub">fib(5) needs fib(3). fib(4) also needs fib(3). Without caching, fib(3) computed twice — and fib(2) many more times. DP stores it once.</div>
+    </div>
+    <div class="card green" data-modal onclick="openModal('optimal_sub')">
+      <span class="badge bd-green">Optimal substructure</span>
+      <div class="card-title">Best answer uses best sub-answers</div>
+      <div class="card-sub">The optimal solution to the whole problem contains optimal solutions to subproblems. Shortest path A to C via B needs shortest A-B and shortest B-C.</div>
+    </div>
+  </div>
+  <div class="grid g3" style="margin-top:10px">
+    <div class="card amber" data-modal onclick="openModal('memo_vs_tab')">
+      <span class="badge bd-amber">Memoisation vs Tabulation</span>
+      <div class="card-title">Top-down vs bottom-up</div>
+      <div class="card-sub">Memoisation = recursion + cache (top-down). Tabulation = loops + table (bottom-up). Same answer, different direction.</div>
+    </div>
+    <div class="card blue" data-modal onclick="openModal('dp_vs_greedy')">
+      <span class="badge bd-blue">DP vs Greedy</span>
+      <div class="card-title">When do you need DP?</div>
+      <div class="card-sub">Greedy picks one best option and never looks back. DP considers ALL options and picks the best. If greedy fails — use DP.</div>
+    </div>
+    <div class="card teal" data-modal onclick="openModal('fib_visual')">
+      <span class="badge bd-teal">Why caching works</span>
+      <div class="card-title">Fibonacci: O(2^n) vs O(n)</div>
+      <div class="card-sub">Without cache: billions of redundant calls for n=50. With cache: n distinct subproblems, each solved once. Click to see the call tree.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 02 FRAMEWORK -->
+<div class="section" id="framework">
+  <div class="sec-label">02 — The 4-step framework</div>
+  <div class="sec-desc">Every DP problem follows the same 4 steps. Master this process and DP becomes pattern recognition, not magic.</div>
+  <div class="card purple">
+    <span class="badge bd-purple">Universal DP process</span>
+    <div style="margin-top:12px">
+      <div class="step-row"><span class="step-num">1</span><div class="step-content"><strong>Define the state.</strong> What does dp[i] mean? Usually: "best answer considering the first i elements." For 2D: "answer using s1[:i] and s2[:j]." This is the hardest step.</div></div>
+      <div class="step-row"><span class="step-num">2</span><div class="step-content"><strong>Write the recurrence.</strong> How does dp[i] relate to smaller subproblems? Ask: what choices do I have at this step? Try each. Take the best (min/max) or sum them.</div></div>
+      <div class="step-row"><span class="step-num">3</span><div class="step-content"><strong>Identify base cases.</strong> What is the answer for the smallest input? dp[0] = 0? dp[1] = nums[0]? Wrong base cases produce wrong answers silently.</div></div>
+      <div class="step-row"><span class="step-num">4</span><div class="step-content"><strong>Determine the answer.</strong> Which dp value is the final answer? Usually dp[n]. Sometimes max(dp). Sometimes dp[m][n].</div></div>
+    </div>
+  </div>
+  <div class="two-col" style="margin-top:10px">
+    <div class="card green">
+      <span class="badge bd-green">Top-down (memoisation)</span>
+      <div class="card-sub" style="margin-top:4px">Start with recursion. Add @cache. Done.</div>
+<pre><span class="kw">from</span> functools <span class="kw">import</span> cache
+
+<span class="kw">def</span> <span class="fn">fib</span>(n):
+    @<span class="fn">cache</span>
+    <span class="kw">def</span> <span class="fn">dp</span>(i):
+        <span class="kw">if</span> i &lt;= <span class="nm">1</span>: <span class="kw">return</span> i    <span class="cm"># base case</span>
+        <span class="kw">return</span> <span class="fn">dp</span>(i-<span class="nm">1</span>) + <span class="fn">dp</span>(i-<span class="nm">2</span>)  <span class="cm"># recurrence</span>
+    <span class="kw">return</span> <span class="fn">dp</span>(n)            <span class="cm"># answer</span></pre>
+    </div>
+    <div class="card blue">
+      <span class="badge bd-blue">Bottom-up (tabulation)</span>
+      <div class="card-sub" style="margin-top:4px">Fill a table from smallest to largest.</div>
+<pre><span class="kw">def</span> <span class="fn">fib</span>(n):
+    <span class="kw">if</span> n &lt;= <span class="nm">1</span>: <span class="kw">return</span> n
+    dp = [<span class="nm">0</span>] * (n + <span class="nm">1</span>)
+    dp[<span class="nm">0</span>], dp[<span class="nm">1</span>] = <span class="nm">0</span>, <span class="nm">1</span>  <span class="cm"># base cases</span>
+    <span class="kw">for</span> i <span class="kw">in</span> range(<span class="nm">2</span>, n + <span class="nm">1</span>):
+        dp[i] = dp[i-<span class="nm">1</span>] + dp[i-<span class="nm">2</span>]  <span class="cm"># recurrence</span>
+    <span class="kw">return</span> dp[n]           <span class="cm"># answer</span></pre>
+    </div>
+  </div>
+</div>
+<!-- 03 1D DP -->
+<div class="section" id="s1d">
+  <div class="sec-label">03 — 1D DP patterns</div>
+  <div class="sec-desc">The simplest DP problems. dp is a 1D array. Each cell depends on a few previous cells. Master these before moving to 2D.</div>
+  <div class="two-col">
+    <div class="card purple" data-modal onclick="openModal('climbing')">
+      <span class="badge bd-purple">Fibonacci pattern</span>
+      <div class="card-title">dp[i] depends on dp[i-1] and dp[i-2]</div>
+<pre><span class="cm"># LC 70 — Climbing Stairs</span>
+<span class="cm"># dp[i] = ways to reach step i</span>
+<span class="cm"># dp[i] = dp[i-1] + dp[i-2]</span>
+dp = [<span class="nm">0</span>] * (n + <span class="nm">1</span>)
+dp[<span class="nm">1</span>] = <span class="nm">1</span>; dp[<span class="nm">2</span>] = <span class="nm">2</span>
+<span class="kw">for</span> i <span class="kw">in</span> range(<span class="nm">3</span>, n + <span class="nm">1</span>):
+    dp[i] = dp[i-<span class="nm">1</span>] + dp[i-<span class="nm">2</span>]
+<span class="kw">return</span> dp[n]</pre>
+    </div>
+    <div class="card green" data-modal onclick="openModal('robber')">
+      <span class="badge bd-green">Include / Exclude pattern</span>
+      <div class="card-title">Take it or leave it — no adjacent</div>
+<pre><span class="cm"># LC 198 — House Robber</span>
+<span class="cm"># dp[i] = max money from first i houses</span>
+<span class="cm"># rob i:  nums[i] + dp[i-2]</span>
+<span class="cm"># skip i: dp[i-1]</span>
+prev2, prev1 = <span class="nm">0</span>, <span class="nm">0</span>
+<span class="kw">for</span> num <span class="kw">in</span> nums:
+    curr = max(prev1, prev2 + num)
+    prev2, prev1 = prev1, curr
+<span class="kw">return</span> prev1</pre>
+    </div>
+  </div>
+  <div class="two-col" style="margin-top:10px">
+    <div class="card amber" data-modal onclick="openModal('kadane')">
+      <span class="badge bd-amber">Kadane — Max Subarray</span>
+      <div class="card-title">LC 53 — extend current or start fresh</div>
+<pre><span class="cm"># dp[i] = max sum subarray ENDING at i</span>
+<span class="cm"># either extend previous or restart at nums[i]</span>
+curr = best = nums[<span class="nm">0</span>]
+<span class="kw">for</span> num <span class="kw">in</span> nums[<span class="nm">1</span>:]:
+    curr = max(num, curr + num)
+    best = max(best, curr)
+<span class="kw">return</span> best</pre>
+    </div>
+    <div class="card blue" data-modal onclick="openModal('coinchange')">
+      <span class="badge bd-blue">Coin Change — LC 322</span>
+      <div class="card-title">Min coins to make amount — try each coin</div>
+<pre><span class="cm"># dp[a] = min coins for amount a</span>
+dp = [float(<span class="st">"inf"</span>)] * (amount + <span class="nm">1</span>)
+dp[<span class="nm">0</span>] = <span class="nm">0</span>  <span class="cm"># base: 0 coins to make 0</span>
+<span class="kw">for</span> a <span class="kw">in</span> range(<span class="nm">1</span>, amount + <span class="nm">1</span>):
+    <span class="kw">for</span> coin <span class="kw">in</span> coins:
+        <span class="kw">if</span> coin &lt;= a:
+            dp[a] = min(dp[a], dp[a-coin] + <span class="nm">1</span>)
+<span class="kw">return</span> dp[amount] <span class="kw">if</span> dp[amount] != float(<span class="st">"inf"</span>) <span class="kw">else</span> -<span class="nm">1</span></pre>
+    </div>
+  </div>
+  <div style="margin-top:10px">
+    <div class="card teal" data-modal onclick="openModal('lis')">
+      <span class="badge bd-teal">Longest Increasing Subsequence — LC 300</span>
+      <div class="card-title">dp[i] = length of LIS ending at index i. For each i, look back at every j &lt; i where nums[j] &lt; nums[i].</div>
+<pre><span class="cm"># dp[i] = LIS length ending at nums[i]</span>
+dp = [<span class="nm">1</span>] * len(nums)  <span class="cm"># every element alone = length 1</span>
+<span class="kw">for</span> i <span class="kw">in</span> range(<span class="nm">1</span>, len(nums)):
+    <span class="kw">for</span> j <span class="kw">in</span> range(i):
+        <span class="kw">if</span> nums[j] &lt; nums[i]:
+            dp[i] = max(dp[i], dp[j] + <span class="nm">1</span>)
+<span class="kw">return</span> max(dp)  <span class="cm"># answer is the global max</span></pre>
+    </div>
+  </div>
+</div>
+
+<!-- 04 2D DP -->
+<div class="section" id="s2d">
+  <div class="sec-label">04 — 2D DP patterns</div>
+  <div class="sec-desc">Two-dimensional DP. dp[i][j] represents the answer involving two inputs — two strings, a grid position, or items vs capacity.</div>
+  <div class="two-col">
+    <div class="card purple">
+      <span class="badge bd-purple">Unique Paths — LC 62</span>
+      <div class="card-sub" style="margin-top:4px">dp[i][j] = ways to reach (i,j) moving only right or down.</div>
+<pre><span class="cm"># dp[i][j] = dp[i-1][j] + dp[i][j-1]</span>
+m, n = len(grid), len(grid[<span class="nm">0</span>])
+dp = [[<span class="nm">1</span>] * n <span class="kw">for</span> _ <span class="kw">in</span> range(m)]
+<span class="kw">for</span> i <span class="kw">in</span> range(<span class="nm">1</span>, m):
+    <span class="kw">for</span> j <span class="kw">in</span> range(<span class="nm">1</span>, n):
+        dp[i][j] = dp[i-<span class="nm">1</span>][j] + dp[i][j-<span class="nm">1</span>]
+<span class="kw">return</span> dp[m-<span class="nm">1</span>][n-<span class="nm">1</span>]</pre>
+    </div>
+    <div class="card green">
+      <span class="badge bd-green">Min Path Sum — LC 64</span>
+      <div class="card-sub" style="margin-top:4px">dp[i][j] = min cost to reach (i,j). Comes from above or left.</div>
+<pre><span class="cm"># init first row and column as base cases</span>
+<span class="kw">for</span> j <span class="kw">in</span> range(<span class="nm">1</span>,n): dp[<span class="nm">0</span>][j]=dp[<span class="nm">0</span>][j-<span class="nm">1</span>]+grid[<span class="nm">0</span>][j]
+<span class="kw">for</span> i <span class="kw">in</span> range(<span class="nm">1</span>,m): dp[i][<span class="nm">0</span>]=dp[i-<span class="nm">1</span>][<span class="nm">0</span>]+grid[i][<span class="nm">0</span>]
+<span class="kw">for</span> i <span class="kw">in</span> range(<span class="nm">1</span>, m):
+    <span class="kw">for</span> j <span class="kw">in</span> range(<span class="nm">1</span>, n):
+        dp[i][j] = grid[i][j] + min(dp[i-<span class="nm">1</span>][j],
+                                     dp[i][j-<span class="nm">1</span>])
+<span class="kw">return</span> dp[m-<span class="nm">1</span>][n-<span class="nm">1</span>]</pre>
+    </div>
+  </div>
+  <div class="grid g3" style="margin-top:10px">
+    <div class="card amber" data-modal onclick="openModal('interval_dp')">
+      <span class="badge bd-amber">Interval DP</span>
+      <div class="card-title">dp[i][j] = answer for range i..j</div>
+      <div class="card-sub">Fill by increasing length. Try every split point k. Burst Balloons, Palindromic Subsequence, Matrix Chain.</div>
+    </div>
+    <div class="card blue" data-modal onclick="openModal('s2d_meaning')">
+      <span class="badge bd-blue">What dp[i][j] means</span>
+      <div class="card-title">Common 2D state interpretations</div>
+      <div class="card-sub">String: first i chars of s1, first j of s2. Knapsack: first i items, capacity j. Grid: row i, col j.</div>
+    </div>
+    <div class="card teal" data-modal onclick="openModal('grid_tips')">
+      <span class="badge bd-teal">Grid DP tips</span>
+      <div class="card-title">Obstacles, reverse fill, base cases</div>
+      <div class="card-sub">Obstacles: set dp=0 at blocked cell. Reverse fill: Dungeon Game fills bottom-right to top-left. First row and col are always base cases.</div>
+    </div>
+  </div>
+</div>
+<!-- 05 KNAPSACK -->
+<div class="section" id="knapsack">
+  <div class="sec-label">05 — Knapsack patterns</div>
+  <div class="sec-desc">The most important DP family. 0/1 knapsack, unbounded knapsack, and subset sum all share the same skeleton.</div>
+  <div class="hi-box"><p><strong>Core idea:</strong> For each item decide — include it or exclude it. If included, remaining capacity = W - weight[i]. dp[i][w] = best value using first i items with capacity w.</p></div>
+  <div class="two-col">
+    <div class="card purple">
+      <span class="badge bd-purple">0/1 Knapsack — each item at most once</span>
+<pre><span class="cm"># dp[i][w] = max value, first i items, cap w</span>
+<span class="cm"># exclude item i: dp[i-1][w]</span>
+<span class="cm"># include item i: val[i] + dp[i-1][w - wt[i]]</span>
+dp = [[<span class="nm">0</span>]*(W+<span class="nm">1</span>) <span class="kw">for</span> _ <span class="kw">in</span> range(n+<span class="nm">1</span>)]
+<span class="kw">for</span> i <span class="kw">in</span> range(<span class="nm">1</span>, n+<span class="nm">1</span>):
+    <span class="kw">for</span> w <span class="kw">in</span> range(W+<span class="nm">1</span>):
+        dp[i][w] = dp[i-<span class="nm">1</span>][w]           <span class="cm"># exclude</span>
+        <span class="kw">if</span> wt[i-<span class="nm">1</span>] &lt;= w:               <span class="cm"># can include?</span>
+            dp[i][w] = max(dp[i][w],
+                val[i-<span class="nm">1</span>] + dp[i-<span class="nm">1</span>][w-wt[i-<span class="nm">1</span>]])
+<span class="kw">return</span> dp[n][W]</pre>
+    </div>
+    <div class="card green">
+      <span class="badge bd-green">1D optimised — iterate BACKWARDS</span>
+<pre><span class="cm"># Collapse 2D to 1D — same result</span>
+<span class="cm"># KEY: go right-to-left for 0/1 knapsack</span>
+<span class="cm"># (prevents using same item twice)</span>
+dp = [<span class="nm">0</span>] * (W + <span class="nm">1</span>)
+<span class="kw">for</span> i <span class="kw">in</span> range(n):
+    <span class="kw">for</span> w <span class="kw">in</span> range(W, wt[i]-<span class="nm">1</span>, -<span class="nm">1</span>):  <span class="cm"># &lt;-- backwards</span>
+        dp[w] = max(dp[w], val[i] + dp[w-wt[i]])
+<span class="kw">return</span> dp[W]
+
+<span class="cm"># Unbounded (infinite items): go LEFT to RIGHT</span>
+<span class="cm"># for w in range(wt[i], W+1): same formula</span></pre>
+    </div>
+  </div>
+  <div class="two-col" style="margin-top:10px">
+    <div class="card amber" data-modal onclick="openModal('subset_sum')">
+      <span class="badge bd-amber">Subset Sum — LC 416</span>
+      <div class="card-title">Can we pick elements that sum to target?</div>
+<pre><span class="cm"># LC 416 — Equal Partition Subset Sum</span>
+target = sum(nums) // <span class="nm">2</span>
+dp = [<span class="kw">False</span>] * (target + <span class="nm">1</span>)
+dp[<span class="nm">0</span>] = <span class="kw">True</span>  <span class="cm"># empty set sums to 0</span>
+<span class="kw">for</span> num <span class="kw">in</span> nums:
+    <span class="kw">for</span> t <span class="kw">in</span> range(target, num-<span class="nm">1</span>, -<span class="nm">1</span>):
+        dp[t] = dp[t] <span class="kw">or</span> dp[t - num]
+<span class="kw">return</span> dp[target]</pre>
+    </div>
+    <div class="card blue" data-modal onclick="openModal('coinways')">
+      <span class="badge bd-blue">Coin Change II — LC 518</span>
+      <div class="card-title">Count combinations (loop order matters!)</div>
+<pre><span class="cm"># coins outer, amounts inner = combinations</span>
+<span class="cm"># (amounts outer = permutations — different!)</span>
+dp = [<span class="nm">0</span>] * (amount + <span class="nm">1</span>)
+dp[<span class="nm">0</span>] = <span class="nm">1</span>  <span class="cm"># 1 way to make 0: do nothing</span>
+<span class="kw">for</span> coin <span class="kw">in</span> coins:
+    <span class="kw">for</span> a <span class="kw">in</span> range(coin, amount + <span class="nm">1</span>):
+        dp[a] += dp[a - coin]
+<span class="kw">return</span> dp[amount]</pre>
+    </div>
+  </div>
+</div>
+
+<!-- 06 STRINGS -->
+<div class="section" id="strings">
+  <div class="sec-label">06 — String DP</div>
+  <div class="sec-desc">String DP almost always uses a 2D table. dp[i][j] involves s1[:i] and s2[:j]. The recurrence splits on whether characters match.</div>
+  <div class="two-col">
+    <div class="card purple">
+      <span class="badge bd-purple">LCS — Longest Common Subsequence</span>
+<pre><span class="cm"># dp[i][j] = LCS of s1[:i] and s2[:j]</span>
+<span class="cm"># if chars match: dp[i-1][j-1] + 1</span>
+<span class="cm"># else: max(skip s1 char, skip s2 char)</span>
+m, n = len(s1), len(s2)
+dp = [[<span class="nm">0</span>]*(n+<span class="nm">1</span>) <span class="kw">for</span> _ <span class="kw">in</span> range(m+<span class="nm">1</span>)]
+<span class="kw">for</span> i <span class="kw">in</span> range(<span class="nm">1</span>, m+<span class="nm">1</span>):
+    <span class="kw">for</span> j <span class="kw">in</span> range(<span class="nm">1</span>, n+<span class="nm">1</span>):
+        <span class="kw">if</span> s1[i-<span class="nm">1</span>] == s2[j-<span class="nm">1</span>]:
+            dp[i][j] = dp[i-<span class="nm">1</span>][j-<span class="nm">1</span>] + <span class="nm">1</span>
+        <span class="kw">else</span>:
+            dp[i][j] = max(dp[i-<span class="nm">1</span>][j], dp[i][j-<span class="nm">1</span>])
+<span class="kw">return</span> dp[m][n]</pre>
+    </div>
+    <div class="card green">
+      <span class="badge bd-green">Edit Distance — LC 72</span>
+<pre><span class="cm"># dp[i][j] = min edits: s1[:i] into s2[:j]</span>
+<span class="cm"># match: dp[i-1][j-1] (free)</span>
+<span class="cm"># insert/delete/replace: 1 + min of neighbors</span>
+m, n = len(s1), len(s2)
+dp = [[<span class="nm">0</span>]*(n+<span class="nm">1</span>) <span class="kw">for</span> _ <span class="kw">in</span> range(m+<span class="nm">1</span>)]
+<span class="kw">for</span> i <span class="kw">in</span> range(m+<span class="nm">1</span>): dp[i][<span class="nm">0</span>] = i  <span class="cm"># delete all</span>
+<span class="kw">for</span> j <span class="kw">in</span> range(n+<span class="nm">1</span>): dp[<span class="nm">0</span>][j] = j  <span class="cm"># insert all</span>
+<span class="kw">for</span> i <span class="kw">in</span> range(<span class="nm">1</span>, m+<span class="nm">1</span>):
+    <span class="kw">for</span> j <span class="kw">in</span> range(<span class="nm">1</span>, n+<span class="nm">1</span>):
+        <span class="kw">if</span> s1[i-<span class="nm">1</span>] == s2[j-<span class="nm">1</span>]:
+            dp[i][j] = dp[i-<span class="nm">1</span>][j-<span class="nm">1</span>]
+        <span class="kw">else</span>:
+            dp[i][j] = <span class="nm">1</span> + min(dp[i-<span class="nm">1</span>][j],
+                           dp[i][j-<span class="nm">1</span>], dp[i-<span class="nm">1</span>][j-<span class="nm">1</span>])
+<span class="kw">return</span> dp[m][n]</pre>
+    </div>
+  </div>
+  <div class="grid g3" style="margin-top:10px">
+    <div class="card amber" data-modal onclick="openModal('palindrome_dp')">
+      <span class="badge bd-amber">Palindrome DP — LC 516</span>
+      <div class="card-title">Longest Palindromic Subsequence</div>
+      <div class="card-sub">Interval DP. dp[i][j] = LPS of s[i..j]. Outer chars match: +2. No match: max(shrink left, shrink right).</div>
+    </div>
+    <div class="card blue" data-modal onclick="openModal('wordbreak')">
+      <span class="badge bd-blue">Word Break — LC 139</span>
+      <div class="card-title">Can s be segmented into dict words?</div>
+      <div class="card-sub">dp[i] = can form s[:i]. Try all split points j. If dp[j] is True and s[j:i] is in dict, dp[i] = True.</div>
+    </div>
+    <div class="card teal" data-modal onclick="openModal('wildcard')">
+      <span class="badge bd-teal">Wildcard Matching — LC 44</span>
+      <div class="card-title">? matches one char, * matches any</div>
+      <div class="card-sub">dp[i][j] = does s[:i] match p[:j]? The * case: dp[i-1][j] (match one more) or dp[i][j-1] (match empty).</div>
+    </div>
+  </div>
+</div>
+<!-- 07 TREES -->
+<div class="section" id="trees">
+  <div class="sec-label">07 — DP on trees &amp; graphs</div>
+  <div class="sec-desc">Tree DP uses post-order traversal — solve children first, then combine at the parent. Graph DP is memoised DFS.</div>
+  <div class="two-col">
+    <div class="card purple">
+      <span class="badge bd-purple">Tree DP — House Robber III — LC 337</span>
+      <div class="card-sub" style="margin-top:4px">Return two values per node: (profit if robbed, profit if skipped).</div>
+<pre><span class="kw">from</span> functools <span class="kw">import</span> cache
+
+<span class="kw">def</span> <span class="fn">rob</span>(root):
+    @<span class="fn">cache</span>
+    <span class="kw">def</span> <span class="fn">dp</span>(node):
+        <span class="kw">if not</span> node: <span class="kw">return</span> <span class="nm">0</span>, <span class="nm">0</span>  <span class="cm"># (rob, skip)</span>
+        lr, ls = <span class="fn">dp</span>(node.left)
+        rr, rs = <span class="fn">dp</span>(node.right)
+        <span class="cm"># rob this node: skip both children</span>
+        rob = node.val + ls + rs
+        <span class="cm"># skip this node: best of each child</span>
+        skip = max(lr,ls) + max(rr,rs)
+        <span class="kw">return</span> rob, skip
+    <span class="kw">return</span> max(<span class="fn">dp</span>(root))</pre>
+    </div>
+    <div class="card green">
+      <span class="badge bd-green">Memo DFS — Longest Path — LC 329</span>
+      <div class="card-sub" style="margin-top:4px">Longest increasing path in a matrix. Memoised DFS on a DAG.</div>
+<pre><span class="kw">from</span> functools <span class="kw">import</span> cache
+
+<span class="kw">def</span> <span class="fn">longest_path</span>(matrix):
+    m, n = len(matrix), len(matrix[<span class="nm">0</span>])
+
+    @<span class="fn">cache</span>
+    <span class="kw">def</span> <span class="fn">dp</span>(r, c):
+        best = <span class="nm">1</span>
+        <span class="kw">for</span> dr, dc <span class="kw">in</span> [(<span class="nm">0</span>,<span class="nm">1</span>),(<span class="nm">0</span>,-<span class="nm">1</span>),(<span class="nm">1</span>,<span class="nm">0</span>),(-<span class="nm">1</span>,<span class="nm">0</span>)]:
+            nr, nc = r+dr, c+dc
+            <span class="kw">if</span> <span class="nm">0</span>&lt;=nr&lt;m <span class="kw">and</span> <span class="nm">0</span>&lt;=nc&lt;n:
+                <span class="kw">if</span> matrix[nr][nc] &gt; matrix[r][c]:
+                    best = max(best, <span class="nm">1</span>+<span class="fn">dp</span>(nr,nc))
+        <span class="kw">return</span> best
+
+    <span class="kw">return</span> max(<span class="fn">dp</span>(r,c) <span class="kw">for</span> r <span class="kw">in</span> range(m)
+                        <span class="kw">for</span> c <span class="kw">in</span> range(n))</pre>
+    </div>
+  </div>
+  <div class="grid g3" style="margin-top:10px">
+    <div class="card amber" data-modal onclick="openModal('tree_diameter')">
+      <span class="badge bd-amber">Tree diameter / path sum</span>
+      <div class="card-title">LC 543, LC 124</div>
+      <div class="card-sub">At each node return the best contribution to parent. Update a global max with the best path through this node (left + right).</div>
+    </div>
+    <div class="card blue" data-modal onclick="openModal('dag_dp')">
+      <span class="badge bd-blue">DP on DAG</span>
+      <div class="card-title">Topological order = fill order</div>
+      <div class="card-sub">Process nodes in topological order. Memoised DFS handles this automatically — it solves dependencies before the node that needs them.</div>
+    </div>
+    <div class="card teal" data-modal onclick="openModal('bitmask')">
+      <span class="badge bd-teal">Bitmask DP</span>
+      <div class="card-title">State = which nodes visited (n &lt;= 20)</div>
+      <div class="card-sub">dp[mask][i] = best answer having visited the set "mask", ending at node i. Used for TSP and assignment problems.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 08 SPACE OPT -->
+<div class="section" id="spaceopt">
+  <div class="sec-label">08 — Space optimisation</div>
+  <div class="sec-desc">Most 2D DP only looks at the current and previous row. Reduce O(nm) to O(m) space by keeping just two rows — or even two variables.</div>
+  <div class="two-col">
+    <div class="card purple">
+      <span class="badge bd-purple">Rolling two rows — LCS</span>
+<pre><span class="cm"># LCS: O(n*m) space → O(m) space</span>
+<span class="kw">def</span> <span class="fn">lcs_opt</span>(s1, s2):
+    m, n = len(s1), len(s2)
+    prev = [<span class="nm">0</span>] * (n+<span class="nm">1</span>)
+    <span class="kw">for</span> i <span class="kw">in</span> range(<span class="nm">1</span>, m+<span class="nm">1</span>):
+        curr = [<span class="nm">0</span>] * (n+<span class="nm">1</span>)
+        <span class="kw">for</span> j <span class="kw">in</span> range(<span class="nm">1</span>, n+<span class="nm">1</span>):
+            <span class="kw">if</span> s1[i-<span class="nm">1</span>] == s2[j-<span class="nm">1</span>]:
+                curr[j] = prev[j-<span class="nm">1</span>] + <span class="nm">1</span>
+            <span class="kw">else</span>:
+                curr[j] = max(prev[j], curr[j-<span class="nm">1</span>])
+        prev = curr
+    <span class="kw">return</span> prev[n]</pre>
+    </div>
+    <div class="card green">
+      <span class="badge bd-green">Two variables — Fibonacci-type</span>
+<pre><span class="cm"># When dp[i] only needs dp[i-1] and dp[i-2]</span>
+<span class="cm"># use two variables, not an array</span>
+
+<span class="cm"># House Robber — O(1) space:</span>
+prev2, prev1 = <span class="nm">0</span>, <span class="nm">0</span>
+<span class="kw">for</span> num <span class="kw">in</span> nums:
+    prev2, prev1 = prev1, max(prev1, prev2+num)
+<span class="kw">return</span> prev1
+
+<span class="cm"># Fibonacci — O(1) space:</span>
+a, b = <span class="nm">0</span>, <span class="nm">1</span>
+<span class="kw">for</span> _ <span class="kw">in</span> range(n): a, b = b, a+b
+<span class="kw">return</span> a</pre>
+    </div>
+  </div>
+  <div class="info-box" style="margin-top:10px">
+    <p><strong>The knapsack direction rule:</strong> 0/1 knapsack — iterate <strong>backwards</strong> (right to left). Each item used at most once. Unbounded knapsack — iterate <strong>forwards</strong> (left to right). Items can be reused. This single loop direction is the entire difference between the two variants in 1D.</p>
+  </div>
+</div>
+
+<!-- 09 PROBLEMS -->
+<div class="section" id="problems">
+  <div class="sec-label">09 — Problem bank</div>
+  <div class="sec-desc">Classic DP problems mapped to pattern, state, and complexity.</div>
+  <div class="card purple">
+    <table class="ref-table">
+      <tr><th>Problem (LC)</th><th>Pattern</th><th>State definition</th><th>TC / SC</th></tr>
+      <tr><td>Climbing Stairs (70)</td><td>1D Fibonacci</td><td>dp[i] = ways to reach step i</td><td>O(n) / O(1)</td></tr>
+      <tr><td>House Robber (198)</td><td>Include/Exclude</td><td>dp[i] = max money, first i houses</td><td>O(n) / O(1)</td></tr>
+      <tr><td>Max Subarray (53)</td><td>Kadane</td><td>dp[i] = max sum ending at i</td><td>O(n) / O(1)</td></tr>
+      <tr><td>Coin Change (322)</td><td>Unbounded knapsack</td><td>dp[a] = min coins for amount a</td><td>O(n·a) / O(a)</td></tr>
+      <tr><td>Coin Change II (518)</td><td>Unbounded knapsack</td><td>dp[a] = ways to make amount a</td><td>O(n·a) / O(a)</td></tr>
+      <tr><td>LIS (300)</td><td>1D DP</td><td>dp[i] = LIS length ending at i</td><td>O(n²) / O(n)</td></tr>
+      <tr><td>Unique Paths (62)</td><td>2D grid</td><td>dp[i][j] = ways to reach (i,j)</td><td>O(mn) / O(n)</td></tr>
+      <tr><td>0/1 Knapsack</td><td>Knapsack</td><td>dp[i][w] = max value, i items, cap w</td><td>O(nW) / O(W)</td></tr>
+      <tr><td>Equal Partition (416)</td><td>Subset sum</td><td>dp[t] = can we make sum t</td><td>O(n·s) / O(s)</td></tr>
+      <tr><td>LCS</td><td>2D string</td><td>dp[i][j] = LCS of s1[:i], s2[:j]</td><td>O(mn) / O(n)</td></tr>
+      <tr><td>Edit Distance (72)</td><td>2D string</td><td>dp[i][j] = edits to turn s1[:i] → s2[:j]</td><td>O(mn) / O(n)</td></tr>
+      <tr><td>Longest Palin. Subseq (516)</td><td>Interval DP</td><td>dp[i][j] = LPS of s[i..j]</td><td>O(n²) / O(n²)</td></tr>
+      <tr><td>Word Break (139)</td><td>1D DP</td><td>dp[i] = can form s[:i] from dict</td><td>O(n²) / O(n)</td></tr>
+      <tr><td>House Robber III (337)</td><td>Tree DP</td><td>dp(node) = (rob, skip) pair</td><td>O(n) / O(h)</td></tr>
+      <tr><td>Longest Inc. Path (329)</td><td>Memo DFS</td><td>dp(r,c) = longest path from (r,c)</td><td>O(mn) / O(mn)</td></tr>
+      <tr><td>Burst Balloons (312)</td><td>Interval DP</td><td>dp[i][j] = max coins bursting i..j last</td><td>O(n³) / O(n²)</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- 10 INTERVIEW -->
+<div class="section" id="interview">
+  <div class="sec-label">10 — Interview approach</div>
+  <div class="sec-desc">How to tackle a DP problem in an interview. Most people fail by jumping to the optimal solution before understanding the problem.</div>
+  <div class="card green">
+    <span class="badge bd-green">Step-by-step approach</span>
+    <div style="margin-top:12px">
+      <div class="step-row"><span class="step-num">1</span><div class="step-content"><strong>Recognise it is DP.</strong> Keywords: minimum, maximum, number of ways, can you reach, longest, shortest. Multiple choices at each step with no obvious greedy rule.</div></div>
+      <div class="step-row"><span class="step-num">2</span><div class="step-content"><strong>Write brute force recursion first.</strong> Do not jump to DP. Say "this naive recursion has overlapping subproblems so I will add memoisation."</div></div>
+      <div class="step-row"><span class="step-num">3</span><div class="step-content"><strong>Add @cache.</strong> Wrap the recursion. This IS already DP. Verify it gives correct answers on examples before optimising.</div></div>
+      <div class="step-row"><span class="step-num">4</span><div class="step-content"><strong>Convert to tabulation (if asked).</strong> Fill a table from smallest subproblem to largest. Handle base cases explicitly.</div></div>
+      <div class="step-row"><span class="step-num">5</span><div class="step-content"><strong>Optimise space (if asked).</strong> Can you reduce to 1-2 rows? Only do this after the solution is verified correct.</div></div>
+    </div>
+  </div>
+  <div class="grid g2" style="margin-top:10px">
+    <div class="card red" data-modal onclick="openModal('mistakes')">
+      <span class="badge bd-red">Common mistakes</span>
+      <div class="card-title">What causes wrong answers</div>
+      <div class="card-sub">Wrong table size (need n+1 not n). Wrong base case (dp[0]=0 vs dp[0]=1). Wrong loop direction in knapsack. Negative index in Python.</div>
+    </div>
+    <div class="card amber" data-modal onclick="openModal('recognise')">
+      <span class="badge bd-amber">Recognising DP problems</span>
+      <div class="card-title">Keywords and shapes</div>
+      <div class="card-sub">Decision at each step. Optimal answer depends on sub-answers. Asking for count, min, max, or yes/no. Brute force is exponential.</div>
+    </div>
+  </div>
+  <div class="grid g3" style="margin-top:10px">
+    <div class="card blue" data-modal onclick="openModal('topdown_vs_bottom')">
+      <span class="badge bd-blue">Top-down vs bottom-up</span>
+      <div class="card-title">Which to use in interviews</div>
+      <div class="card-sub">Top-down is easier to write and harder to get wrong. Start there. Only convert to bottom-up if asked or if you need space optimisation.</div>
+    </div>
+    <div class="card teal" data-modal onclick="openModal('reconstruct')">
+      <span class="badge bd-teal">Reconstructing the path</span>
+      <div class="card-title">Not just the value — the actual choices</div>
+      <div class="card-sub">Keep the full dp table. Trace back from dp[n] following the decisions that were made. Backward pass through the table.</div>
+    </div>
+    <div class="card pink" data-modal onclick="openModal('complexity')">
+      <span class="badge bd-pink">Complexity analysis</span>
+      <div class="card-title">Time = states x work per state</div>
+      <div class="card-sub">Count distinct states then multiply by work per state. 1D: O(n). 2D string: O(mn). Knapsack: O(nW). Interval: O(n³). Bitmask: O(2^n · n).</div>
+    </div>
+  </div>
+</div>
+</div><!-- end .page -->
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <span id="modalBadge"></span>
+        <span id="modalTitle" style="font-size:15px;font-weight:500;color:var(--text)"></span>
+      </div>
+      <button class="modal-close" onclick="closeModalBtn()">&#x2715; close</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+<script>
+var M = {
+  overlapping:{badge:'<span class="badge bd-purple">Overlapping subproblems</span>',title:'Why DP works — overlapping subproblems',body:'<p>The defining property of DP. The same subproblem appears in multiple branches of the recursion tree. Without caching, we solve it repeatedly — exponential time.</p><h3>Fibonacci call tree for fib(5)</h3><pre><span class="cm">fib(5)</span>\n<span class="cm">  fib(4)                fib(3)</span>\n<span class="cm">    fib(3)    fib(2)      fib(2)  fib(1)</span>\n<span class="cm">      fib(2) fib(1)  fib(1) fib(0)</span>\n<span class="cm">      fib(1) fib(0)</span>\n<span class="cm">-- fib(3) computed 2x, fib(2) computed 3x</span></pre><h3>With @cache</h3><pre><span class="kw">from</span> functools <span class="kw">import</span> cache\n@<span class="fn">cache</span>\n<span class="kw">def</span> <span class="fn">fib</span>(n):\n    <span class="kw">if</span> n &lt;= <span class="nm">1</span>: <span class="kw">return</span> n\n    <span class="kw">return</span> <span class="fn">fib</span>(n-<span class="nm">1</span>) + <span class="fn">fib</span>(n-<span class="nm">2</span>)\n<span class="cm"># fib(3) computed once, cached, reused</span></pre><div class="modal-tip"><div class="tip-label">quick test</div><p>If your recursive function is called with the same arguments multiple times in different branches, it has overlapping subproblems and DP will help.</p></div>'},
+  optimal_sub:{badge:'<span class="badge bd-green">Optimal substructure</span>',title:'Optimal substructure',body:'<p>An optimal solution to the whole problem contains optimal solutions to its subproblems. This is what allows us to build up from smaller answers.</p><h3>Example: shortest path</h3><p>If the shortest path from A to C goes through B, then A-to-B must be the shortest path from A to B, and B-to-C must be the shortest from B to C. If either sub-path were not optimal, we could improve the whole path.</p><h3>Counter-example: longest path in cyclic graph</h3><p>Does NOT have optimal substructure — including a vertex in one sub-path might block you from using it in another, creating dependencies between subproblems.</p><div class="modal-tip"><div class="tip-label">the test</div><p>If you know the optimal answer for all smaller subproblems, can you build the optimal answer for the current problem? If yes, optimal substructure holds.</p></div>'},
+  memo_vs_tab:{badge:'<span class="badge bd-amber">Memo vs Tab</span>',title:'Memoisation vs Tabulation — full comparison',body:'<table class="ref-table"><tr><th></th><th>Memoisation (top-down)</th><th>Tabulation (bottom-up)</th></tr><tr><td>Direction</td><td>Start at answer, recurse down</td><td>Start at base, build up</td></tr><tr><td>Code style</td><td>Recursion + @cache</td><td>Loops + array</td></tr><tr><td>Stack overflow</td><td>Possible for large n</td><td>No risk</td></tr><tr><td>Speed</td><td>Slightly slower (function calls)</td><td>Faster (no overhead)</td></tr><tr><td>Computes only needed</td><td>Yes — lazy</td><td>No — fills all states</td></tr><tr><td>Easier to write</td><td>Yes</td><td>Harder — need correct order</td></tr><tr><td>Space optimisation</td><td>Harder</td><td>Easy — swap rows</td></tr></table><div class="modal-tip"><div class="tip-label">recommendation</div><p>In interviews, start with memoisation. It is easier to write, harder to get wrong, and shows you understand the recurrence. Convert to tabulation only if asked or if you need space optimisation.</p></div>'},
+  dp_vs_greedy:{badge:'<span class="badge bd-blue">DP vs Greedy</span>',title:'When to use DP vs Greedy',body:'<h3>Use Greedy when</h3><ul><li>A locally optimal choice is always globally optimal</li><li>Fractional choices are allowed (fractional knapsack)</li><li>You can prove no greedy choice ever blocks a better future</li></ul><h3>Use DP when</h3><ul><li>A greedy counterexample exists</li><li>0/1 choices — take it or leave it</li><li>Taking one option now changes what is available later</li></ul><h3>Canonical counterexample</h3><pre><span class="cm"># Coins [1, 3, 4], target = 6</span>\n<span class="cm"># Greedy (largest first): 4+1+1 = 3 coins</span>\n<span class="cm"># DP (try all):           3+3   = 2 coins (optimal)</span>\n<span class="cm"># Greedy failed. Use DP.</span></pre><div class="modal-tip"><div class="tip-label">quick rule</div><p>Spend 30 seconds trying to find a counterexample before committing to greedy. If you find one, switch to DP.</p></div>'},
+  fib_visual:{badge:'<span class="badge bd-teal">Why caching works</span>',title:'Fibonacci — O(2^n) vs O(n)',body:'<h3>Without caching: exponential</h3><pre><span class="kw">def</span> <span class="fn">fib</span>(n):  <span class="cm"># O(2^n) calls</span>\n    <span class="kw">if</span> n &lt;= <span class="nm">1</span>: <span class="kw">return</span> n\n    <span class="kw">return</span> <span class="fn">fib</span>(n-<span class="nm">1</span>) + <span class="fn">fib</span>(n-<span class="nm">2</span>)\n\n<span class="cm"># fib(50) = ~2^50 = 1 quadrillion calls</span></pre><h3>With caching: linear</h3><pre><span class="kw">from</span> functools <span class="kw">import</span> cache\n@<span class="fn">cache</span>\n<span class="kw">def</span> <span class="fn">fib</span>(n):  <span class="cm"># O(n) calls</span>\n    <span class="kw">if</span> n &lt;= <span class="nm">1</span>: <span class="kw">return</span> n\n    <span class="kw">return</span> <span class="fn">fib</span>(n-<span class="nm">1</span>) + <span class="fn">fib</span>(n-<span class="nm">2</span>)\n\n<span class="cm"># fib(50) = 50 calls. Each result stored once.</span></pre><p>There are only n distinct subproblems: fib(0), fib(1), ..., fib(n). Caching ensures each is computed exactly once. The rest are O(1) lookups.</p>'},
+  climbing:{badge:'<span class="badge bd-purple">Fibonacci pattern</span>',title:'Climbing Stairs family',body:'<p>Problems where dp[i] depends only on the previous 1 or 2 states. Can always be solved in O(1) space.</p><h3>Problems in this family</h3><ul><li><strong>LC 70 Climbing Stairs</strong> — 1 or 2 steps at a time</li><li><strong>LC 746 Min Cost Climbing Stairs</strong> — pay cost[i], jump 1 or 2</li><li><strong>LC 509 Fibonacci Number</strong> — the classic</li></ul><h3>LC 746 — Min Cost</h3><pre><span class="cm"># dp[i] = min cost to reach step i</span>\n<span class="cm"># dp[i] = min(dp[i-1]+cost[i-1], dp[i-2]+cost[i-2])</span>\nn = len(cost)\na, b = <span class="nm">0</span>, <span class="nm">0</span>  <span class="cm"># free to start at 0 or 1</span>\n<span class="kw">for</span> i <span class="kw">in</span> range(<span class="nm">2</span>, n+<span class="nm">1</span>):\n    a, b = b, min(b+cost[i-<span class="nm">1</span>], a+cost[i-<span class="nm">2</span>])\n<span class="kw">return</span> b</pre><div class="modal-tip"><div class="tip-label">O(1) space trick</div><p>Since dp[i] only needs dp[i-1] and dp[i-2], keep two variables: prev and curr. Discard the rest.</p></div>'},
+  robber:{badge:'<span class="badge bd-green">Include/Exclude</span>',title:'House Robber family',body:'<h3>LC 198 — linear houses</h3><pre>prev2, prev1 = <span class="nm">0</span>, <span class="nm">0</span>\n<span class="kw">for</span> num <span class="kw">in</span> nums:\n    prev2, prev1 = prev1, max(prev1, prev2+num)\n<span class="kw">return</span> prev1</pre><h3>LC 213 — circular (houses form a ring)</h3><pre><span class="cm"># Trick: solve twice, take max</span>\n<span class="cm"># once for houses[0..n-2]</span>\n<span class="cm"># once for houses[1..n-1]</span>\n<span class="kw">def</span> <span class="fn">rob_linear</span>(nums):\n    prev2 = prev1 = <span class="nm">0</span>\n    <span class="kw">for</span> num <span class="kw">in</span> nums:\n        prev2, prev1 = prev1, max(prev1, prev2+num)\n    <span class="kw">return</span> prev1\n<span class="kw">return</span> max(<span class="fn">rob_linear</span>(nums[:-<span class="nm">1</span>]), <span class="fn">rob_linear</span>(nums[<span class="nm">1</span>:]))</pre><div class="modal-tip"><div class="tip-label">LC 337 tree version</div><p>Apply the same include/exclude logic recursively. At each node return a pair: (rob this node, skip this node). Combine children appropriately.</p></div>'},
+  kadane:{badge:'<span class="badge bd-amber">Kadane</span>',title:"Kadane's algorithm — Maximum Subarray",body:'<p>dp[i] = max sum subarray ending exactly at index i. Either start fresh at nums[i] or extend the best previous subarray.</p><pre><span class="cm"># dp[i] = max(nums[i], dp[i-1] + nums[i])</span>\n<span class="cm"># "start fresh" vs "extend previous"</span>\ncurr = best = nums[<span class="nm">0</span>]\n<span class="kw">for</span> num <span class="kw">in</span> nums[<span class="nm">1</span>:]:\n    curr = max(num, curr + num)\n    best = max(best, curr)\n<span class="kw">return</span> best</pre><h3>Key insight</h3><p>If curr + num is less than num, the previous subarray is hurting us. Discard it and start fresh. This is the greedy-looking choice that is actually DP.</p><h3>Variants</h3><ul><li><strong>LC 152 Max Product Subarray</strong> — track both max AND min (neg * neg = pos)</li><li><strong>LC 918 Max Sum Circular</strong> — answer is either Kadane OR total_sum - min_subarray</li></ul>'},
+  coinchange:{badge:'<span class="badge bd-blue">Coin Change</span>',title:'Coin Change — unbounded knapsack',body:'<h3>LC 322 — minimum coins</h3><pre><span class="cm"># dp[a] = min coins to make amount a</span>\ndp = [float(<span class="st">"inf"</span>)] * (amount + <span class="nm">1</span>)\ndp[<span class="nm">0</span>] = <span class="nm">0</span>\n<span class="kw">for</span> a <span class="kw">in</span> range(<span class="nm">1</span>, amount + <span class="nm">1</span>):\n    <span class="kw">for</span> coin <span class="kw">in</span> coins:\n        <span class="kw">if</span> coin &lt;= a:\n            dp[a] = min(dp[a], dp[a-coin] + <span class="nm">1</span>)\n<span class="kw">return</span> dp[amount] <span class="kw">if</span> dp[amount] != float(<span class="st">"inf"</span>) <span class="kw">else</span> -<span class="nm">1</span></pre><h3>LC 518 — number of combinations</h3><pre><span class="cm"># coins outer, amounts inner = combinations</span>\ndp = [<span class="nm">0</span>] * (amount + <span class="nm">1</span>)\ndp[<span class="nm">0</span>] = <span class="nm">1</span>  <span class="cm"># 1 way to make 0</span>\n<span class="kw">for</span> coin <span class="kw">in</span> coins:\n    <span class="kw">for</span> a <span class="kw">in</span> range(coin, amount + <span class="nm">1</span>):\n        dp[a] += dp[a - coin]\n<span class="kw">return</span> dp[amount]</pre><div class="modal-warn"><div class="tip-label">loop order matters</div><p>Coins outer = combinations (LC 518). Amounts outer = permutations (LC 377). Swap the loop order to switch between them.</p></div>'},
+  lis:{badge:'<span class="badge bd-teal">LIS</span>',title:'Longest Increasing Subsequence — LC 300',body:'<h3>O(n²) DP</h3><pre><span class="cm"># dp[i] = LIS length ending at nums[i]</span>\ndp = [<span class="nm">1</span>] * n\n<span class="kw">for</span> i <span class="kw">in</span> range(<span class="nm">1</span>, n):\n    <span class="kw">for</span> j <span class="kw">in</span> range(i):\n        <span class="kw">if</span> nums[j] &lt; nums[i]:\n            dp[i] = max(dp[i], dp[j] + <span class="nm">1</span>)\n<span class="kw">return</span> max(dp)</pre><h3>O(n log n) — patience sorting</h3><pre><span class="kw">import</span> bisect\ntails = []\n<span class="kw">for</span> num <span class="kw">in</span> nums:\n    pos = bisect.bisect_left(tails, num)\n    <span class="kw">if</span> pos == len(tails):\n        tails.append(num)   <span class="cm"># extend LIS</span>\n    <span class="kw">else</span>:\n        tails[pos] = num    <span class="cm"># keep tails minimal</span>\n<span class="kw">return</span> len(tails)</pre><div class="modal-tip"><div class="tip-label">patience sorting intuition</div><p>Think of it as a card game. Place each card on the leftmost pile whose top is >= the card. Number of piles = LIS length. Binary search finds the right pile in O(log n).</p></div>'},
+  interval_dp:{badge:'<span class="badge bd-amber">Interval DP</span>',title:'Interval DP — dp[i][j] for range i..j',body:'<p>Used when the problem asks about some property of a contiguous range. Fill by increasing length — length 1 first, then 2, and so on.</p><h3>Template</h3><pre><span class="cm"># fill by increasing length</span>\nn = len(arr)\ndp = [[<span class="nm">0</span>]*n <span class="kw">for</span> _ <span class="kw">in</span> range(n)]\n<span class="kw">for</span> i <span class="kw">in</span> range(n): dp[i][i] = base\n\n<span class="kw">for</span> length <span class="kw">in</span> range(<span class="nm">2</span>, n+<span class="nm">1</span>):\n    <span class="kw">for</span> i <span class="kw">in</span> range(n - length + <span class="nm">1</span>):\n        j = i + length - <span class="nm">1</span>\n        <span class="kw">for</span> k <span class="kw">in</span> range(i, j):  <span class="cm"># try each split</span>\n            dp[i][j] = max(dp[i][j],\n                dp[i][k] + dp[k+<span class="nm">1</span>][j] + cost)</pre><h3>LC 516 — Longest Palindromic Subsequence</h3><pre><span class="kw">for</span> length <span class="kw">in</span> range(<span class="nm">2</span>, n+<span class="nm">1</span>):\n    <span class="kw">for</span> i <span class="kw">in</span> range(n-length+<span class="nm">1</span>):\n        j = i + length - <span class="nm">1</span>\n        <span class="kw">if</span> s[i] == s[j]: dp[i][j] = dp[i+<span class="nm">1</span>][j-<span class="nm">1</span>] + <span class="nm">2</span>\n        <span class="kw">else</span>: dp[i][j] = max(dp[i+<span class="nm">1</span>][j], dp[i][j-<span class="nm">1</span>])</pre>'},
+  s2d_meaning:{badge:'<span class="badge bd-blue">2D state</span>',title:'What dp[i][j] means in different problems',body:'<div class="kv-list"><div class="kv"><span class="kv-key">LCS / Edit Distance</span><span style="font-size:12px;color:var(--muted)">dp[i][j] = answer using first i chars of s1 and first j chars of s2</span></div><div class="kv"><span class="kv-key">0/1 Knapsack</span><span style="font-size:12px;color:var(--muted)">dp[i][w] = max value using first i items with capacity w</span></div><div class="kv"><span class="kv-key">Grid paths</span><span style="font-size:12px;color:var(--muted)">dp[i][j] = answer for reaching or being at position (i,j)</span></div><div class="kv"><span class="kv-key">Interval DP</span><span style="font-size:12px;color:var(--muted)">dp[i][j] = answer for the subarray or substring from index i to j</span></div><div class="kv"><span class="kv-key">Bitmask DP</span><span style="font-size:12px;color:var(--muted)">dp[mask][i] = answer having visited the set encoded in mask, at node i</span></div></div><div class="modal-tip"><div class="tip-label">how to find the right state</div><p>Ask: what information do I need to make a decision at this step? What changes as I process each element? That changing information IS the state.</p></div>'},
+  grid_tips:{badge:'<span class="badge bd-teal">Grid tips</span>',title:'Grid DP tips and variations',body:'<h3>Obstacles — LC 63</h3><pre><span class="kw">if</span> obstacleGrid[i][j] == <span class="nm">1</span>:\n    dp[i][j] = <span class="nm">0</span>   <span class="cm"># blocked: 0 ways</span>\n<span class="kw">else</span>:\n    dp[i][j] = dp[i-<span class="nm">1</span>][j] + dp[i][j-<span class="nm">1</span>]</pre><h3>Triangle — LC 120 (fill bottom-up)</h3><pre>dp = triangle[-<span class="nm">1</span>][:]   <span class="cm"># start from last row</span>\n<span class="kw">for</span> row <span class="kw">in</span> range(len(triangle)-<span class="nm">2</span>, -<span class="nm">1</span>, -<span class="nm">1</span>):\n    <span class="kw">for</span> j <span class="kw">in</span> range(len(triangle[row])):\n        dp[j] = triangle[row][j] + min(dp[j], dp[j+<span class="nm">1</span>])\n<span class="kw">return</span> dp[<span class="nm">0</span>]</pre><div class="modal-tip"><div class="tip-label">reverse fill</div><p>When the constraint is on a future state (Dungeon Game: min health to enter a cell), fill backwards from bottom-right to top-left.</p></div>'},
+  subset_sum:{badge:'<span class="badge bd-amber">Subset Sum</span>',title:'Subset Sum and Partition problems',body:'<p>Can we pick a subset that sums to T? This is 0/1 knapsack where value = weight = 1.</p><h3>LC 416 — Equal Partition</h3><pre>total = sum(nums)\n<span class="kw">if</span> total % <span class="nm">2</span> != <span class="nm">0</span>: <span class="kw">return False</span>\ntarget = total // <span class="nm">2</span>\ndp = [<span class="kw">False</span>] * (target + <span class="nm">1</span>)\ndp[<span class="nm">0</span>] = <span class="kw">True</span>   <span class="cm"># empty subset sums to 0</span>\n<span class="kw">for</span> num <span class="kw">in</span> nums:\n    <span class="kw">for</span> t <span class="kw">in</span> range(target, num-<span class="nm">1</span>, -<span class="nm">1</span>):  <span class="cm"># backwards!</span>\n        dp[t] = dp[t] <span class="kw">or</span> dp[t - num]\n<span class="kw">return</span> dp[target]</pre><h3>LC 494 — Target Sum</h3><pre><span class="cm"># Assign + or - to each number</span>\n<span class="cm"># Equivalent: find subset S where</span>\n<span class="cm"># sum(S) - (total - sum(S)) = target</span>\n<span class="cm"># => sum(S) = (target + total) / 2</span>\n<span class="cm"># Count subsets summing to (target+total)/2</span></pre>'},
+  coinways:{badge:'<span class="badge bd-blue">Coin Change II</span>',title:'Counting combinations vs permutations',body:'<h3>Combinations — LC 518 (order does NOT matter)</h3><pre><span class="cm"># [1,2] and [2,1] are the SAME</span>\ndp = [<span class="nm">0</span>] * (amount + <span class="nm">1</span>)\ndp[<span class="nm">0</span>] = <span class="nm">1</span>\n<span class="kw">for</span> coin <span class="kw">in</span> coins:       <span class="cm"># outer: coins</span>\n    <span class="kw">for</span> a <span class="kw">in</span> range(coin, amount+<span class="nm">1</span>):  <span class="cm"># inner: amounts</span>\n        dp[a] += dp[a - coin]</pre><h3>Permutations — LC 377 (order DOES matter)</h3><pre><span class="cm"># [1,2] and [2,1] are DIFFERENT</span>\ndp = [<span class="nm">0</span>] * (target + <span class="nm">1</span>)\ndp[<span class="nm">0</span>] = <span class="nm">1</span>\n<span class="kw">for</span> a <span class="kw">in</span> range(<span class="nm">1</span>, target+<span class="nm">1</span>):  <span class="cm"># outer: amounts</span>\n    <span class="kw">for</span> num <span class="kw">in</span> nums:              <span class="cm"># inner: nums</span>\n        <span class="kw">if</span> num &lt;= a: dp[a] += dp[a - num]</pre><div class="modal-tip"><div class="tip-label">the key insight</div><p>Coins as outer loop: each coin processed once before moving on = combinations. Amounts as outer loop: all coins tried for every amount = permutations. One loop swap changes everything.</p></div>'},
+  palindrome_dp:{badge:'<span class="badge bd-amber">Palindrome DP</span>',title:'Palindrome DP problems',body:'<h3>LC 516 — Longest Palindromic Subsequence</h3><pre><span class="cm"># dp[i][j] = LPS length for s[i..j]</span>\nn = len(s)\ndp = [[<span class="nm">0</span>]*n <span class="kw">for</span> _ <span class="kw">in</span> range(n)]\n<span class="kw">for</span> i <span class="kw">in</span> range(n): dp[i][i] = <span class="nm">1</span>  <span class="cm"># single char</span>\n<span class="kw">for</span> length <span class="kw">in</span> range(<span class="nm">2</span>, n+<span class="nm">1</span>):\n    <span class="kw">for</span> i <span class="kw">in</span> range(n-length+<span class="nm">1</span>):\n        j = i + length - <span class="nm">1</span>\n        <span class="kw">if</span> s[i] == s[j]:\n            dp[i][j] = (<span class="nm">0</span> <span class="kw">if</span> length==<span class="nm">2</span> <span class="kw">else</span> dp[i+<span class="nm">1</span>][j-<span class="nm">1</span>]) + <span class="nm">2</span>\n        <span class="kw">else</span>:\n            dp[i][j] = max(dp[i+<span class="nm">1</span>][j], dp[i][j-<span class="nm">1</span>])\n<span class="kw">return</span> dp[<span class="nm">0</span>][n-<span class="nm">1</span>]</pre>'},
+  wordbreak:{badge:'<span class="badge bd-blue">Word Break</span>',title:'Word Break — LC 139',body:'<p>dp[i] = can we form s[:i] using words from the dictionary? Try all split points j.</p><pre><span class="cm"># dp[i] = can we form s[:i]?</span>\nword_set = set(wordDict)\ndp = [<span class="kw">False</span>] * (len(s) + <span class="nm">1</span>)\ndp[<span class="nm">0</span>] = <span class="kw">True</span>   <span class="cm"># empty string is always valid</span>\n<span class="kw">for</span> i <span class="kw">in</span> range(<span class="nm">1</span>, len(s)+<span class="nm">1</span>):\n    <span class="kw">for</span> j <span class="kw">in</span> range(i):\n        <span class="kw">if</span> dp[j] <span class="kw">and</span> s[j:i] <span class="kw">in</span> word_set:\n            dp[i] = <span class="kw">True</span>\n            <span class="kw">break</span>\n<span class="kw">return</span> dp[len(s)]</pre><div class="modal-tip"><div class="tip-label">intuition</div><p>For each position i, is there a split point j where the prefix s[:j] is formable (dp[j]==True) AND the remaining piece s[j:i] is a valid word? If yes, s[:i] is formable.</p></div>'},
+  wildcard:{badge:'<span class="badge bd-teal">Wildcard</span>',title:'Wildcard Matching — LC 44',body:'<pre><span class="cm"># dp[i][j] = does s[:i] match p[:j]?</span>\nm, n = len(s), len(p)\ndp = [[<span class="kw">False</span>]*(n+<span class="nm">1</span>) <span class="kw">for</span> _ <span class="kw">in</span> range(m+<span class="nm">1</span>)]\ndp[<span class="nm">0</span>][<span class="nm">0</span>] = <span class="kw">True</span>\n<span class="kw">for</span> j <span class="kw">in</span> range(<span class="nm">1</span>, n+<span class="nm">1</span>):   <span class="cm"># * matches empty</span>\n    <span class="kw">if</span> p[j-<span class="nm">1</span>] == <span class="st">"*"</span>: dp[<span class="nm">0</span>][j] = dp[<span class="nm">0</span>][j-<span class="nm">1</span>]\n<span class="kw">for</span> i <span class="kw">in</span> range(<span class="nm">1</span>, m+<span class="nm">1</span>):\n    <span class="kw">for</span> j <span class="kw">in</span> range(<span class="nm">1</span>, n+<span class="nm">1</span>):\n        <span class="kw">if</span> p[j-<span class="nm">1</span>] == <span class="st">"*"</span>:\n            dp[i][j] = dp[i-<span class="nm">1</span>][j] <span class="kw">or</span> dp[i][j-<span class="nm">1</span>]\n            <span class="cm"># match one more  /  match empty</span>\n        <span class="kw">elif</span> p[j-<span class="nm">1</span>] <span class="kw">in</span> (<span class="st">"?"</span>, s[i-<span class="nm">1</span>]):\n            dp[i][j] = dp[i-<span class="nm">1</span>][j-<span class="nm">1</span>]\n<span class="kw">return</span> dp[m][n]</pre>'},
+  tree_diameter:{badge:'<span class="badge bd-amber">Tree diameter</span>',title:'Tree path problems',body:'<h3>LC 543 — Diameter</h3><pre>self.ans = <span class="nm">0</span>\n<span class="kw">def</span> <span class="fn">depth</span>(node):\n    <span class="kw">if not</span> node: <span class="kw">return</span> <span class="nm">0</span>\n    left = <span class="fn">depth</span>(node.left)\n    right = <span class="fn">depth</span>(node.right)\n    self.ans = max(self.ans, left+right)  <span class="cm"># path thru node</span>\n    <span class="kw">return</span> <span class="nm">1</span> + max(left, right)   <span class="cm"># contribute to parent</span></pre><h3>LC 124 — Max Path Sum</h3><pre><span class="kw">def</span> <span class="fn">dp</span>(node):\n    <span class="kw">if not</span> node: <span class="kw">return</span> <span class="nm">0</span>\n    left = max(<span class="nm">0</span>, <span class="fn">dp</span>(node.left))   <span class="cm"># ignore negative</span>\n    right = max(<span class="nm">0</span>, <span class="fn">dp</span>(node.right))\n    self.ans = max(self.ans, node.val+left+right)\n    <span class="kw">return</span> node.val + max(left, right)</pre><div class="modal-tip"><div class="tip-label">pattern</div><p>At each node: update global answer with the best path through this node (left + right). Return only one-sided path to parent.</p></div>'},
+  dag_dp:{badge:'<span class="badge bd-blue">DAG DP</span>',title:'DP on directed acyclic graphs',body:'<p>DP requires subproblems form a DAG — no cycles. Memoised DFS handles topological ordering automatically.</p><pre><span class="kw">from</span> functools <span class="kw">import</span> cache\n@<span class="fn">cache</span>\n<span class="kw">def</span> <span class="fn">best_path</span>(node):\n    <span class="kw">if</span> is_sink(node): <span class="kw">return</span> base_value\n    <span class="kw">return</span> node.value + max(<span class="fn">best_path</span>(n)\n                            <span class="kw">for</span> n <span class="kw">in</span> node.neighbors)\n\n<span class="cm"># When best_path(A) calls best_path(B),</span>\n<span class="cm"># B is solved and cached before A continues.</span>\n<span class="cm"># That IS topological order — automatic.</span></pre>'},
+  bitmask:{badge:'<span class="badge bd-teal">Bitmask DP</span>',title:'Bitmask DP — state as a set',body:'<p>When you need to track which elements from a small set (n &lt;= 20) have been used, encode the set as an integer bitmask.</p><h3>TSP skeleton</h3><pre><span class="cm"># dp[mask][i] = min cost visiting nodes</span>\n<span class="cm">#               in "mask", ending at i</span>\nn = len(dist)\nINF = float(<span class="st">"inf"</span>)\ndp = [[INF]*n <span class="kw">for</span> _ <span class="kw">in</span> range(<span class="nm">1</span>&lt;&lt;n)]\ndp[<span class="nm">1</span>][<span class="nm">0</span>] = <span class="nm">0</span>  <span class="cm"># start at node 0</span>\n<span class="kw">for</span> mask <span class="kw">in</span> range(<span class="nm">1</span>&lt;&lt;n):\n    <span class="kw">for</span> u <span class="kw">in</span> range(n):\n        <span class="kw">if</span> dp[mask][u] == INF: <span class="kw">continue</span>\n        <span class="kw">if not</span> (mask &gt;&gt; u &amp; <span class="nm">1</span>): <span class="kw">continue</span>\n        <span class="kw">for</span> v <span class="kw">in</span> range(n):\n            <span class="kw">if</span> mask &gt;&gt; v &amp; <span class="nm">1</span>: <span class="kw">continue</span>\n            new_mask = mask | (<span class="nm">1</span> &lt;&lt; v)\n            dp[new_mask][v] = min(dp[new_mask][v],\n                                  dp[mask][u] + dist[u][v])</pre>'},
+  mistakes:{badge:'<span class="badge bd-red">Common mistakes</span>',title:'Common DP mistakes',body:'<h3>1. Wrong table size</h3><pre><span class="cm"># WRONG: dp of size n, but need n+1</span>\ndp = [<span class="nm">0</span>] * n      <span class="cm"># index 0..n-1</span>\n<span class="cm"># CORRECT: dp[0]=base, dp[n]=answer</span>\ndp = [<span class="nm">0</span>] * (n+<span class="nm">1</span>)</pre><h3>2. Wrong base case</h3><pre><span class="cm"># Forgetting dp[0]=1 for "number of ways"</span>\n<span class="cm"># dp[0]=1 means "1 way to do nothing"</span>\ndp[<span class="nm">0</span>] = <span class="nm">1</span>   <span class="cm"># not 0!</span></pre><h3>3. Wrong knapsack loop direction</h3><pre><span class="cm"># 0/1 knapsack MUST go backwards</span>\n<span class="kw">for</span> w <span class="kw">in</span> range(W, weight-<span class="nm">1</span>, -<span class="nm">1</span>):  <span class="cm"># RIGHT to LEFT</span></pre><h3>4. Accessing dp[-1] unintentionally</h3><pre><span class="cm"># Python: dp[-1] = last element, not error!</span>\n<span class="cm"># Use explicit base cases to prevent negative index</span>\ndp[<span class="nm">0</span>] = <span class="nm">0</span>; dp[<span class="nm">1</span>] = <span class="nm">1</span>  <span class="cm"># set before loop</span></pre><div class="modal-tip"><div class="tip-label">debug tip</div><p>Print the entire dp array for a small input and verify manually. If dp[3] should be 5 but is 4, trace which step in the recurrence is wrong.</p></div>'},
+  recognise:{badge:'<span class="badge bd-amber">Recognition</span>',title:'How to recognise DP problems',body:'<h3>Keywords in the problem</h3><ul><li><strong>minimum / maximum</strong> — minimise cost, maximise value</li><li><strong>number of ways / count</strong> — how many distinct paths/combinations</li><li><strong>can you / is it possible</strong> — yes/no reachability</li><li><strong>longest / shortest</strong> — longest subsequence, shortest path</li></ul><h3>Problem shape signals</h3><ul><li>You make a sequence of decisions and each affects the next</li><li>Brute force involves trying all subsets or sequences</li><li>No obvious greedy rule that always works</li></ul><h3>Quick test</h3><p>Write the brute force recursion. If the same function is called with the same arguments in multiple branches of the call tree, DP will help.</p><div class="modal-warn"><div class="tip-label">not all optimisation is DP</div><p>Try greedy first — it is simpler. Only switch to DP if you find a counterexample or see clear overlapping subproblems.</p></div>'},
+  topdown_vs_bottom:{badge:'<span class="badge bd-blue">Top-down vs bottom-up</span>',title:'Which to use in interviews',body:'<h3>Start with top-down (memoisation)</h3><p>Easier to write, harder to get wrong. Just write the recursion and add @cache. The recursive structure naturally matches the recurrence.</p><h3>Convert to bottom-up when</h3><ul><li>Interviewer asks for iterative solution</li><li>n &gt; 1000 (Python stack overflow risk)</li><li>You need O(1) or O(n) space optimisation</li></ul><h3>Conversion recipe</h3><pre><span class="cm"># Top-down</span>\n@<span class="fn">cache</span>\n<span class="kw">def</span> <span class="fn">dp</span>(i): <span class="kw">return</span> <span class="fn">dp</span>(i-<span class="nm">1</span>) + <span class="fn">dp</span>(i-<span class="nm">2</span>) <span class="kw">if</span> i &gt; <span class="nm">1</span> <span class="kw">else</span> i\n\n<span class="cm"># Bottom-up equivalent</span>\ndp = [<span class="nm">0</span>, <span class="nm">1</span>]\n<span class="kw">for</span> i <span class="kw">in</span> range(<span class="nm">2</span>, n+<span class="nm">1</span>): dp.append(dp[-<span class="nm">1</span>] + dp[-<span class="nm">2</span>])</pre>'},
+  reconstruct:{badge:'<span class="badge bd-teal">Reconstruct</span>',title:'Reconstructing the solution',body:'<p>DP gives you the optimal value. To find the actual choices made, trace back through the full table.</p><h3>LCS reconstruction</h3><pre><span class="kw">def</span> <span class="fn">reconstruct</span>(dp, s1, s2):\n    i, j = len(s1), len(s2)\n    result = []\n    <span class="kw">while</span> i &gt; <span class="nm">0</span> <span class="kw">and</span> j &gt; <span class="nm">0</span>:\n        <span class="kw">if</span> s1[i-<span class="nm">1</span>] == s2[j-<span class="nm">1</span>]:  <span class="cm"># match: came from diagonal</span>\n            result.append(s1[i-<span class="nm">1</span>]); i -= <span class="nm">1</span>; j -= <span class="nm">1</span>\n        <span class="kw">elif</span> dp[i-<span class="nm">1</span>][j] &gt; dp[i][j-<span class="nm">1</span>]:  <span class="cm"># came from above</span>\n            i -= <span class="nm">1</span>\n        <span class="kw">else</span>:  <span class="cm"># came from left</span>\n            j -= <span class="nm">1</span>\n    <span class="kw">return</span> <span class="st">""</span>.join(reversed(result))</pre><div class="modal-tip"><div class="tip-label">general rule</div><p>At each cell, ask: which choice produced this value? Check the recurrence. If dp[i][j] equals dp[i-1][j], you excluded item i. If it equals val+dp[i-1][j-w], you included it. Follow back to the start.</p></div>'},
+  complexity:{badge:'<span class="badge bd-pink">Complexity</span>',title:'DP time and space complexity',body:'<h3>Formula: Time = states x work per state</h3><ul><li><strong>1D DP:</strong> n states, O(1) work = O(n)</li><li><strong>Coin Change:</strong> amount states, k coins each = O(amount x k)</li><li><strong>LCS:</strong> m x n states, O(1) each = O(mn)</li><li><strong>Knapsack:</strong> n x W states, O(1) each = O(nW)</li><li><strong>Interval DP:</strong> n^2 states, O(n) split points = O(n^3)</li><li><strong>Bitmask:</strong> 2^n x n states = O(2^n x n)</li></ul><h3>Space complexity</h3><ul><li>Full table: same as number of states</li><li>Rolling two rows: O(min(m,n))</li><li>1D optimised: O(W) or O(amount)</li><li>Two variables: O(1)</li></ul><div class="modal-warn"><div class="tip-label">pseudo-polynomial</div><p>Knapsack is O(nW) which looks polynomial but W can be exponentially large relative to the number of input bits. This is why knapsack is NP-hard — the complexity is pseudo-polynomial.</p></div>'}
+};
+
+window.openModal = function(key) {
+  var data = M[key];
+  if (!data) return;
+  document.getElementById('modalBadge').innerHTML = data.badge;
+  document.getElementById('modalTitle').textContent = data.title;
+  document.getElementById('modalBody').innerHTML = data.body;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+window.closeModal = function(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalBtn();
+};
+window.closeModalBtn = function() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+};
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModalBtn();
+});
+window.navTo = function(id) {
+  document.getElementById(id).scrollIntoView({behavior:'smooth'});
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active')});
+  event.target.classList.add('active');
+};
+var sections = document.querySelectorAll('.section');
+var btns = document.querySelectorAll('.nav-btn');
+new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting){
+      var idx = Array.from(sections).indexOf(e.target);
+      btns.forEach(function(b){b.classList.remove('active')});
+      if(btns[idx]) btns[idx].classList.add('active');
+    }
+  });
+},{rootMargin:'-30% 0px -60% 0px'}).observe && sections.forEach(function(s){
+  new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        var idx=Array.from(sections).indexOf(e.target);
+        btns.forEach(function(b){b.classList.remove('active')});
+        if(btns[idx])btns[idx].classList.add('active');
+      }
+    });
+  },{rootMargin:'-30% 0px -60% 0px'}).observe(s);
+});
+</script>
+</body>
+</html>
