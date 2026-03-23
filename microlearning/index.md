@@ -21,6 +21,8 @@
    - **Layered System**: the server must be composed of loosely coupled layers.
    - **Code on Demand (optional)**: the server can dynamically generate code on demand.
 6. Stateless vs stateful services
+   - **stateful**: The server stores information about the client's session (e.g., shopping cart contents, user login state). This can lead to scalability issues because the server has to manage and remember each client's state.
+   - **stateless**: The server does not store any information about the client's session. Each request from the client must contain all the information needed to process it (e.g., using JWT tokens for authentication).
 7. Synchronous vs asynchronous communication
 8. What happens when you type a URL and hit Enter
 9. TCP vs UDP — when each is used in backend systems
