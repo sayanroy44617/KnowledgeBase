@@ -110,6 +110,7 @@ pre{background:var(--bg);border:1px solid var(--border);border-radius:6px;paddin
 <div class="nav"><div class="nav-inner">
   <button class="nb active" onclick="navTo('whatisdp')">What is DP?</button>
   <button class="nb" onclick="navTo('framework')">Framework</button>
+  <button class="nb" onclick="navTo('rec2tab')">Recursion→Table</button>
   <button class="nb" onclick="navTo('s1d')">1D DP</button>
   <button class="nb" onclick="navTo('s2d')">2D DP</button>
   <button class="nb" onclick="navTo('knapsack')">Knapsack</button>
@@ -233,9 +234,221 @@ pre{background:var(--bg);border:1px solid var(--border);border-radius:6px;paddin
   </div>
   <div class="info-box" style="margin-top:10px"><p><strong>Which to use?</strong> In an interview, start with top-down — it is easier to write and harder to mess up. Convert to bottom-up only if asked, or if you need to optimise space.</p></div>
 </div>
+<!-- ===== 02b RECURSION TO TABLE ===== -->
+<div class="sec" id="rec2tab">
+  <div class="sec-lbl">02b — The most important insight: Recursion → Table (Aditya Verma method)</div>
+  <div class="hi-box">
+    <p><strong>The secret that makes DP click:</strong> Tabulation is not a "different algorithm." It is your recursive solution with function calls replaced by table lookups. The logic inside the if/else is <em>identical</em>. The only change is <strong>n-1 becomes i-1</strong> (a row above in the table) and <strong>a function call becomes an array index</strong>.</p>
+  </div>
+
+  <!-- SIDE BY SIDE -->
+  <div class="g2">
+    <div class="card c-purple">
+      <span class="badge b-purple">Step 1 — Write the recursion first</span>
+      <div class="cs" style="margin-top:4px;margin-bottom:6px">Always start here. Write the naive recursive solution with a clear choice diagram: <em>include the item</em> OR <em>exclude it</em>. Do not think about DP yet.</div>
+<pre><span class="cm">// Subset Sum — recursive version</span>
+<span class="cm">// "Can we pick from arr[0..n-1] to hit target?"</span>
+<span class="kw">boolean</span> <span class="fn">solve</span>(<span class="kw">int</span>[] arr, <span class="kw">int</span> n, <span class="kw">int</span> target) {
+    <span class="cm">// BASE CASES</span>
+    <span class="kw">if</span> (target == <span class="nm">0</span>) <span class="kw">return true</span>;  <span class="cm">// sum reached!</span>
+    <span class="kw">if</span> (n == <span class="nm">0</span>) <span class="kw">return false</span>;      <span class="cm">// no items left</span>
+
+    <span class="cm">// CHOICE: can we include arr[n-1]?</span>
+    <span class="kw">if</span> (arr[n-<span class="nm">1</span>] &lt;= target) {
+        <span class="cm">// INCLUDE: use item, reduce target</span>
+        <span class="cm">// EXCLUDE: skip item, keep target</span>
+        <span class="kw">return</span> <span class="fn">solve</span>(arr, n-<span class="nm">1</span>, target-arr[n-<span class="nm">1</span>])
+            || <span class="fn">solve</span>(arr, n-<span class="nm">1</span>, target);
+    } <span class="kw">else</span> {
+        <span class="cm">// MUST EXCLUDE: item is too big</span>
+        <span class="kw">return</span> <span class="fn">solve</span>(arr, n-<span class="nm">1</span>, target);
+    }
+}</pre>
+    </div>
+    <div class="card c-green">
+      <span class="badge b-green">Step 2 — Add memo (top-down DP)</span>
+      <div class="cs" style="margin-top:4px;margin-bottom:6px">The recursion above recomputes the same (n, target) pairs many times. Add a 2D memo array. Check it before computing, store before returning.</div>
+<pre><span class="cm">// Add memo — ZERO code logic changes</span>
+<span class="kw">int</span>[][] memo = <span class="kw">new int</span>[n+<span class="nm">1</span>][sum+<span class="nm">1</span>];
+<span class="cm">// initialise all to -1 (unvisited)</span>
+<span class="kw">for</span> (<span class="kw">int</span>[] row : memo) Arrays.<span class="fn">fill</span>(row, -<span class="nm">1</span>);
+
+<span class="kw">boolean</span> <span class="fn">solve</span>(<span class="kw">int</span>[] arr, <span class="kw">int</span> n, <span class="kw">int</span> target) {
+    <span class="kw">if</span> (target == <span class="nm">0</span>) <span class="kw">return true</span>;
+    <span class="kw">if</span> (n == <span class="nm">0</span>) <span class="kw">return false</span>;
+    <span class="cm">// CHECK: already solved this (n, target)?</span>
+    <span class="kw">if</span> (memo[n][target] != -<span class="nm">1</span>)
+        <span class="kw">return</span> memo[n][target] == <span class="nm">1</span>;
+    <span class="kw">boolean</span> result;
+    <span class="kw">if</span> (arr[n-<span class="nm">1</span>] &lt;= target)
+        result = <span class="fn">solve</span>(arr,n-<span class="nm">1</span>,target-arr[n-<span class="nm">1</span>])
+              || <span class="fn">solve</span>(arr,n-<span class="nm">1</span>,target);
+    <span class="kw">else</span>
+        result = <span class="fn">solve</span>(arr,n-<span class="nm">1</span>,target);
+    <span class="cm">// STORE before returning</span>
+    memo[n][target] = result ? <span class="nm">1</span> : <span class="nm">0</span>;
+    <span class="kw">return</span> result;
+}</pre>
+    </div>
+  </div>
+
+  <!-- THE KEY TRANSFORMATION -->
+  <div class="card c-amber" style="margin-top:10px">
+    <span class="badge b-amber">The transformation — this is what Aditya Verma is teaching</span>
+    <div class="cs" style="margin-top:8px;margin-bottom:10px">Every recursive call <code style="font-family:var(--mono);font-size:11px;background:var(--bg);padding:1px 5px;border-radius:3px">solve(arr, n-1, ...)</code> becomes a table lookup <code style="font-family:var(--mono);font-size:11px;background:var(--bg);padding:1px 5px;border-radius:3px">t[i-1][...]</code>. The logic inside the if/else does not change at all.</div>
+    <div class="g2">
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--purple);margin-bottom:6px;letter-spacing:.06em">RECURSIVE CALL</div>
+<pre><span class="kw">if</span> (arr[n-<span class="nm">1</span>] &lt;= target) {
+
+    result =
+      <span class="fn">solve</span>(arr, <span class="nm">n-1</span>, target-arr[<span class="nm">n-1</span>])
+   || <span class="fn">solve</span>(arr, <span class="nm">n-1</span>, target);
+
+} <span class="kw">else</span> {
+
+    result = <span class="fn">solve</span>(arr, <span class="nm">n-1</span>, target);
+
+}</pre>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--green);margin-bottom:6px;letter-spacing:.06em">TABLE LOOKUP — same logic, no recursion</div>
+<pre><span class="kw">if</span> (arr[i-<span class="nm">1</span>] &lt;= j) {
+
+    t[i][j] =
+      t[<span class="nm">i-1</span>][j - arr[<span class="nm">i-1</span>]]
+   || t[<span class="nm">i-1</span>][j];
+
+} <span class="kw">else</span> {
+
+    t[i][j] = t[<span class="nm">i-1</span>][j];
+
+}</pre>
+      </div>
+    </div>
+    <div style="margin-top:10px;padding:10px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--amber);margin-bottom:8px;letter-spacing:.06em">THE THREE SUBSTITUTIONS</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div style="font-size:12px;color:var(--muted)"><span style="font-family:var(--mono);color:var(--purple)">n-1</span> → <span style="font-family:var(--mono);color:var(--green)">i-1</span><br><span style="font-size:11px">"previous item" = row above in table</span></div>
+        <div style="font-size:12px;color:var(--muted)"><span style="font-family:var(--mono);color:var(--purple)">target</span> → <span style="font-family:var(--mono);color:var(--green)">j</span><br><span style="font-size:11px">"remaining sum" = column index</span></div>
+        <div style="font-size:12px;color:var(--muted)"><span style="font-family:var(--mono);color:var(--purple)">solve()</span> → <span style="font-family:var(--mono);color:var(--green)">t[][]</span><br><span style="font-size:11px">"function call" = table lookup</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FULL BOTTOM UP -->
+  <div style="margin-top:10px">
+    <div class="card c-blue">
+      <span class="badge b-blue">Step 3 — Full bottom-up tabulation (the end result)</span>
+      <div class="cs" style="margin-top:4px;margin-bottom:6px">Build the table row by row. Row 0 = base cases. Every row i uses row i-1, which is already filled. No recursion, no stack.</div>
+<pre><span class="kw">boolean</span> <span class="fn">subsetSum</span>(<span class="kw">int</span>[] arr, <span class="kw">int</span> sum) {
+    <span class="kw">int</span> n = arr.length;
+    <span class="cm">// t[i][j] = "can we make sum j using first i items?"</span>
+    <span class="kw">boolean</span>[][] t = <span class="kw">new boolean</span>[n+<span class="nm">1</span>][sum+<span class="nm">1</span>];
+
+    <span class="cm">// BASE CASE 1: sum==0 is always true (take nothing)</span>
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt;= n; i++) t[i][<span class="nm">0</span>] = <span class="kw">true</span>;
+    <span class="cm">// BASE CASE 2: n==0, sum!=0 is always false (default)</span>
+    <span class="cm">// (boolean array is false by default — nothing to do)</span>
+
+    <span class="cm">// FILL the table row by row (small → large)</span>
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">1</span>; i &lt;= n; i++) {
+        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="nm">1</span>; j &lt;= sum; j++) {
+            <span class="kw">if</span> (arr[i-<span class="nm">1</span>] &lt;= j)
+                <span class="cm">// SAME logic as recursion — just table lookup</span>
+                t[i][j] = t[i-<span class="nm">1</span>][j - arr[i-<span class="nm">1</span>]] || t[i-<span class="nm">1</span>][j];
+            <span class="kw">else</span>
+                t[i][j] = t[i-<span class="nm">1</span>][j]; <span class="cm">// item too big, exclude</span>
+        }
+    }
+    <span class="kw">return</span> t[n][sum]; <span class="cm">// answer: can we make full sum?</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- TABLE VISUAL -->
+  <div class="card" style="margin-top:10px">
+    <span class="badge b-teal">What the table looks like — arr=[2,3,7], sum=5</span>
+    <div style="overflow-x:auto;margin-top:10px">
+      <table style="border-collapse:collapse;font-family:var(--mono);font-size:11px;width:100%">
+        <tr>
+          <th style="padding:6px 10px;border:1px solid var(--border);color:var(--muted);text-align:center">i\j</th>
+          <th style="padding:6px 10px;border:1px solid var(--border);color:var(--muted);text-align:center">0</th>
+          <th style="padding:6px 10px;border:1px solid var(--border);color:var(--muted);text-align:center">1</th>
+          <th style="padding:6px 10px;border:1px solid var(--border);color:var(--muted);text-align:center">2</th>
+          <th style="padding:6px 10px;border:1px solid var(--border);color:var(--muted);text-align:center">3</th>
+          <th style="padding:6px 10px;border:1px solid var(--border);color:var(--muted);text-align:center">4</th>
+          <th style="padding:6px 10px;border:1px solid var(--border);color:var(--muted);text-align:center">5</th>
+        </tr>
+        <tr>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--muted);text-align:center">0 (no items)</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--green);text-align:center;font-weight:600">T</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--red);text-align:center">F</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--red);text-align:center">F</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--red);text-align:center">F</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--red);text-align:center">F</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--red);text-align:center">F</td>
+        </tr>
+        <tr>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--muted);text-align:center">1 (item=2)</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--green);text-align:center;font-weight:600">T</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--red);text-align:center">F</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--green);text-align:center;font-weight:600">T</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--red);text-align:center">F</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--red);text-align:center">F</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--red);text-align:center">F</td>
+        </tr>
+        <tr>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--muted);text-align:center">2 (item=3)</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--green);text-align:center;font-weight:600">T</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--red);text-align:center">F</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--green);text-align:center;font-weight:600">T</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--green);text-align:center;font-weight:600">T</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--red);text-align:center">F</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--green);text-align:center;font-weight:600">T</td>
+        </tr>
+        <tr>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--muted);text-align:center">3 (item=7)</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--green);text-align:center;font-weight:600">T</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--red);text-align:center">F</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--green);text-align:center;font-weight:600">T</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--green);text-align:center;font-weight:600">T</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--red);text-align:center">F</td>
+          <td style="padding:6px 10px;border:1px solid var(--border);color:var(--green);text-align:center;font-weight:600">T</td>
+        </tr>
+      </table>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted);line-height:1.8">
+      <strong style="color:var(--text)">How to read this:</strong> t[2][5] = T means "using the first 2 items (2 and 3), we CAN make sum 5 (2+3=5)". t[1][3] = F means "using only item 2, we CANNOT make sum 3". The answer is always in the <strong style="color:var(--purple)">bottom-right cell</strong>: t[n][sum].
+    </div>
+    <div style="margin-top:8px;font-size:12px;color:var(--muted);line-height:1.8">
+      <strong style="color:var(--text)">How t[2][5] = T was computed:</strong> arr[1]=3, j=5. Since 3 &lt;= 5: t[2][5] = t[1][5-3] || t[1][5] = t[1][2] || t[1][5] = <span style="color:var(--green)">T</span> || F = <span style="color:var(--green)">T</span>. That T in t[1][2] comes from row above — item 2 makes sum 2. This is i-1 in action.
+    </div>
+  </div>
+
+  <!-- WHY THIS MATTERS -->
+  <div class="g2" style="margin-top:10px">
+    <div class="card c-teal">
+      <span class="badge b-teal">The Aditya Verma process in 3 steps</span>
+      <div style="margin-top:10px">
+        <div class="step-row"><span class="sn">1</span><div class="sc"><strong>Write the recursive Choice Diagram.</strong> Just handle include vs exclude. Get it working. Do not think about efficiency yet.</div></div>
+        <div class="step-row"><span class="sn">2</span><div class="sc"><strong>Identify the changing variables.</strong> In the recursion, n and target change with each call. These become your table dimensions: t[n+1][sum+1].</div></div>
+        <div class="step-row"><span class="sn">3</span><div class="sc"><strong>Copy the if/else into a nested for loop.</strong> Replace solve(n-1, ...) with t[i-1][...]. Fill base cases first. That is the entire conversion.</div></div>
+      </div>
+    </div>
+    <div class="card c-red">
+      <span class="badge b-red">Why i-1 means "previous item"</span>
+      <div class="cs" style="margin-top:8px;line-height:1.9">In the table, <strong style="color:var(--text)">row i represents the decision about item i</strong>. Row i-1 is the world <em>before</em> item i was considered — which is exactly what solve(n-1, ...) means in the recursion.<br><br>So <code style="font-family:var(--mono);font-size:11px;background:var(--bg);padding:1px 5px;border-radius:3px">t[i-1][j]</code> = "best answer not using item i" = <code style="font-family:var(--mono);font-size:11px;background:var(--bg);padding:1px 5px;border-radius:3px">solve(n-1, target)</code><br><br>And <code style="font-family:var(--mono);font-size:11px;background:var(--bg);padding:1px 5px;border-radius:3px">t[i-1][j-arr[i-1]]</code> = "best answer with item i subtracted" = <code style="font-family:var(--mono);font-size:11px;background:var(--bg);padding:1px 5px;border-radius:3px">solve(n-1, target-arr[n-1])</code></div>
+    </div>
+  </div>
+  <div class="info-box" style="margin-top:10px">
+    <p><strong>Once you see this, you can write tabulation in 2 minutes:</strong> Get the recursion right. The table size = dimensions of your recursive parameters + 1. The if/else inside the loops = copy from the recursion. Base cases = your recursive base cases written as table initialisations. The answer = t[n][sum] (last values of your parameters).</p>
+  </div>
+</div>
+
 <!-- ===== 03 1D DP ===== -->
 <div class="sec" id="s1d">
-  <div class="sec-lbl">03 — 1D DP patterns</div>
+  <div class="sec-lbl">04 — 1D DP patterns</div>
   <div class="sec-desc">dp is a 1D array. Each cell uses one or two previous cells. These are the building blocks — get comfortable here before moving to 2D.</div>
 
   <div class="g2">
@@ -331,7 +544,7 @@ pre{background:var(--bg);border:1px solid var(--border);border-radius:6px;paddin
 
 <!-- ===== 04 2D DP ===== -->
 <div class="sec" id="s2d">
-  <div class="sec-lbl">04 — 2D DP patterns</div>
+  <div class="sec-lbl">05 — 2D DP patterns</div>
   <div class="sec-desc">dp is a 2D grid. The state dp[i][j] usually means: "the best answer considering the first i items from one input and the first j items from another."</div>
   <div class="g2">
     <div class="card c-purple">
@@ -386,7 +599,7 @@ pre{background:var(--bg);border:1px solid var(--border);border-radius:6px;paddin
 </div>
 <!-- ===== 05 KNAPSACK ===== -->
 <div class="sec" id="knapsack">
-  <div class="sec-lbl">05 — Knapsack patterns</div>
+  <div class="sec-lbl">06 — Knapsack patterns</div>
   <div class="sec-desc">The most important DP family. The core idea: for each item, decide whether to include it or exclude it. Include it and reduce your remaining capacity. Exclude it and move on.</div>
   <div class="hi-box"><p><strong>The two variants:</strong> 0/1 knapsack — each item usable at most once (iterate capacity backwards). Unbounded knapsack — each item usable unlimited times (iterate capacity forwards). One loop direction is the only difference in the 1D version.</p></div>
   <div class="g2">
@@ -461,7 +674,7 @@ pre{background:var(--bg);border:1px solid var(--border);border-radius:6px;paddin
 
 <!-- ===== 06 STRINGS ===== -->
 <div class="sec" id="strings">
-  <div class="sec-lbl">06 — String DP</div>
+  <div class="sec-lbl">07 — String DP</div>
   <div class="sec-desc">Almost always a 2D table. dp[i][j] involves the first i characters of s1 and the first j characters of s2. The recurrence always splits on one question: do the current characters match?</div>
   <div class="g2">
     <div class="card c-purple">
@@ -526,7 +739,7 @@ pre{background:var(--bg);border:1px solid var(--border);border-radius:6px;paddin
 </div>
 <!-- ===== 07 TREES ===== -->
 <div class="sec" id="trees">
-  <div class="sec-lbl">07 — DP on Trees</div>
+  <div class="sec-lbl">08 — DP on Trees</div>
   <div class="sec-desc">Tree DP uses post-order traversal — solve children first, then combine results at the parent. The function returns one or more values per node.</div>
   <div class="g2">
     <div class="card c-purple">
@@ -595,7 +808,7 @@ pre{background:var(--bg);border:1px solid var(--border);border-radius:6px;paddin
 
 <!-- ===== 08 SPACE OPT ===== -->
 <div class="sec" id="spaceopt">
-  <div class="sec-lbl">08 — Space Optimisation</div>
+  <div class="sec-lbl">09 — Space Optimisation</div>
   <div class="sec-desc">Most 2D DP tables only ever look at the current row and the previous row. You can reduce O(n*m) space down to O(m) by keeping just those two rows — or even just two variables.</div>
   <div class="g2">
     <div class="card c-purple">
@@ -649,7 +862,7 @@ pre{background:var(--bg);border:1px solid var(--border);border-radius:6px;paddin
 
 <!-- ===== 09 PROBLEMS ===== -->
 <div class="sec" id="problems">
-  <div class="sec-lbl">09 — Problem bank</div>
+  <div class="sec-lbl">10 — Problem bank</div>
   <div class="card c-purple">
     <table class="rt">
       <tr><th>Problem (LC #)</th><th>Pattern</th><th>State in plain English</th><th>TC / SC</th></tr>
@@ -675,7 +888,7 @@ pre{background:var(--bg);border:1px solid var(--border);border-radius:6px;paddin
 
 <!-- ===== 10 INTERVIEW ===== -->
 <div class="sec" id="interview">
-  <div class="sec-lbl">10 — Interview approach</div>
+  <div class="sec-lbl">11 — Interview approach</div>
   <div class="sec-desc">Most people fail DP interviews by jumping to the optimal solution too fast. The steps below work every time.</div>
   <div class="card c-green">
     <span class="badge b-green">The 5-step interview playbook</span>

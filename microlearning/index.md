@@ -24,21 +24,96 @@
    - **stateful**: The server stores information about the client's session (e.g., shopping cart contents, user login state). This can lead to scalability issues because the server has to manage and remember each client's state.
    - **stateless**: The server does not store any information about the client's session. Each request from the client must contain all the information needed to process it (e.g., using JWT tokens for authentication).
 7. Synchronous vs asynchronous communication
+   - Most real systems use hybrid:
+     - Sync for user-facing request
+     - - Async for background processing
 8. What happens when you type a URL and hit Enter
 9. TCP vs UDP — when each is used in backend systems
+   - Need guaranteed delivery / transactions → TCP 
+   - Can tolerate loss + need low latency → UDP
 10. DNS resolution — how hostnames become IP addresses
 
 ## APIs
-11. REST vs GraphQL vs gRPC — when to use each
-12. API versioning strategies — URI vs header vs query param
-13. Pagination — offset vs cursor-based
-14. Rate limiting — token bucket vs leaky bucket algorithms
-15. API Gateway — what it does and when you need one
-16. Webhooks vs polling — tradeoffs
-17. HATEOAS — what it is and why most people skip it
-18. OpenAPI/Swagger — writing good API specs
-19. Request validation — where to do it and why
-20. API authentication — API keys vs OAuth vs JWT
+1. REST vs GraphQL vs gRPC — when to use each
+    - REST : 
+      - **Best for:** Public APIs and simple CRUD apps.
+         * **Pros:** Highly cacheable, stateless, and universally compatible.
+         * **Cons:** Over-fetching or under-fetching of data. 
+    - GraphQL :
+      - **Best for:** Complex Frontends and Mobile Apps.
+        * **Pros:** Client defines exact data shape; single request for nested data.
+        * **Cons:** Server-side complexity; harder to cache.
+    - gRPC :
+      - **Best for:** Internal Microservices and high-performance systems.
+        * **Pros:** Extremely fast (Binary/HTTP2); strict contracts; supports streaming.
+        * **Cons:** Poor browser support; not human-readable.
+        
+    - **Comparison Example (Fetching User & Posts)**
+
+      - **REST:** - `GET /users/1`
+          - `GET /users/1/posts`
+
+      - **GraphQL:**
+      ```graphql
+      {
+        user(id: "1") {
+          name
+          posts { title }
+        }
+      }
+      ```
+2. API versioning strategies — URI vs header vs query param
+   - API versioning helps you evolve your API **without breaking existing clients**.
+
+   - **URI Versioning**
+     - Example: `/api/v1/users`
+     - **Pros:**
+       - Clear and explicit
+       - Easy to test and document
+       - Commonly used
+     - **Cons:**
+       - Version becomes part of the URL
+       - Can clutter endpoints
+     - **Best for:** Public APIs
+
+   - **Header Versioning**
+     - Example: `Accept: application/vnd.myapi.v2+json`
+     - **Pros:**
+       - Keeps URLs clean
+       - More REST-oriented
+       - Good separation of concerns
+     - **Cons:**
+       - Harder to test/debug manually
+       - Less obvious to API consumers
+     - **Best for:** Mature or enterprise APIs
+
+   - **Query Parameter Versioning**
+     - Example: `/api/users?version=2`
+     - **Pros:**
+       - Easy to implement
+       - Simple for internal use
+     - **Cons:**
+       - Less clean and structured
+       - Not ideal for long-term public APIs
+     - **Best for:** Internal tools / lightweight APIs
+
+   - **Rule of thumb:**
+     - Public API → URI versioning
+     - Enterprise / cleaner design → Header versioning
+     - Quick internal use → Query param versioning
+
+   - **Key principle:** Good API versioning is about **backward compatibility** and **not breaking consumers**.
+3. Pagination — offset vs cursor-based
+4. Rate limiting — token bucket vs leaky bucket algorithms
+   - **Token Bucket** allows requests as long as tokens are available, so it supports **short bursts** while still controlling the average rate.
+   - **Leaky Bucket** processes requests at a **fixed rate**, smoothing traffic and preventing sudden spikes from overwhelming the system.
+
+5. API Gateway — what it does and when you need one
+6. Webhooks vs polling — tradeoffs
+7. HATEOAS — what it is and why most people skip it
+8. OpenAPI/Swagger — writing good API specs
+9. Request validation — where to do it and why
+10. API authentication — API keys vs OAuth vs JWT
 
 ## Databases
 21. ACID properties — what each one means with examples
