@@ -107,30 +107,156 @@
 4. Rate limiting — token bucket vs leaky bucket algorithms
    - **Token Bucket** allows requests as long as tokens are available, so it supports **short bursts** while still controlling the average rate.
    - **Leaky Bucket** processes requests at a **fixed rate**, smoothing traffic and preventing sudden spikes from overwhelming the system.
-
 5. API Gateway — what it does and when you need one
+   - Client shouldn;t be exposed to all the complexity of your microservices. An API Gateway acts as a single entry point that can handle:
+     - **Routing**: Directing requests to the appropriate service.
+     - **Authentication**: Verifying client credentials before forwarding requests.
+     - **Rate Limiting**: Controlling traffic to prevent abuse.
+     - **Load Balancing**: Distributing requests across multiple instances of a service.
+     - **Response Aggregation**: Combining responses from multiple services into one.
 6. Webhooks vs polling — tradeoffs
+   - **Polling** means a client repeatedly checks another system for updates. It is **simple** but can be **wasteful and delayed**.
+   - **Webhooks** mean the server pushes an update to your system when an event happens. They are **more efficient and near real-time**, but harder to implement reliably.
+   - **Rule of thumb:**  
+     - Use **Polling** for simplicity.  
+     - Use **Webhooks** for event-driven, timely updates.
 7. HATEOAS — what it is and why most people skip it
 8. OpenAPI/Swagger — writing good API specs
 9. Request validation — where to do it and why
+   - Request Validation
+        - **API layer:** Validate structure, types, required fields (fail fast)
+        - **Service layer:** Validate business rules (domain logic)
+        - **DB layer:** Enforce integrity (constraints, uniqueness)
+**Rule of thumb:**  
+Validate early, validate deeply, enforce at the database.
 10. API authentication — API keys vs OAuth vs JWT
-
+    - **API Keys:** Simple token to identify the calling application. Easy but limited security and no user context.
+    - **JWT (JSON Web Token):** Signed token carrying user/service identity and claims. Stateless and scalable.
+    - **OAuth:** Authorization framework for delegated access (e.g., "Login with Google"). Issues tokens (often JWTs).
+    - **Rule of thumb:**
+      - API Keys → simple app access (Internal service-to-service)
+      - JWT → user/service authentication (User login system , Microservices with user context)
+      - OAuth → delegated authorization (asking an app access to a user's data)
 ## Databases
-21. ACID properties — what each one means with examples
-22. CAP theorem — why you can only pick two
+21. **ACID properties** — what each one means with examples
+    - **atomicity** : everything that is part of the transaction must succeed or fail together
+    - **consistency** : if any part of the transaction fails, the whole transaction should fail and the database should be left unchanged
+    - **isolation** : no other process should influence any other process 
+    - **durability** : once a transaction is committed, it should be permanent even in the case of a crash
+22. **CAP theorem** — why you can only pick two
+    - Partition Tolerance is inavoidable in distributed systems, so you have to choose between Consistency and Availability.
+    - a x b (suppose partition tolerance is a given)
+    - Write happens on a and make it 100 from 50.
+    - Now read happens in b  
+      - now if you choose consistency b will reject the request because it doesn't know A (this is not available)
+      - but if you choose availability, b will return 50 (but this is not consistent).
 23. Indexing — how B-tree indexes work
+    - B-tree = wide, shallow, sorted tree optimized for fast disk-based lookups and range scans
+    - It's self sorted , grows in width not height , held multiple keys 
+    - [10,15] -> a node , if anything searchable is there , it goes in the middle
 24. Query optimization — reading EXPLAIN output
+    - EXPLAIN shows how the database plans to execute your query. You read it to detect inefficiencies before running the query on large data.
+      - Core idea 
+        - You are not reading results. You are reading the execution plan:
+        - which table is read first 
+        - how rows are filtered 
+        - whether indexes are used and estimated cost / rows scanned
+      
+        - Avoid Breaking Index 
+          - Bad: 
+                ```YEAR(date) = 2024 LIKE '%abc'```
+          - Good:
+          ```date BETWEEN ... LIKE 'abc%'```
+
 25. N+1 query problem — how to detect and fix it
+    - n+1 query is a query that fetches the same data for multiple things rather than one fat big query.
+    - rather than having ```select * from users```, you have ```select * from users where id = $id```
+    - it calls the database n times for n users, which is inefficient.
 26. Database normalization — 1NF, 2NF, 3NF explained simply
-27. Transactions — isolation levels and what dirty reads are
+27. **Transactions** — isolation levels and what dirty reads are
+    - **Transaction**: A group of DB operations where all succeed or all fail (ACID).
+    - **Isolation**: Controls how transactions see each other and prevents inconsistent reads.
+    - **Isolation Levels (low → high):**
+      - Read Uncommitted
+      - Read Committed
+      - Repeatable Read
+      - Serializable
+    - **Dirty Read**: Reading uncommitted data from another transaction. If the other transaction rolls back → data was invalid.
+    - **Key**: Dirty reads allowed only in Read Uncommitted isolation level.
 28. Connection pooling — why you need it and how it works
+    #### Problem
+    - Creating DB connection is expensive (time + resources)
+      - Doing it per request → slow + high overhead
+    #### Solution: Connection Pool
+    - Pre-create a pool of connections
+      - Reuse them instead of creating new ones
+
+    #### How it works
+    1. App asks for connection
+       2. Pool gives an **available connection**
+       3. App uses it
+       4. App returns it to pool (not closed)
+
+    #### Benefits
+    - Faster (no creation cost each time)
+      - Limits max connections (protect DB)
+      - Better performance under load
+
+    #### Key Params
+    - max connections
+      - idle timeout
+      - connection timeout
+
+    #### One-line
+    Reuse DB connections instead of creating every time
 29. SQL vs NoSQL — choosing the right tool
 30. Database migrations — best practices and rollback strategies
+    - expand the table add columns but dont remove anything
+    - make the app talk and write to both the new and the old table
+    - backfill the new table with data from the old table
+    - make the app read only from the new table
+    - remove the old table
 
 ## Caching
 31. Cache-aside vs write-through vs write-behind patterns
 32. Cache invalidation — why it's hard and common strategies
 33. Redis data structures — strings, hashes, sets, sorted sets
+
+    **Strings**
+    
+    * Single value (string/number/binary)
+      * Use: cache, counters
+      * Ops: `SET`, `GET`, `INCR`
+      * Time: O(1)
+    
+    **Hashes**
+    
+    * Field → value map
+      * Use: objects (user, config)
+      * Ops: `HSET`, `HGET`, `HGETALL`
+      * Time: O(1) per field
+    
+    **Sets**
+    
+    * Unique, unordered elements
+      * Use: dedup, membership
+      * Ops: `SADD`, `SISMEMBER`, `SINTER`
+      * Time: O(1)
+    
+    **Sorted Sets (ZSET)**
+    
+    * Unique elements + score (ordered)
+      * Use: leaderboard, ranking, timeline
+      * Ops: `ZADD`, `ZRANGE`, `ZINCRBY`
+      * Time: O(log N)
+    
+    **Selection**
+    
+    * Value → String
+      * Object → Hash
+      * Unique no order → Set
+      * Ordered/ranked → Sorted Set
+
 34. TTL strategies — how to set expiry times
 35. Cache stampede — what it is and how to prevent it
 36. CDN caching — how edge caching works

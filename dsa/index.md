@@ -1,3 +1,4 @@
 - [Greedy Algorithm](greedy.html)
 - [Dynamic Programming](dynamic.html)
 - [DSA decision tree](dsa-decision-tree.html)
+- [Important Algorithms](important-algos.html)
