@@ -219,7 +219,19 @@ Validate early, validate deeply, enforce at the database.
 
 ## Caching
 31. Cache-aside vs write-through vs write-behind patterns
+    - **cache aside** : talk to redis first, if not found then talk to db and update redis (lazy loading) , cache is there as a diff layer
+    - **Read through** : redis keeps the responisbility of talking to db and updating itself, app only talks to redis (redis is the source of truth)
+    - **write behind** : write operation is done in redis first and then redis updates the db asynchronously (redis is the source of truth)
 32. Cache invalidation — why it's hard and common strategies
+    - Challenges:
+      - Stale data: Cached data may become outdated if the underlying data changes.
+      - Concurrency: Multiple processes may update the same data, leading to inconsistencies between cache and database.
+      - cache miss penalty: If the cache is invalidated too frequently, it can lead to increased load on the database.
+    - Solutions:
+      - explicit invalidation: When the underlying data changes, explicitly remove or update the corresponding cache entry.
+      - write through caching: Update the cache immediately when the underlying data changes, ensuring consistency.
+      - cache versioning: Use version numbers or timestamps to track changes in the underlying data, allowing the cache to determine if it is still valid.
+      - event driven invalidation: Use events or notifications to trigger cache invalidation when the underlying data changes.
 33. Redis data structures — strings, hashes, sets, sorted sets
 
     **Strings**
@@ -259,7 +271,12 @@ Validate early, validate deeply, enforce at the database.
 
 34. TTL strategies — how to set expiry times
 35. Cache stampede — what it is and how to prevent it
+    - when an important cache expires and when a lot of requests come in at the same time, it can cause a thundering herd problem. To avoid this, you can use a **randomized TTL** strategy:
+    - Instead of setting a fixed TTL (e.g., 60 seconds), add a random offset (e.g., 60-120 seconds). This spreads out the expiration times and reduces the chance of many clients hitting the database simultaneously.
 36. CDN caching — how edge caching works
+    - technique to cache content at edge (closest node to the user) to reduce latency and improve performance. CDNs store copies of static assets (images, videos, scripts) in multiple locations worldwide. When a user requests content, the CDN serves it from the nearest edge server, reducing load on the origin server and speeding up delivery.
+    - rather than every request going to the origin server, the CDN caches the content at edge servers. When a user requests content, the CDN serves it from the nearest edge server, reducing latency and improving performance.
+    - request -> cdn server --> hit cache? yes -> return content, no -> fetch from origin server, cache it, return content
 37. HTTP caching headers — Cache-Control, ETag, Last-Modified
 38. Memoization vs caching — the difference
 39. Distributed cache vs local cache tradeoffs
