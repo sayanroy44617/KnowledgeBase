@@ -279,15 +279,30 @@ Validate early, validate deeply, enforce at the database.
     - request -> cdn server --> hit cache? yes -> return content, no -> fetch from origin server, cache it, return content
 37. HTTP caching headers — Cache-Control, ETag, Last-Modified
 38. Memoization vs caching — the difference
+    - memorization is a technique to optimize function calls by storing the results of expensive function calls and returning the cached result when the same inputs occur again. It is typically used for pure functions (functions that always produce the same output for the same input and have no side effects). Memoization is usually implemented in-memory and is specific to a single process or instance of an application.
 39. Distributed cache vs local cache tradeoffs
+    - **Local Cache**: Stored in the memory of a single application instance. Fast access, but not shared across instances. Good for small-scale apps or when data is specific to a single instance.
+    - **Distributed Cache**: Shared across multiple application instances, often using external systems like Redis or Memcached. Slower than local cache due to network latency, but allows for data sharing and consistency across instances. Suitable for large-scale applications with multiple servers.
 40. When NOT to cache — cases where caching hurts
 
 ## Authentication & Security
 41. JWT structure — header, payload, signature decoded
 42. OAuth 2.0 flows — authorization code vs client credentials
+    - auth code -> user logs in, gets code, exchanges for token
+    - client credentials -> service logs in with its own credentials, gets token
 43. Session vs token authentication — tradeoffs
+    - Session: Server stores authentication state; client sends a session ID/cookie. Easy revocation, but requires shared session storage when scaling.
+    - Token: Client sends an access token (often JWT); server can validate it without session state. Scales easily, but revocation is harder.
 44. Password hashing — bcrypt vs Argon2 vs PBKDF2
+    - Password hashing is used because passwords should never be stored as plaintext.
+        bcrypt: Proven, widely supported, intentionally slow; good default for many systems.
+        Argon2: Modern choice, designed to resist GPU/memory-based attacks; generally preferred for new systems.
+        PBKDF2: Older, standardized, widely available; still useful where compatibility/compliance requires it.
+    Preference: Argon2 > bcrypt > PBKDF2 for a new application, assuming your platform supports them properly.
 45. SQL injection — how it works and how parameterized queries prevent it
+    - Think of SQL injection as the application accidentally allowing the user to write part of the SQL command.
+    - **Unsafe example**```sqlquery = "SELECT * FROM users WHERE username = '" + username + "'"```→ input ```sql''OR '1'='1``` can turn it into ```WHERE username = '' OR '1'='1'.```which is always true
+    - **Safe example**```query = "SELECT * FROM users WHERE username = ?" with execute(query, (username,))``` → the same input is treated as data, not SQL
 46. CORS — why it exists and how to configure it properly
 47. CSRF attacks — how they work and prevention strategies
 48. Rate limiting for auth endpoints — brute force prevention
